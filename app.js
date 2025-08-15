@@ -562,7 +562,11 @@ class BeachSafetyApp {
         });
         this.markers = [];
 
-        this.beaches.forEach(beach => {
+        const beachesToShow = this.currentFilter === 'all'
+            ? this.beaches
+            : this.beaches.filter(beach => beach.flag === this.currentFilter);
+
+        beachesToShow.forEach(beach => {
             const flagColor = beach.flag;
             const emoji = flagColor === 'green' ? '🟢' : flagColor === 'yellow' ? '🟡' : '🔴';
             
@@ -1061,6 +1065,9 @@ class BeachSafetyApp {
 
         // Update beach list
         this.renderBeachList();
+        
+        // Update map markers
+        this.addBeachMarkers();
     }
 
     filterBeaches() {
