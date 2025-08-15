@@ -231,8 +231,3 @@ For questions or issues:
 ***
 
 **Made with ❤️ for safer beach experiences on the Bulgarian Black Sea coast**
-
-[1] https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/attachments/40447289/6d0b8552-628d-47e8-83f5-e5c40bab6271/app.js
-[2] https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/attachments/40447289/fed13d97-7c40-475b-995a-b390386e33bb/index.html
-[3] https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/attachments/40447289/3f8bf815-956b-4b9c-a08d-bd580d56549f/style.css
-[4] https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/attachments/40447289/5e385f6f-bfa6-435e-b887-ad7261465830/sw.js
