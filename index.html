@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Real-time beach safety monitoring for Bulgarian Black Sea beaches">
+    <title>Black Sea Beach Safety</title>
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoiQmxhY2sgU2VhIEJlYWNoIFNhZmV0eSIsInNob3J0X25hbWUiOiJCZWFjaCBTYWZldHkiLCJzdGFydF91cmwiOiIvIiwiZGlzcGxheSI6InN0YW5kYWxvbmUiLCJ0aGVtZV9jb2xvciI6IiMwMDc3YmUiLCJiYWNrZ3JvdW5kX2NvbG9yIjoiI2ZmZmZmZiIsImljb25zIjpbeyJzcmMiOiJkYXRhOmltYWdlL3N2Zyt4bWw7YmFzZTY0LFBITjJaeUJwWkQwaVJtbGhaMGxqYjI0aUlIaHRiRzV6UFNKb2RIUndPaTh2ZDNkM0xuY3pMbTl5Wnk4eU1EQXdMM04yWnlJZ2QybGtkR2c5SWpFNU1pSWdhR1ZwWjJoMFBTSXhPVElpSUdacGJHdzlJaU13TURjM1ltVWlQZzBMSUR4eVpXTjBJSGdyUFNJeU5DSWdlVDA5SWpJMElpQjNhV1IwYUQwaU1UUTBJaUJvWldsbmFIUTlJalEwSWlCbWFXeHNQU0lqWm1abVptWm1JaUJ5ZUQwaU9TSXZQZzBMSUR4d1lYUm9JR1E5SW0wMk5DMHhNekk2SWpsa01qUXRNVE00VFRFMk5TMHhNVGRqTXpNdU1UTnROek11TlRNdE1pNHhPUzAyTVMwME5pNDBNaU5OYmk0MUlERXpNM016T1M0eE0yTXpNeTR4TXkwM015NDFNMDB5TFRZeElqZ2dRaTQwTW14T1NUQXRNak1nTWpRdGVDSWdabWxzYkQwaVkyWm1abVptSWk4K1BDOXpkbWMrIiwic2l6ZXMiOiIxOTJ4MTkyIiwidHlwZSI6ImltYWdlL3N2Zyt4bWwifSx7InNyYyI6ImRhdGE6aW1hZ2Uvc3ZnK3htbDtiYXNlNjQsUEhOMlp5QnBaRDBpUm1saFowbGpiMjRpSUhodGJHNXpQU0pvZEhSd09pOHZkM2QzTG5jekxtOXlaeTh5TURBd0wzTjJaeUlnZDJsa2RHZzlJalV4TWlJZ2FHVnBaMmgwUFNJMU1USWlJR1pwYkd3OUlpTXdNRGMzWW1VaVBnMExJRHh5WldOMElIZ3JQU0kyTkNJZ2VUMDlJalk0SWlCM2FXUjBhRDA5SWpNNE5DSWdhR1ZwWjJoMFBTSTROQ0lnWm1sc2JEMGlJMlptWm1abVppSWdlbmc5SWpreHZQZ05MSUR4d1lYUm9JR1E5SW0wNE1DNDNNbVJvTXpNdU1UUmhNVEkwSWk0eE5DQXVNVFF1SWpRd0xqQjRNU2d6TGpBMElqUXpMamd0TkRZdU1qZ1RNakVnVFRZMExqTjROUzQwTVRRdE16Y2dNemdnTWpjdU1qa2dNamN1TWprdE5ESTNMT1RNMExTMU5iekF1TVRjZ01USXRPUS4wTnpNdE1UtE1qWTFiVzVvTFRVM01ta3RJREV6TVRNYKRERXdNV09rTnpNdU1UUkRRaTQ0TUdGS1NFOE1qVVRNams0YURVM01HRjBMQ05JRUV6TkNkdWJTNHhPUzE0WW1neEVqYzNMakZETGpOellsTnpNeTR4TnkwM2N6Z3hiVUF6Y0M5R01ERWNkbGxySU5JaTVjQmZiQ2REY3c0K0lEOHZjM1puUGc9PSIsInNpemVzIjoiNTEyeDUxMiIsInRypeZSI6ImltYWdlL3N2Zyt4bWwifV1dfQ==">
+    
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    
+    <!-- App CSS -->
+    <link rel="stylesheet" href="style.css">
+    
+    <!-- Meta for PWA -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Beach Safety">
+    <link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyBpZD0iRmlhZ0ljb24iIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgd2lkdGg9IjE5MiIgaGVpZ2h0PSIxOTIiIGZpbGw9IiMwMDc3YmUiPg0LIDxyZWN0IHgrPSIyNCIgeT0iMjQiIHdpZHRoPSIxNDQiIGhlaWdodD0iNDQiIGZpbGw9IiNmZmZmZmYiIHJ4PSI5Ii8+DQogPHBhdGggZD0ibTY0LTEzMjozOWs5MjQtMTM4VDE2NS0xMTdjMzMuMTMtNzMuNTMtMi4xOS02MS00Ni40MmNuLTVITDEzMzMzOS4xM2MzMy4xMy03My41M00yLTYxOzhCLjQwbENTSTAtMjMgMjQteCIgZmlsbD0iY2ZmZmZmIi8+PC9zdmc+">
+<link rel="stylesheet" href="/index.css">
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div id="loading-screen" class="loading-screen">
+        <div class="loading-content">
+            <div class="loading-icon">🏖️</div>
+            <h2 id="loading-title">Black Sea Beach Safety</h2>
+            <div class="loading-spinner"></div>
+        </div>
+    </div>
+
+    <!-- Main App Container -->
+    <div id="app" class="app hidden">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <h1 id="app-title" class="header-title">Black Sea Beach Safety</h1>
+                <div class="header-controls">
+                    <button id="language-toggle" class="btn btn--sm btn--outline" aria-label="Switch language">EN</button>
+                    <button id="settings-btn" class="btn btn--sm btn--outline" aria-label="Settings">⚙️</button>
+                    <button id="install-btn" class="btn btn--sm btn--primary hidden" aria-label="Install app">📱</button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Navigation -->
+        <nav class="nav-tabs">
+            <button id="map-tab" class="nav-tab active" data-view="map">
+                <span id="map-tab-text">Map</span>
+            </button>
+            <button id="list-tab" class="nav-tab" data-view="list">
+                <span id="list-tab-text">List</span>
+            </button>
+        </nav>
+
+        <!-- Search Bar -->
+        <div class="search-container">
+            <input type="text" id="search-input" class="form-control search-input" placeholder="Search beaches...">
+            <div class="filter-controls">
+                <button class="filter-btn active" data-filter="all">All</button>
+                <button class="filter-btn" data-filter="green">🟢 Safe</button>
+                <button class="filter-btn" data-filter="yellow">🟡 Caution</button>
+                <button class="filter-btn" data-filter="red">🔴 Danger</button>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Map View -->
+            <div id="map-view" class="view active">
+                <div id="map" class="map-container"></div>
+                <div class="map-controls">
+                    <button id="locate-btn" class="btn btn--primary map-control-btn" aria-label="Find my location">📍</button>
+                </div>
+            </div>
+
+            <!-- List View -->
+            <div id="list-view" class="view">
+                <div class="beach-list" id="beach-list">
+                    <!-- Beach items will be populated by JavaScript -->
+                </div>
+            </div>
+        </main>
+
+        <!-- Beach Detail Modal -->
+        <div id="beach-modal" class="modal hidden" role="dialog" aria-labelledby="beach-modal-title" aria-hidden="true">
+            <div class="modal-backdrop"></div>
+            <div class="modal-content">
+                <header class="modal-header">
+                    <h2 id="beach-modal-title" class="modal-title"></h2>
+                    <button id="close-modal" class="modal-close" aria-label="Close">&times;</button>
+                </header>
+                <div class="modal-body">
+                    <div id="beach-flag" class="flag-indicator"></div>
+                    <div id="beach-conditions" class="conditions-grid">
+                        <div class="condition-item">
+                            <span class="condition-label" id="wind-label">Wind</span>
+                            <span id="wind-value" class="condition-value">--</span>
+                        </div>
+                        <div class="condition-item">
+                            <span class="condition-label" id="waves-label">Waves</span>
+                            <span id="waves-value" class="condition-value">--</span>
+                        </div>
+                        <div class="condition-item">
+                            <span class="condition-label" id="water-temp-label">Water Temp</span>
+                            <span id="water-temp-value" class="condition-value">--</span>
+                        </div>
+                        <div class="condition-item">
+                            <span class="condition-label" id="air-temp-label">Air Temp</span>
+                            <span id="air-temp-value" class="condition-value">--</span>
+                        </div>
+                         <div class="condition-item">
+                            <span class="condition-label" id="uv-index-label">UV Index</span>
+                            <span id="uv-index-value" class="condition-value">--</span>
+                        </div>
+                    </div>
+                    <div id="safety-message" class="safety-message"></div>
+                    <div id="beach-facilities" class="facilities"></div>
+                    <div id="last-updated" class="last-updated"></div>
+                </div>
+                <div class="modal-footer">
+                    <button id="share-location" class="btn btn--secondary">📤 <span id="share-location-text">Share Location</span></button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Settings Modal -->
+        <div id="settings-modal" class="modal hidden" role="dialog" aria-labelledby="settings-modal-title" aria-hidden="true">
+            <div class="modal-backdrop"></div>
+            <div class="modal-content">
+                <header class="modal-header">
+                    <h2 id="settings-modal-title" class="modal-title">Settings</h2>
+                    <button id="close-settings" class="modal-close" aria-label="Close">&times;</button>
+                </header>
+                <div class="modal-body">
+                    <div class="settings-section">
+                        <h3 id="flag-legend-title">Flag Legend</h3>
+                        <div class="legend-items">
+                            <div class="legend-item">
+                                <span class="flag-icon green">🟢</span>
+                                <span id="legend-green">Safe swimming conditions</span>
+                            </div>
+                            <div class="legend-item">
+                                <span class="flag-icon yellow">🟡</span>
+                                <span id="legend-yellow">Caution advised</span>
+                            </div>
+                            <div class="legend-item">
+                                <span class="flag-icon red">🔴</span>
+                                <span id="legend-red">Dangerous conditions</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="settings-section">
+                        <h3 id="safety-tips-title">Safety Tips</h3>
+                        <ul id="safety-tips-list">
+                            <li>Always check flag status before entering water</li>
+                            <li>Stay close to lifeguarded areas when available</li>
+                            <li>Never swim alone in red flag conditions</li>
+                            <li>Emergency number: 112</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Offline Indicator -->
+        <div id="offline-indicator" class="offline-indicator hidden">
+            <span id="offline-text">Offline Mode - Showing cached data</span>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="app.js"></script>
+<script type="module" src="/index.tsx"></script>
+</body>
+</html>
