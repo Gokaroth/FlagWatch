@@ -88,15 +88,7 @@ Visit the live app: **[flagwatch.netlify.app](https://flagwatch.netlify.app)**
    ```
    http://localhost:8000
    ```
-
-### Deploy to Netlify
-
-1. Fork this repository
-2. Connect to Netlify
-3. Deploy with these settings:
-   - **Build command**: (leave empty)
-   - **Publish directory**: `/` (root)
-
+   
 ## 📁 Project Structure
 
 ```
