@@ -233,8 +233,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 📞 Support
 
 For questions or issues:
-- 🐛 [Open an issue](https://github.com/yourusername/flagwatch/issues)
-- 📧 Contact: your.email@example.com
+- 🐛 [Open an issue](https://github.com/Gokaroth/flagwatch/issues)
 - 🌐 Live demo: [flagwatch.netlify.app](https://flagwatch.netlify.app)
 
 ***
