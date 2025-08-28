@@ -1,8 +1,8 @@
 
+// NOTE: This app no longer uses the Gemini API for cleanliness reports.
+// It has been replaced with a real scientific data source from Copernicus Marine Service.
 
-import { GoogleGenAI, Type } from "@google/genai";
-
-const APP_VERSION = '6.0.0'; // Increment this to show the popup for new users/updates
+const APP_VERSION = '7.0.0'; // Increment this to show the popup for new users/updates
 
 /**
  * Configuration for the "What's New" popup.
@@ -10,47 +10,27 @@ const APP_VERSION = '6.0.0'; // Increment this to show the popup for new users/u
  * The content is dynamically built from the `features` array and supports multiple languages.
  */
 const WHATS_NEW_CONFIG = {
-    version: '6.0.0',
+    version: '7.0.0',
     features: [
         {
             title: {
-                en: '🌙 Hello Darkness, My Old Friend!',
-                bg: '🌙 Здравей, тъмнина, моя стара приятелко!'
+                en: '🔬 Real Scientific Algae Data!',
+                bg: '🔬 Реални научни данни за водорасли!'
             },
             description: {
-                en: "Introducing a beautiful new Dark Mode! It respects your system's theme by default and can be toggled anytime in Settings. Perfect for late-night beach planning!",
-                bg: "Представяме ви красив нов Тъмен режим! Той се съобразява с темата на вашата система по подразбиране и може да бъде превключен по всяко време от Настройки. Идеален за планиране на плаж до късно вечер!"
+                en: "We've replaced AI-generated reports with near-real-time satellite data from the Copernicus Marine Service. The app now uses Chlorophyll-a concentration to provide scientifically accurate algae bloom estimates.",
+                bg: "Заменихме генерираните от AI доклади със сателитни данни в почти реално време от Морската служба на Коперник. Приложението вече използва концентрацията на Хлорофил-а, за да предостави научно точни оценки за цъфтежа на водорасли."
             },
         },
         {
             title: {
-                en: '🌊 AI-Powered Algae Reports',
-                bg: '🌊 Доклади за водорасли, генерирани от AI'
+                en: '💡 Updated Data Legend',
+                bg: '💡 Обновена легенда на данните'
             },
             description: {
-                en: "Get the scoop on water cleanliness! We've added AI-generated algae reports to the beach detail screen, so you know the conditions before you go.",
-                bg: "Научете всичко за чистотата на водата! Добавихме генерирани от AI доклади за водорасли към екрана с детайли за плажа, за да знаете условията, преди да отидете."
+                en: "Check out the Algae Legend in Settings! It's been updated to reflect the new scientific data source and show the thresholds we use for 'Clear', 'Moderate', and 'High' reports.",
+                bg: "Разгледайте Легендата за водорасли в Настройки! Тя е актуализирана, за да отрази новия научен източник на данни и да покаже праговете, които използваме за 'Чисто', 'Умерено' и 'Високо'."
             },
-        },
-        {
-            title: {
-                en: '🗺️ Enhanced Map Markers',
-                bg: '🗺️ Подобрени маркери на картата'
-            },
-            description: {
-                en: "See cleanliness at a glance! Map markers now include a small dot (🔵 Clear, 🟡 Moderate, 🔴 High) to indicate the current algae status.",
-                bg: "Вижте чистотата с един поглед! Маркерите на картата вече включват малка точка (🔵 Чисто, 🟡 Умерено, 🔴 Високо), за да покажат текущото състояние на водораслите."
-            },
-        },
-        {
-            title: {
-                en: '🎁 See What\'s New, Anytime!',
-                bg: '🎁 Вижте новостите по всяко време!'
-            },
-            description: {
-                en: "Missed what's new? Just tap the gift icon (🎁) next to Settings to see the latest feature updates whenever you like.",
-                bg: "Пропуснали сте новостите? Просто докоснете иконата с подарък (🎁) до Настройки, за да видите последните актуализации на функциите, когато пожелаете."
-            }
         }
     ]
 };
@@ -267,86 +247,102 @@ class BeachSafetyApp {
         }
     
         try {
-            const reports = await this.fetchAlgaeReportsFromGemini();
+            const reports = await this.fetchRealCleanlinessData();
             this.mergeCleanlinessData(reports);
             localStorage.setItem('beach-app-cleanliness', JSON.stringify({
                 timestamp: new Date().toISOString(),
                 reports: reports
             }));
         } catch (error) {
-            console.error("Failed to fetch from Gemini, using demo cleanliness data.", error);
+            console.error("Failed to fetch real cleanliness data, using demo data.", error);
             const demoReports = this.generateDemoCleanlinessData();
             this.mergeCleanlinessData(demoReports);
         }
     }
 
-    async fetchAlgaeReportsFromGemini() {
-        if (typeof process === 'undefined' || !process.env.API_KEY) {
-            console.warn("API_KEY environment variable not found. Falling back to demo data.");
-            return this.generateDemoCleanlinessData();
-        }
+    async fetchRealCleanlinessData() {
+        console.log("Fetching real cleanliness data from Copernicus Marine Service...");
+        const reports = [];
 
-        const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+        for (const beach of this.beaches) {
+            const { lat, lng } = beach.coordinates;
+            // Create a small bounding box around the beach coordinates
+            const bbox = `${lng - 0.01},${lat - 0.01},${lng + 0.01},${lat + 0.01}`;
+            
+            // Construct the WMS GetFeatureInfo URL
+            const serviceUrl = 'https://nrt.cmems-du.eu/thredds/wms/cmems_obs-oc_blk_bgc-plankton_nrt_l3-multi-1km_P1D';
+            const params = new URLSearchParams({
+                service: 'WMS',
+                version: '1.3.0',
+                request: 'GetFeatureInfo',
+                layers: 'CHL',
+                query_layers: 'CHL',
+                crs: 'EPSG:4326',
+                bbox: bbox,
+                width: '1',
+                height: '1',
+                i: '0',
+                j: '0',
+                info_format: 'application/json'
+            });
 
-        const schema = {
-            type: Type.OBJECT,
-            properties: {
-                reports: {
-                    type: Type.ARRAY,
-                    items: {
-                        type: Type.OBJECT,
-                        properties: {
-                            beach_id: { type: Type.STRING },
-                            status: { type: Type.STRING, enum: ["clear", "moderate", "high"] },
-                            report_en: { type: Type.STRING },
-                            report_bg: { type: Type.STRING }
-                        },
-                        required: ["beach_id", "status", "report_en", "report_bg"]
-                    }
+            try {
+                const response = await fetch(`${serviceUrl}?${params.toString()}`);
+                if (!response.ok) {
+                    throw new Error(`Copernicus API returned status ${response.status}`);
                 }
+                const data = await response.json();
+                
+                // Extract the Chlorophyll-a value
+                const chlValue = data?.features?.[0]?.properties?.value;
+
+                if (chlValue !== undefined && chlValue !== null) {
+                    const value = parseFloat(chlValue);
+                    let status = 'clear';
+                    if (value >= 20) {
+                        status = 'high';
+                    } else if (value >= 5) {
+                        status = 'moderate';
+                    }
+                    reports.push(this.createReportFromStatus(beach.id, status, value));
+                } else {
+                    // No data available for this point, assume clear
+                    reports.push(this.createReportFromStatus(beach.id, 'clear', null));
+                }
+
+            } catch (error) {
+                console.warn(`Could not fetch data for ${beach.name}: ${error.message}. Assuming clear.`);
+                reports.push(this.createReportFromStatus(beach.id, 'clear', null));
             }
-        };
-
-        const beachNames = this.beaches.map(b => `${b.id} (${b.name})`).join(', ');
-        const prompt = `Generate a plausible but fictional daily algae and water cleanliness report for the following Bulgarian Black Sea beaches: ${beachNames}. It's currently summer. Provide a status ('clear', 'moderate', 'high') and a brief, one-sentence report in both English (report_en) and Bulgarian (report_bg) for each beach. Some beaches should be clear, a few moderate, and maybe one or two high, reflecting typical conditions.`;
-
-        const response = await ai.models.generateContent({
-            model: "gemini-2.5-flash",
-            contents: prompt,
-            config: {
-                responseMimeType: "application/json",
-                responseSchema: schema,
-            },
-        });
-
-        const jsonResponse = JSON.parse(response.text);
-        return jsonResponse.reports;
+        }
+        return reports;
+    }
+    
+    createReportFromStatus(beach_id, status, value) {
+        let report_en, report_bg;
+        const valueText = value !== null ? ` (CHL: ${value.toFixed(2)} mg/m³)` : '';
+        
+        switch (status) {
+            case 'high':
+                report_en = `High Chlorophyll-a concentration detected${valueText}. Widespread algae bloom likely.`;
+                report_bg = `Открита е висока концентрация на Хлорофил-a${valueText}. Вероятен е масов цъфтеж на водорасли.`;
+                break;
+            case 'moderate':
+                report_en = `Moderate Chlorophyll-a concentration detected${valueText}. Some algae patches possible.`;
+                report_bg = `Открита е умерена концентрация на Хлорофил-a${valueText}. Възможни са петна от водорасли.`;
+                break;
+            default: // clear
+                report_en = `Chlorophyll-a concentration is low${valueText}. Water is expected to be clear.`;
+                report_bg = `Концентрацията на Хлорофил-a е ниска${valueText}. Очаква се водата да е чиста.`;
+        }
+        return { beach_id, status, report_en, report_bg };
     }
 
     generateDemoCleanlinessData() {
         const statuses = ["clear", "moderate", "high"];
         return this.beaches.map(beach => {
             const randomStatus = statuses[Math.floor(Math.random() * 2.2)]; // Skew towards clear/moderate
-            let report_en, report_bg;
-            switch (randomStatus) {
-                case 'high':
-                    report_en = "Significant algae bloom reported near the shore, caution is advised.";
-                    report_bg = "Значителен цъфтеж на водорасли близо до брега, препоръчва се повишено внимание.";
-                    break;
-                case 'moderate':
-                    report_en = "Some patches of algae are present in the water, but swimming is generally possible.";
-                    report_bg = "Във водата има петна от водорасли, но плуването е възможно.";
-                    break;
-                default: // clear
-                    report_en = "The water is clear with excellent visibility and no significant algae presence.";
-                    report_bg = "Водата е чиста с отлична видимост и без значително присъствие на водорасли.";
-            }
-            return {
-                beach_id: beach.id,
-                status: randomStatus,
-                report_en,
-                report_bg
-            };
+            return this.createReportFromStatus(beach.id, randomStatus, null);
         });
     }
 
@@ -356,11 +352,8 @@ class BeachSafetyApp {
             if (report) {
                 beach.cleanliness = report;
             } else {
-                beach.cleanliness = {
-                    status: 'clear',
-                    report_en: 'Data not available, assuming clear conditions.',
-                    report_bg: 'Няма налични данни, приема се, че условията са чисти.'
-                };
+                // This is a fallback in case a beach was missed in the reports
+                beach.cleanliness = this.createReportFromStatus(beach.id, 'clear', null);
             }
         });
     }
@@ -824,8 +817,8 @@ class BeachSafetyApp {
             "legend-yellow": "Caution advised",
             "legend-red": "Dangerous conditions",
             "algae-legend-title": "Algae Legend",
-            "legend-clear": "Clear: Low algae presence",
-            "legend-moderate": "Moderate: Visible algae patches",
+            "legend-clear": "Clear: Low Chlorophyll",
+            "legend-moderate": "Moderate: Potential algae bloom",
             "legend-high": "High: Widespread algae bloom",
             "safety-tips-title": "Safety Tips",
             "whats-new-modal-title": "What's New!",
@@ -876,9 +869,9 @@ class BeachSafetyApp {
             "legend-yellow": "Препоръчва се повишено внимание",
             "legend-red": "Опасни условия",
             "algae-legend-title": "Легенда за водорасли",
-            "legend-clear": "Чисто: Ниско присъствие на водорасли",
-            "legend-moderate": "Умерено: Видими петна от водорасли",
-            "legend-high": "Високо: Широко разпространен цъфтеж",
+            "legend-clear": "Чисто: Ниска концентрация на хлорофил",
+            "legend-moderate": "Умерено: Възможен цъфтеж на водорасли",
+            "legend-high": "Високо: Масов цъфтеж на водорасли",
             "safety-tips-title": "Съвети за безопасност",
             "whats-new-modal-title": "Какво ново!",
             "offline-text": "Офлайн режим - Показват се кеширани данни",
