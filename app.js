@@ -1,5 +1,3 @@
-
-
 // NOTE: This app no longer uses the Gemini API for cleanliness reports.
 // It has been replaced with a real scientific data source from Copernicus Marine Service.
 
@@ -86,7 +84,7 @@ class BeachSafetyApp {
         this.userLocation = null;
         this.map = null;
         this.markers = [];
-        this.beaches = [];
+        this.beaches = []; // Will be populated with static data first, then live data
         this.currentView = 'map';
         this.currentFilter = 'all';
         this.isOffline = !navigator.onLine;
@@ -111,9 +109,9 @@ class BeachSafetyApp {
         // Apply language
         this.applyLanguage();
         
-        // Load beach and cleanliness data
-        await this.loadBeachData();
-        await this.loadCleanlinessData();
+        // Load static beach info and then fetch all live data
+        this.loadStaticBeachData();
+        await this.fetchAllData();
         
         // Initialize map after a short delay
         setTimeout(() => {
@@ -127,7 +125,7 @@ class BeachSafetyApp {
         this.requestLocation();
         
         // Render initial views
-        this.renderAllLists();
+        this.updateAllViews();
         
         // Hide loading screen
         setTimeout(() => {
@@ -148,8 +146,7 @@ class BeachSafetyApp {
         setInterval(async () => {
             if (!this.isOffline) {
                 console.log('Refreshing weather and cleanliness data...');
-                await this.loadBeachData();
-                await this.loadCleanlinessData();
+                await this.fetchAllData();
                 this.updateAllViews();
             }
         }, 30 * 60 * 1000); // 30 minutes
@@ -169,259 +166,115 @@ class BeachSafetyApp {
         }
     }
 
-    async loadBeachData() {
-        // Caching logic for beach data
-        const cachedBeaches = localStorage.getItem('beach-app-data');
-        if (cachedBeaches) {
-            this.beaches = JSON.parse(cachedBeaches);
-        }
-
-        const beachData = {
-            "priority_beaches": [
-                // North Coast
-                { "id": "durankulak_north", "name": "Durankulak North", "name_bg": "Дуранкулак - Север", "coordinates": {"lat": 43.684, "lng": 28.575}, "region": "Dobrich", "type": "wild", "facilities": {"camping": true}, "description": "Pristine wild beach near the Romanian border, next to Durankulak Lake.", "description_bg": "Девствен див плаж до румънската граница, до Дуранкулашкото езеро." },
-                { "id": "krapets", "name": "Krapets", "name_bg": "Крапец", "coordinates": {"lat": 43.633, "lng": 28.570}, "region": "Dobrich", "type": "wild", "facilities": {"camping": true, "restaurants": true}, "description": "Long, quiet sandy beach backed by dunes and fields.", "description_bg": "Дълъг, тих пясъчен плаж, заобиколен от дюни и поля." },
-                { "id": "shabla", "name": "Shabla Lighthouse Beach", "name_bg": "Плаж при фар Шабла", "coordinates": {"lat": 43.545, "lng": 28.599}, "region": "Dobrich", "type": "wild", "facilities": {}, "description": "Rugged, scenic beach near Bulgaria's oldest lighthouse.", "description_bg": "Скалист, живописен плаж до най-стария фар в България." },
-                { "id": "bolata", "name": "Bolata Beach", "name_bg": "Болата", "coordinates": {"lat": 43.433, "lng": 28.467}, "region": "Dobrich", "type": "nature", "facilities": {"nature_reserve": true, "parking": true}, "description": "Horseshoe-shaped bay protected by red cliffs, a former fishing cove.", "description_bg": "Залив във форма на подкова, защитен от червени скали, бивш рибарски пристан." },
-                { "id": "rusalka", "name": "Rusalka", "name_bg": "Русалка", "coordinates": {"lat": 43.411, "lng": 28.508}, "region": "Dobrich", "type": "resort", "facilities": {"resort_complex": true, "scenic": true}, "description": "Rocky coves and small beaches within a holiday resort.", "description_bg": "Скалъпи заливчета и малки плажове в рамките на ваканционен комплекс." },
-                { "id": "kavarna", "name": "Kavarna Central Beach", "name_bg": "Каварна - Централен", "coordinates": {"lat": 43.419, "lng": 28.344}, "region": "Dobrich", "type": "urban", "facilities": {"lifeguards": true, "restaurants": true}, "description": "The main city beach of Kavarna, located in a calm bay.", "description_bg": "Основният градски плаж на Каварна, разположен в спокоен залив." },
-                { "id": "topola", "name": "Topola", "name_bg": "Топола", "coordinates": {"lat": 43.376, "lng": 28.257}, "region": "Dobrich", "type": "resort", "facilities": {"resort_complex": true, "scenic": true}, "description": "Known for its golf courses and therapeutic white mud.", "description_bg": "Известен със своите голф игрища и лечебна бяла кал." },
-                { "id": "balchik_central", "name": "Balchik Central", "name_bg": "Балчик - Централен", "coordinates": {"lat": 43.407, "lng": 28.163}, "region": "Dobrich", "type": "urban", "facilities": {"lifeguards": true, "restaurants": true}, "description": "City beach near the famous Balchik Palace and Botanical Garden.", "description_bg": "Градски плаж до известния Дворец и Ботаническата градина в Балчик." },
-                { "id": "albena", "name": "Albena Beach", "name_bg": "Албена", "coordinates": {"lat": 43.367, "lng": 28.083}, "region": "Dobrich", "type": "resort", "facilities": {"lifeguards": true, "blueflag": true, "family": true, "medical": true}, "description": "Family-friendly resort with mineral springs and a vast sandy beach.", "description_bg": "Семеен курорт с минерални извори и огромен пясъчен плаж." },
-                { "id": "kranevo", "name": "Kranevo", "name_bg": "Кранево", "coordinates": {"lat": 43.340, "lng": 28.066}, "region": "Dobrich", "type": "resort", "facilities": {"lifeguards": true, "restaurants": true}, "description": "A long and wide beach connecting to Albena's beach to the north.", "description_bg": "Дълъг и широк плаж, който се свързва с плажа на Албена на север." },
-                { "id": "golden_sands", "name": "Golden Sands", "name_bg": "Златни пясъци", "coordinates": {"lat": 43.283, "lng": 28.033}, "region": "Varna", "type": "resort", "facilities": {"lifeguards": true, "blueflag": true, "medical": true, "restaurants": true, "hotels": true}, "description": "Major resort with fine golden sand and excellent facilities.", "description_bg": "Голям курорт с фин златен пясък и отлични съоръжения." },
-                { "id": "saints_constantine", "name": "Sts. Constantine & Helena", "name_bg": "Св. Св. Константин и Елена", "coordinates": {"lat": 43.232, "lng": 28.010}, "region": "Varna", "type": "resort", "facilities": {"lifeguards": true, "restaurants": true}, "description": "Bulgaria's oldest seaside resort, known for its spas.", "description_bg": "Най-старият морски курорт в България, известен със своите спа центрове." },
-                { "id": "varna_beach", "name": "Varna Beach", "name_bg": "Варна - Централен", "coordinates": {"lat": 43.205, "lng": 27.916}, "region": "Varna", "type": "urban", "facilities": {"lifeguards": true, "urban": true, "transport": true, "restaurants": true, "shops": true}, "description": "Main city beach accessible by public transport, next to the Sea Garden.", "description_bg": "Основният градски плаж, достъпен с обществен транспорт, до Морската градина." },
-                { "id": "asparuhovo", "name": "Asparuhovo Beach", "name_bg": "Аспарухово", "coordinates": {"lat": 43.181, "lng": 27.915}, "region": "Varna", "type": "urban", "facilities": {"lifeguards": true, "restaurants": true}, "description": "A large beach in a Varna suburb, south of the Asparuhov Bridge.", "description_bg": "Голям плаж в предградие на Варна, южно от Аспаруховия мост." },
-                { "id": "fichoza", "name": "Fichoza", "name_bg": "Фичоза", "coordinates": {"lat": 43.136, "lng": 27.937}, "region": "Varna", "type": "wild", "facilities": {"camping": true}, "description": "A series of small, wild beaches popular with locals and campers.", "description_bg": "Поредица от малки, диви плажове, популярни сред местните и къмпингуващите." },
-                { "id": "kamchia", "name": "Kamchia", "name_bg": "Камчия", "coordinates": {"lat": 43.023, "lng": 27.886}, "region": "Varna", "type": "nature", "facilities": {"lifeguards": true, "nature_reserve": true}, "description": "A vast beach where the Kamchia River meets the sea, part of a UNESCO biosphere reserve.", "description_bg": "Огромен плаж, където река Камчия се влива в морето, част от биосферен резерват на ЮНЕСКО." },
-                { "id": "shkorpilovtsi", "name": "Shkorpilovtsi Beach", "name_bg": "Шкорпиловци", "coordinates": {"lat": 42.966, "lng": 27.889}, "region": "Varna", "type": "wild", "facilities": {"camping": true, "length_km": 13}, "description": "Longest beach in Bulgaria, known for its wild nature and wide sandy strip.", "description_bg": "Най-дългият плаж в България, известен със своята дива природа и широка пясъчна ивица." },
-                { "id": "byala", "name": "Byala Beach", "name_bg": "Бяла", "coordinates": {"lat": 42.875, "lng": 27.888}, "region": "Varna", "type": "urban", "facilities": {"lifeguards": true, "restaurants": true}, "description": "Known for its clean water and the nearby Palaeontological site at the White Cliffs.", "description_bg": "Известен с чистата си вода и близкия палеонтологичен обект при Белите скали." },
-                { "id": "obzor", "name": "Obzor Beach", "name_bg": "Обзор", "coordinates": {"lat": 42.821, "lng": 27.880}, "region": "Burgas", "type": "resort", "facilities": {"lifeguards": true, "restaurants": true}, "description": "A long beach strip located halfway between Varna and Burgas.", "description_bg": "Дълга плажна ивица, разположена по средата между Варна и Бургас." },
-                
-                // South Coast
-                { "id": "irakli", "name": "Irakli Beach", "name_bg": "Иракли", "coordinates": {"lat": 42.775, "lng": 27.872}, "region": "Burgas", "type": "wild", "facilities": {"nudist_friendly": true, "camping": true}, "description": "Protected area with pristine nature and a river mouth, popular with campers.", "description_bg": "Защитена зона с девствена природа и устие на река, популярна сред къмпингуващите." },
-                { "id": "elenite", "name": "Elenite", "name_bg": "Елените", "coordinates": {"lat": 42.715, "lng": 27.795}, "region": "Burgas", "type": "resort", "facilities": {"lifeguards": true, "resort_complex": true}, "description": "A private-access resort beach at the foot of the Stara Planina mountain.", "description_bg": "Частен курортен плаж в подножието на Стара планина." },
-                { "id": "svetivlas_central", "name": "Sveti Vlas Central", "name_bg": "Свети Влас - Централен", "coordinates": {"lat": 42.709, "lng": 27.760}, "region": "Burgas", "type": "resort", "facilities": {"lifeguards": true, "blueflag": true}, "description": "A clean, well-maintained beach next to the modern Marina Dinevi yacht port.", "description_bg": "Чист, добре поддържан плаж до модерното яхтено пристанище Марина Диневи." },
-                { "id": "sunny_beach", "name": "Sunny Beach", "name_bg": "Слънчев бряг", "coordinates": {"lat": 42.688, "lng": 27.714}, "region": "Burgas", "type": "resort", "facilities": {"lifeguards": true, "blueflag": true, "nightlife": true, "restaurants": true, "hotels": true}, "description": "Largest and most famous beach resort with vibrant nightlife.", "description_bg": "Най-големият и известен плажен курорт с оживен нощен живот." },
-                { "id": "nessebar_south", "name": "Nessebar South", "name_bg": "Несебър - Южен", "coordinates": {"lat": 42.653, "lng": 27.721}, "region": "Burgas", "type": "urban", "facilities": {"lifeguards": true, "restaurants": true}, "description": "The main beach of the new town of Nessebar, offering views to the old town.", "description_bg": "Основният плаж на новия град на Несебър, с гледка към стария град." },
-                { "id": "pomorie", "name": "Pomorie East", "name_bg": "Поморие - Източен", "coordinates": {"lat": 42.564, "lng": 27.636}, "region": "Burgas", "type": "urban", "facilities": {"lifeguards": true, "restaurants": true}, "description": "Famous for its dark, iron-rich sand and the nearby Pomorie salt lake.", "description_bg": "Известен с тъмния си, богат на желязо пясък и близкото Поморийско езеро." },
-                { "id": "burgas_north", "name": "Burgas North", "name_bg": "Бургас - Северен", "coordinates": {"lat": 42.508, "lng": 27.481}, "region": "Burgas", "type": "urban", "facilities": {"lifeguards": true, "sea_garden": true}, "description": "The main city beach next to the famous Sea Garden.", "description_bg": "Основният градски плаж до известната Морска градина." },
-                { "id": "kraymorie", "name": "Kraymorie", "name_bg": "Крайморие", "coordinates": {"lat": 42.441, "lng": 27.514}, "region": "Burgas", "type": "urban", "facilities": {"lifeguards": true, "restaurants": true}, "description": "A small beach in a Burgas suburb, popular with local families.", "description_bg": "Малък плаж в предградие на Бургас, популярен сред местните семейства." },
-                { "id": "chernomorets", "name": "Chernomorets Central", "name_bg": "Черноморец - Централен", "coordinates": {"lat": 42.446, "lng": 27.641}, "region": "Burgas", "type": "urban", "facilities": {"lifeguards": true}, "description": "The main beach of the town of Chernomorets.", "description_bg": "Основният плаж на град Черноморец." },
-                { "id": "gradina", "name": "Gradina Camping", "name_bg": "Къмпинг Градина", "coordinates": {"lat": 42.417, "lng": 27.671}, "region": "Burgas", "type": "wild", "facilities": {"lifeguards": true, "camping": true, "water_sports": true}, "description": "Famous camping beach, popular for kitesurfing and windsurfing.", "description_bg": "Известен къмпинг плаж, популярен за кайтсърф и уиндсърф." },
-                { "id": "sozopol_harmanite", "name": "Sozopol - Harmanite", "name_bg": "Созопол - Харманите", "coordinates": {"lat": 42.413, "lng": 27.695}, "region": "Burgas", "type": "urban", "facilities": {"lifeguards": true, "blueflag": true, "restaurants": true}, "description": "Popular beach in the new town of Sozopol.", "description_bg": "Популярен плаж в новия град на Созопол." },
-                { "id": "kavatsite", "name": "Kavatsite", "name_bg": "Каваците", "coordinates": {"lat": 42.390, "lng": 27.705}, "region": "Burgas", "type": "wild", "facilities": {"lifeguards": true, "camping": true}, "description": "A long sandy beach south of Sozopol, bordered by a forest.", "description_bg": "Дълъг пясъчен плаж южно от Созопол, граничещ с гора." },
-                { "id": "dyuni", "name": "Dyuni Beach", "name_bg": "Дюни", "coordinates": {"lat": 42.365, "lng": 27.714}, "region": "Burgas", "type": "resort", "facilities": {"lifeguards": true, "resort_complex": true, "water_sports": true}, "description": "Long sandy beach part of a holiday resort complex.", "description_bg": "Дълъг пясъчен плаж, част от курортен комплекс." },
-                { "id": "arkutino", "name": "Arkutino", "name_bg": "Аркутино", "coordinates": {"lat": 42.338, "lng": 27.739}, "region": "Burgas", "type": "nature", "facilities": {"nature_reserve": true}, "description": "Pristine beach known for its sand lilies, part of the Ropotamo Reserve.", "description_bg": "Девствен плаж, известен със своите пясъчни лилии, част от резерват Ропотамо." },
-                { "id": "primorsko_north", "name": "Primorsko North", "name_bg": "Приморско - Северен", "coordinates": {"lat": 42.275, "lng": 27.755}, "region": "Burgas", "type": "resort", "facilities": {"lifeguards": true, "blueflag": true, "dunes": true, "restaurants": true}, "description": "Wide beach with impressive sand dunes, separated from the town by a river.", "description_bg": "Широк плаж с впечатляващи пясъчни дюни, отделен от града с река." },
-                { "id": "perla", "name": "Perla Beach", "name_bg": "Перла", "coordinates": {"lat": 42.290, "lng": 27.750}, "region": "Burgas", "type": "wild", "facilities": {"scenic": true}, "description": "A quiet beach located near the former residence of Todor Zhivkov.", "description_bg": "Тих плаж, разположен до бившата резиденция на Тодор Живков." },
-                { "id": "kiten_atliman", "name": "Kiten - Atliman", "name_bg": "Китен - Атлиман", "coordinates": {"lat": 42.245, "lng": 27.772}, "region": "Burgas", "type": "resort", "facilities": {"lifeguards": true, "bay": true, "family": true}, "description": "Calm bay beach, very suitable for families with children.", "description_bg": "Спокоен заливен плаж, много подходящ за семейства с деца." },
-                { "id": "lozenets", "name": "Lozenets Beach", "name_bg": "Лозенец", "coordinates": {"lat": 42.210, "lng": 27.808}, "region": "Burgas", "type": "resort", "facilities": {"lifeguards": true, "surfing": true, "restaurants": true}, "description": "Popular with young people and water sports enthusiasts.", "description_bg": "Популярен сред младите хора и любителите на водни спортове." },
-                { "id": "korala", "name": "Oasis/Korala", "name_bg": "Оазис/Корал", "coordinates": {"lat": 42.200, "lng": 27.820}, "region": "Burgas", "type": "wild", "facilities": {"camping": true}, "description": "One of the last remaining truly wild beaches, a favorite for campers.", "description_bg": "Един от последните останали истински диви плажове, любим на къмпингуващите." },
-                { "id": "tsarevo_central", "name": "Tsarevo Central", "name_bg": "Царево - Централен", "coordinates": {"lat": 42.170, "lng": 27.854}, "region": "Burgas", "type": "urban", "facilities": {"lifeguards": true}, "description": "The small central beach of the town of Tsarevo.", "description_bg": "Малкият централен плаж на град Царево." },
-                { "id": "nestinarka", "name": "Nestinarka", "name_bg": "Нестинарка", "coordinates": {"lat": 42.160, "lng": 27.868}, "region": "Burgas", "type": "resort", "facilities": {"lifeguards": true, "camping": true}, "description": "A large camping beach just south of Tsarevo.", "description_bg": "Голям къмпинг плаж, южно от Царево." },
-                { "id": "varvara", "name": "Varvara", "name_bg": "Варвара", "coordinates": {"lat": 42.121, "lng": 27.909}, "region": "Burgas", "type": "wild", "facilities": {"scenic": true}, "description": "A small, picturesque beach nestled among rocks, popular for diving.", "description_bg": "Малък, живописен плаж, сгушен сред скали, популярен за гмуркане." },
-                { "id": "ahtopol", "name": "Ahtopol", "name_bg": "Ахтопол", "coordinates": {"lat": 42.095, "lng": 27.935}, "region": "Burgas", "type": "urban", "facilities": {"lifeguards": true}, "description": "The main beach of the southernmost town on the coast.", "description_bg": "Основният плаж на най-южния град по крайбрежието." },
-                { "id": "sinemorets_veleka", "name": "Sinemorets Veleka Beach", "name_bg": "Синеморец - Велека", "coordinates": {"lat": 42.067, "lng": 27.973}, "region": "Burgas", "type": "nature", "facilities": {"river_mouth": true, "scenic": true}, "description": "Stunning beach where the Veleka River meets the sea, creating a sandbar.", "description_bg": "Зашеметяващ плаж, където река Велека се влива в морето, образувайки пясъчна коса." },
-                { "id": "sinemorets_butamyata", "name": "Sinemorets Butamyata", "name_bg": "Синеморец - Бутамята", "coordinates": {"lat": 42.057, "lng": 27.981}, "region": "Burgas", "type": "resort", "facilities": {"lifeguards": true}, "description": "The main, southern beach of Sinemorets, located in a calm bay.", "description_bg": "Основният, южен плаж на Синеморец, разположен в спокоен залив." },
-                { "id": "lipite", "name": "Lipite", "name_bg": "Липите", "coordinates": {"lat": 42.049, "lng": 27.992}, "region": "Burgas", "type": "wild", "facilities": {"nudist_friendly": true}, "description": "A secluded wild beach accessible by a walk from Sinemorets.", "description_bg": "Уединен див плаж, достъпен пеша от Синеморец." },
-                { "id": "silistar", "name": "Silistar Beach", "name_bg": "Силистар", "coordinates": {"lat": 42.019, "lng": 28.006}, "region": "Burgas", "type": "nature", "facilities": {"protected_area": true, "camping": true}, "description": "One of the most beautiful southern beaches, located in a protected area.", "description_bg": "Един от най-красивите южни плажове, разположен в защитена местност." },
-                { "id": "rezovo", "name": "Rezovo Beach", "name_bg": "Резово", "coordinates": {"lat": 41.985, "lng": 28.026}, "region": "Burgas", "type": "wild", "facilities": {}, "description": "The southernmost beach in Bulgaria, right at the border with Turkey.", "description_bg": "Най-южният плаж в България, точно на границата с Турция." }
-            ]
-        };
-        
-        const latitudes = beachData.priority_beaches.map(b => b.coordinates.lat);
-        const longitudes = beachData.priority_beaches.map(b => b.coordinates.lng);
-        
-        try {
-            if (this.isOffline) {
-                console.log("Offline mode, using cached beach data.");
-                return;
-            }
-
-            const weatherResponse = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitudes.join(',')}&longitude=${longitudes.join(',')}&hourly=temperature_2m,uv_index,wind_speed_10m,wind_direction_10m&timezone=auto`);
-            const marineResponse = await fetch(`https://marine-api.open-meteo.com/v1/marine?latitude=${latitudes.join(',')}&longitude=${longitudes.join(',')}&hourly=wave_height,sea_surface_temperature&timezone=auto`);
-            
-            if (!weatherResponse.ok || !marineResponse.ok) {
-                throw new Error('Failed to fetch weather data');
-            }
-            
-            const weatherData = await weatherResponse.json();
-            const marineData = await marineResponse.json();
-
-            const combinedData = beachData.priority_beaches.map((beach, index) => {
-                const now = new Date();
-                const currentHour = now.getHours();
-
-                const weather = weatherData[index]?.hourly;
-                const marine = marineData[index]?.hourly;
-                
-                const waveHeight = marine?.wave_height[currentHour] ?? 'N/A';
-                const waterTemp = marine?.sea_surface_temperature[currentHour] ?? 'N/A';
-                const airTemp = weather?.temperature_2m[currentHour] ?? 'N/A';
-                const windSpeed = weather?.wind_speed_10m[currentHour] ?? 'N/A';
-                const uvIndex = weather?.uv_index[currentHour] ?? 'N/A';
-
-                let flag = 'green';
-                if (waveHeight > 2 || windSpeed > 40) {
-                    flag = 'red';
-                } else if (waveHeight > 1.25 || windSpeed > 25) {
-                    flag = 'yellow';
-                }
-
-                return {
-                    ...beach,
-                    conditions: {
-                        waveHeight: waveHeight.toFixed(2),
-                        waterTemp: waterTemp.toFixed(1),
-                        airTemp: airTemp.toFixed(1),
-                        windSpeed: windSpeed.toFixed(1),
-                        uvIndex: uvIndex.toFixed(1),
-                        flag: flag,
-                        lastUpdated: new Date().toISOString()
-                    }
-                };
-            });
-            this.beaches = combinedData;
-            localStorage.setItem('beach-app-data', JSON.stringify(this.beaches));
-
-        } catch (error) {
-            console.error('Error loading beach data:', error);
-            // If API fails, we rely on potentially stale cached data
-            if (!this.beaches.length) {
-                // If there's no cached data at all, this is a problem
-                console.error("No cached data available and API fetch failed.");
-            }
-        }
+    loadStaticBeachData() {
+        // This method now only loads the static, unchanging data for all beaches.
+        // The live data (conditions, cleanliness) will be fetched separately.
+        this.beaches = [
+            // North Coast
+            { "id": "durankulak_north", "name": "Durankulak North", "name_bg": "Дуранкулак - Север", "coordinates": {"lat": 43.684, "lng": 28.575}, "region": "Dobrich", "type": "wild", "facilities": {"camping": true}, "description": "Pristine wild beach near the Romanian border, next to Durankulak Lake.", "description_bg": "Девствен див плаж до румънската граница, до Дуранкулашкото езеро." },
+            { "id": "krapets", "name": "Krapets", "name_bg": "Крапец", "coordinates": {"lat": 43.633, "lng": 28.570}, "region": "Dobrich", "type": "wild", "facilities": {"camping": true, "restaurants": true}, "description": "Long, quiet sandy beach backed by dunes and fields.", "description_bg": "Дълъг, тих пясъчен плаж, заобиколен от дюни и поля." },
+            { "id": "shabla", "name": "Shabla Lighthouse Beach", "name_bg": "Плаж при фар Шабла", "coordinates": {"lat": 43.545, "lng": 28.599}, "region": "Dobrich", "type": "wild", "facilities": {}, "description": "Rugged, scenic beach near Bulgaria's oldest lighthouse.", "description_bg": "Скалист, живописен плаж до най-стария фар в България." },
+            { "id": "bolata", "name": "Bolata Beach", "name_bg": "Болата", "coordinates": {"lat": 43.433, "lng": 28.467}, "region": "Dobrich", "type": "nature", "facilities": {"nature_reserve": true, "parking": true}, "description": "Horseshoe-shaped bay protected by red cliffs, a former fishing cove.", "description_bg": "Залив във форма на подкова, защитен от червени скали, бивш рибарски пристан." },
+            { "id": "rusalka", "name": "Rusalka", "name_bg": "Русалка", "coordinates": {"lat": 43.411, "lng": 28.508}, "region": "Dobrich", "type": "resort", "facilities": {"resort_complex": true, "scenic": true}, "description": "Rocky coves and small beaches within a holiday resort.", "description_bg": "Скалъпи заливчета и малки плажове в рамките на ваканционен комплекс." },
+            { "id": "kavarna", "name": "Kavarna Central Beach", "name_bg": "Каварна - Централен", "coordinates": {"lat": 43.419, "lng": 28.344}, "region": "Dobrich", "type": "urban", "facilities": {"lifeguards": true, "restaurants": true}, "description": "The main city beach of Kavarna, located in a calm bay.", "description_bg": "Основният градски плаж на Каварна, разположен в спокоен залив." },
+            { "id": "topola", "name": "Topola", "name_bg": "Топола", "coordinates": {"lat": 43.376, "lng": 28.257}, "region": "Dobrich", "type": "resort", "facilities": {"resort_complex": true, "scenic": true}, "description": "Known for its golf courses and therapeutic white mud.", "description_bg": "Известен със своите голф игрища и лечебна бяла кал." },
+            { "id": "balchik_central", "name": "Balchik Central", "name_bg": "Балчик - Централен", "coordinates": {"lat": 43.407, "lng": 28.163}, "region": "Dobrich", "type": "urban", "facilities": {"lifeguards": true, "restaurants": true}, "description": "City beach near the famous Balchik Palace and Botanical Garden.", "description_bg": "Градски плаж до известния Дворец и Ботаническата градина в Балчик." },
+            { "id": "albena", "name": "Albena Beach", "name_bg": "Албена", "coordinates": {"lat": 43.367, "lng": 28.083}, "region": "Dobrich", "type": "resort", "facilities": {"lifeguards": true, "blueflag": true, "family": true, "medical": true}, "description": "Family-friendly resort with mineral springs and a vast sandy beach.", "description_bg": "Семеен курорт с минерални извори и огромен пясъчен плаж." },
+            { "id": "kranevo", "name": "Kranevo", "name_bg": "Кранево", "coordinates": {"lat": 43.340, "lng": 28.066}, "region": "Dobrich", "type": "resort", "facilities": {"lifeguards": true, "restaurants": true}, "description": "A long and wide beach connecting to Albena's beach to the north.", "description_bg": "Дълъг и широк плаж, който се свързва с плажа на Албена на север." },
+            { "id": "golden_sands", "name": "Golden Sands", "name_bg": "Златни пясъци", "coordinates": {"lat": 43.283, "lng": 28.033}, "region": "Varna", "type": "resort", "facilities": {"lifeguards": true, "blueflag": true, "medical": true, "restaurants": true, "hotels": true}, "description": "Major resort with fine golden sand and excellent facilities.", "description_bg": "Голям курорт с фин златен пясък и отлични съоръжения." },
+            { "id": "saints_constantine", "name": "Sts. Constantine & Helena", "name_bg": "Св. Св. Константин и Елена", "coordinates": {"lat": 43.232, "lng": 28.010}, "region": "Varna", "type": "resort", "facilities": {"lifeguards": true, "restaurants": true}, "description": "Bulgaria's oldest seaside resort, known for its spas.", "description_bg": "Най-старият морски курорт в България, известен със своите спа центрове." },
+            { "id": "varna_beach", "name": "Varna Beach", "name_bg": "Варна - Централен", "coordinates": {"lat": 43.205, "lng": 27.916}, "region": "Varna", "type": "urban", "facilities": {"lifeguards": true, "urban": true, "transport": true, "restaurants": true, "shops": true}, "description": "Main city beach accessible by public transport, next to the Sea Garden.", "description_bg": "Основният градски плаж, достъпен с обществен транспорт, до Морската градина." },
+            { "id": "asparuhovo", "name": "Asparuhovo Beach", "name_bg": "Аспарухово", "coordinates": {"lat": 43.181, "lng": 27.915}, "region": "Varna", "type": "urban", "facilities": {"lifeguards": true, "restaurants": true}, "description": "A large beach in a Varna suburb, south of the Asparuhov Bridge.", "description_bg": "Голям плаж в предградие на Варна, южно от Аспаруховия мост." },
+            { "id": "fichoza", "name": "Fichoza", "name_bg": "Фичоза", "coordinates": {"lat": 43.136, "lng": 27.937}, "region": "Varna", "type": "wild", "facilities": {"camping": true}, "description": "A series of small, wild beaches popular with locals and campers.", "description_bg": "Поредица от малки, диви плажове, популярни сред местните и къмпингуващите." },
+            { "id": "kamchia", "name": "Kamchia", "name_bg": "Камчия", "coordinates": {"lat": 43.023, "lng": 27.886}, "region": "Varna", "type": "nature", "facilities": {"lifeguards": true, "nature_reserve": true}, "description": "A vast beach where the Kamchia River meets the sea, part of a UNESCO biosphere reserve.", "description_bg": "Огромен плаж, където река Камчия се влива в морето, част от биосферен резерват на ЮНЕСКО." },
+            { "id": "shkorpilovtsi", "name": "Shkorpilovtsi Beach", "name_bg": "Шкорпиловци", "coordinates": {"lat": 42.966, "lng": 27.889}, "region": "Varna", "type": "wild", "facilities": {"camping": true, "length_km": 13}, "description": "Longest beach in Bulgaria, known for its wild nature and wide sandy strip.", "description_bg": "Най-дългият плаж в България, известен със своята дива природа и широка пясъчна ивица." },
+            { "id": "byala", "name": "Byala Beach", "name_bg": "Бяла", "coordinates": {"lat": 42.875, "lng": 27.888}, "region": "Varna", "type": "urban", "facilities": {"lifeguards": true, "restaurants": true}, "description": "Known for its clean water and the nearby Palaeontological site at the White Cliffs.", "description_bg": "Известен с чистата си вода и близкия палеонтологичен обект при Белите скали." },
+            { "id": "obzor", "name": "Obzor Beach", "name_bg": "Обзор", "coordinates": {"lat": 42.821, "lng": 27.880}, "region": "Burgas", "type": "resort", "facilities": {"lifeguards": true, "restaurants": true}, "description": "A long beach strip located halfway between Varna and Burgas.", "description_bg": "Дълга плажна ивица, разположена по средата между Варна и Бургас." },
+            { "id": "irakli", "name": "Irakli Beach", "name_bg": "Иракли", "coordinates": {"lat": 42.775, "lng": 27.872}, "region": "Burgas", "type": "wild", "facilities": {"nudist_friendly": true, "camping": true}, "description": "Protected area with pristine nature and a river mouth, popular with campers.", "description_bg": "Защитена зона с девствена природа и устие на река, популярна сред къмпингуващите." },
+            { "id": "elenite", "name": "Elenite", "name_bg": "Елените", "coordinates": {"lat": 42.715, "lng": 27.795}, "region": "Burgas", "type": "resort", "facilities": {"lifeguards": true, "resort_complex": true}, "description": "A private-access resort beach at the foot of the Stara Planina mountain.", "description_bg": "Частен курортен плаж в подножието на Стара планина." },
+            { "id": "svetivlas_central", "name": "Sveti Vlas Central", "name_bg": "Свети Влас - Централен", "coordinates": {"lat": 42.709, "lng": 27.760}, "region": "Burgas", "type": "resort", "facilities": {"lifeguards": true, "blueflag": true}, "description": "A clean, well-maintained beach next to the modern Marina Dinevi yacht port.", "description_bg": "Чист, добре поддържан плаж до модерното яхтено пристанище Марина Диневи." },
+            { "id": "sunny_beach", "name": "Sunny Beach", "name_bg": "Слънчев бряг", "coordinates": {"lat": 42.688, "lng": 27.714}, "region": "Burgas", "type": "resort", "facilities": {"lifeguards": true, "blueflag": true, "nightlife": true, "restaurants": true, "hotels": true}, "description": "Largest and most famous beach resort with vibrant nightlife.", "description_bg": "Най-големият и известен плажен курорт с оживен нощен живот." },
+            { "id": "nessebar_south", "name": "Nessebar South", "name_bg": "Несебър - Южен", "coordinates": {"lat": 42.653, "lng": 27.721}, "region": "Burgas", "type": "urban", "facilities": {"lifeguards": true, "restaurants": true}, "description": "The main beach of the new town of Nessebar, offering views to the old town.", "description_bg": "Основният плаж на новия град на Несебър, с гледка към стария град." },
+            { "id": "pomorie", "name": "Pomorie East", "name_bg": "Поморие - Източен", "coordinates": {"lat": 42.564, "lng": 27.636}, "region": "Burgas", "type": "urban", "facilities": {"lifeguards": true, "restaurants": true}, "description": "Famous for its dark, iron-rich sand and the nearby Pomorie salt lake.", "description_bg": "Известен с тъмния си, богат на желязо пясък и близкото Поморийско езеро." },
+            { "id": "burgas_north", "name": "Burgas North", "name_bg": "Бургас - Северен", "coordinates": {"lat": 42.508, "lng": 27.481}, "region": "Burgas", "type": "urban", "facilities": {"lifeguards": true, "sea_garden": true}, "description": "The main city beach next to the famous Sea Garden.", "description_bg": "Основният градски плаж до известната Морска градина." },
+            { "id": "kraymorie", "name": "Kraymorie", "name_bg": "Крайморие", "coordinates": {"lat": 42.441, "lng": 27.514}, "region": "Burgas", "type": "urban", "facilities": {"lifeguards": true, "restaurants": true}, "description": "A small beach in a Burgas suburb, popular with local families.", "description_bg": "Малък плаж в предградие на Бургас, популярен сред местните семейства." },
+            { "id": "chernomorets", "name": "Chernomorets Central", "name_bg": "Черноморец - Централен", "coordinates": {"lat": 42.446, "lng": 27.641}, "region": "Burgas", "type": "urban", "facilities": {"lifeguards": true}, "description": "The main beach of the town of Chernomorets.", "description_bg": "Основният плаж на град Черноморец." },
+            { "id": "gradina", "name": "Gradina Camping", "name_bg": "Къмпинг Градина", "coordinates": {"lat": 42.417, "lng": 27.671}, "region": "Burgas", "type": "wild", "facilities": {"lifeguards": true, "camping": true, "water_sports": true}, "description": "Famous camping beach, popular for kitesurfing and windsurfing.", "description_bg": "Известен къмпинг плаж, популярен за кайтсърф и уиндсърф." },
+            { "id": "sozopol_harmanite", "name": "Sozopol - Harmanite", "name_bg": "Созопол - Харманите", "coordinates": {"lat": 42.413, "lng": 27.695}, "region": "Burgas", "type": "urban", "facilities": {"lifeguards": true, "blueflag": true, "restaurants": true}, "description": "Popular beach in the new town of Sozopol.", "description_bg": "Популярен плаж в новия град на Созопол." },
+            { "id": "kavatsite", "name": "Kavatsite", "name_bg": "Каваците", "coordinates": {"lat": 42.390, "lng": 27.705}, "region": "Burgas", "type": "wild", "facilities": {"lifeguards": true, "camping": true}, "description": "A long sandy beach south of Sozopol, bordered by a forest.", "description_bg": "Дълъг пясъчен плаж южно от Созопол, граничещ с гора." },
+            { "id": "dyuni", "name": "Dyuni Beach", "name_bg": "Дюни", "coordinates": {"lat": 42.365, "lng": 27.714}, "region": "Burgas", "type": "resort", "facilities": {"lifeguards": true, "resort_complex": true, "water_sports": true}, "description": "Long sandy beach part of a holiday resort complex.", "description_bg": "Дълъг пясъчен плаж, част от курортен комплекс." },
+            { "id": "arkutino", "name": "Arkutino", "name_bg": "Аркутино", "coordinates": {"lat": 42.338, "lng": 27.739}, "region": "Burgas", "type": "nature", "facilities": {"nature_reserve": true}, "description": "Pristine beach known for its sand lilies, part of the Ropotamo Reserve.", "description_bg": "Девствен плаж, известен със своите пясъчни лилии, част от резерват Ропотамо." },
+            { "id": "primorsko_north", "name": "Primorsko North", "name_bg": "Приморско - Северен", "coordinates": {"lat": 42.275, "lng": 27.755}, "region": "Burgas", "type": "resort", "facilities": {"lifeguards": true, "blueflag": true, "dunes": true, "restaurants": true}, "description": "Wide beach with impressive sand dunes, separated from the town by a river.", "description_bg": "Широк плаж с впечатляващи пясъчни дюни, отделен от града с река." },
+            { "id": "perla", "name": "Perla Beach", "name_bg": "Перла", "coordinates": {"lat": 42.290, "lng": 27.750}, "region": "Burgas", "type": "wild", "facilities": {"scenic": true}, "description": "A quiet beach located near the former residence of Todor Zhivkov.", "description_bg": "Тих плаж, разположен до бившата резиденция на Тодор Живков." },
+            { "id": "kiten_atliman", "name": "Kiten - Atliman", "name_bg": "Китен - Атлиман", "coordinates": {"lat": 42.245, "lng": 27.772}, "region": "Burgas", "type": "resort", "facilities": {"lifeguards": true, "bay": true, "family": true}, "description": "Calm bay beach, very suitable for families with children.", "description_bg": "Спокоен заливен плаж, много подходящ за семейства с деца." },
+            { "id": "lozenets", "name": "Lozenets Beach", "name_bg": "Лозенец", "coordinates": {"lat": 42.210, "lng": 27.808}, "region": "Burgas", "type": "resort", "facilities": {"lifeguards": true, "surfing": true, "restaurants": true}, "description": "Popular with young people and water sports enthusiasts.", "description_bg": "Популярен сред младите хора и любителите на водни спортове." },
+            { "id": "korala", "name": "Oasis/Korala", "name_bg": "Оазис/Корал", "coordinates": {"lat": 42.200, "lng": 27.820}, "region": "Burgas", "type": "wild", "facilities": {"camping": true}, "description": "One of the last remaining truly wild beaches, a favorite for campers.", "description_bg": "Един от последните останали истински диви плажове, любим на къмпингуващите." },
+            { "id": "tsarevo_central", "name": "Tsarevo Central", "name_bg": "Царево - Централен", "coordinates": {"lat": 42.170, "lng": 27.854}, "region": "Burgas", "type": "urban", "facilities": {"lifeguards": true}, "description": "The small central beach of the town of Tsarevo.", "description_bg": "Малкият централен плаж на град Царево." },
+            { "id": "nestinarka", "name": "Nestinarka", "name_bg": "Нестинарка", "coordinates": {"lat": 42.160, "lng": 27.868}, "region": "Burgas", "type": "resort", "facilities": {"lifeguards": true, "camping": true}, "description": "A large camping beach just south of Tsarevo.", "description_bg": "Голям къмпинг плаж, южно от Царево." },
+            { "id": "varvara", "name": "Varvara", "name_bg": "Варвара", "coordinates": {"lat": 42.121, "lng": 27.909}, "region": "Burgas", "type": "wild", "facilities": {"scenic": true}, "description": "A small, picturesque beach nestled among rocks, popular for diving.", "description_bg": "Малък, живописен плаж, сгушен сред скали, популярен за гмуркане." },
+            { "id": "ahtopol", "name": "Ahtopol", "name_bg": "Ахтопол", "coordinates": {"lat": 42.095, "lng": 27.935}, "region": "Burgas", "type": "urban", "facilities": {"lifeguards": true}, "description": "The main beach of the southernmost town on the coast.", "description_bg": "Основният плаж на най-южния град по крайбрежието." },
+            { "id": "sinemorets_veleka", "name": "Sinemorets Veleka Beach", "name_bg": "Синеморец - Велека", "coordinates": {"lat": 42.067, "lng": 27.973}, "region": "Burgas", "type": "nature", "facilities": {"river_mouth": true, "scenic": true}, "description": "Stunning beach where the Veleka River meets the sea, creating a sandbar.", "description_bg": "Зашеметяващ плаж, където река Велека се влива в морето, образувайки пясъчна коса." },
+            { "id": "sinemorets_butamyata", "name": "Sinemorets Butamyata", "name_bg": "Синеморец - Бутамята", "coordinates": {"lat": 42.057, "lng": 27.981}, "region": "Burgas", "type": "resort", "facilities": {"lifeguards": true}, "description": "The main, southern beach of Sinemorets, located in a calm bay.", "description_bg": "Основният, южен плаж на Синеморец, разположен в спокоен залив." },
+            { "id": "lipite", "name": "Lipite", "name_bg": "Липите", "coordinates": {"lat": 42.049, "lng": 27.992}, "region": "Burgas", "type": "wild", "facilities": {"nudist_friendly": true}, "description": "A secluded wild beach accessible by a walk from Sinemorets.", "description_bg": "Уединен див плаж, достъпен пеша от Синеморец." },
+            { "id": "silistar", "name": "Silistar Beach", "name_bg": "Силистар", "coordinates": {"lat": 42.019, "lng": 28.006}, "region": "Burgas", "type": "nature", "facilities": {"protected_area": true, "camping": true}, "description": "One of the most beautiful southern beaches, located in a protected area.", "description_bg": "Един от най-красивите южни плажове, разположен в защитена местност." },
+            { "id": "rezovo", "name": "Rezovo Beach", "name_bg": "Резово", "coordinates": {"lat": 41.985, "lng": 28.026}, "region": "Burgas", "type": "wild", "facilities": {}, "description": "The southernmost beach in Bulgaria, right at the border with Turkey.", "description_bg": "Най-южният плаж в България, точно на границата с Турция." }
+        ];
     }
-
-    async loadCleanlinessData() {
-        const cachedCleanliness = localStorage.getItem('beach-app-cleanliness');
-        if (cachedCleanliness) {
-            const data = JSON.parse(cachedCleanliness);
-            // Only use cache if it's less than 6 hours old
-            if (new Date() - new Date(data.timestamp) < 6 * 60 * 60 * 1000) {
-                this.mergeCleanlinessData(data.reports);
+    
+    async fetchAllData() {
+        // Caching logic
+        const cachedData = localStorage.getItem('beach-app-data');
+        if (cachedData) {
+            const parsedData = JSON.parse(cachedData);
+            // Use cache if it's less than 30 mins old
+            if (new Date() - new Date(parsedData.timestamp) < 30 * 60 * 1000) {
+                this.beaches = parsedData.beaches;
+                console.log("Using fresh cached data.");
                 return;
             }
         }
-    
+
         if (this.isOffline) {
-            console.log("Offline mode, using cached cleanliness data if available.");
+            console.log("Offline mode, using cached beach data if available.");
+            if (cachedData) this.beaches = JSON.parse(cachedData).beaches;
             return;
         }
-    
+
         try {
-            const reports = await this.fetchRealCleanlinessData();
-            this.mergeCleanlinessData(reports);
-            localStorage.setItem('beach-app-cleanliness', JSON.stringify({
-                timestamp: new Date().toISOString(),
-                reports: reports
-            }));
-        } catch (error) {
-            console.error("Failed to fetch real cleanliness data, using demo data.", error);
-            const demoReports = this.generateDemoCleanlinessData();
-            this.mergeCleanlinessData(demoReports);
-        }
-    }
-
-    async fetchRealCleanlinessData() {
-        console.log("Fetching real cleanliness data from Copernicus Marine Service...");
-        const reports = [];
-
-        for (const beach of this.beaches) {
-            const { lat, lng } = beach.coordinates;
-            // Create a small bounding box around the beach coordinates
-            const bbox = `${lng - 0.01},${lat - 0.01},${lng + 0.01},${lat + 0.01}`;
-            
-            // Construct the WMS GetFeatureInfo URL
-            const serviceUrl = 'https://nrt.cmems-du.eu/thredds/wms/cmems_obs-oc_blk_bgc-plankton_nrt_l3-multi-1km_P1D';
-            const params = new URLSearchParams({
-                service: 'WMS',
-                version: '1.3.0',
-                request: 'GetFeatureInfo',
-                layers: 'CHL',
-                query_layers: 'CHL',
-                crs: 'EPSG:4326',
-                bbox: bbox,
-                width: '1',
-                height: '1',
-                i: '0',
-                j: '0',
-                info_format: 'application/json'
+            console.log("Fetching all live data from backend function...");
+            // The body of the request will be our static beach data.
+            const response = await fetch('/.netlify/functions/get-beach-data', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(this.beaches),
             });
 
-            try {
-                const response = await fetch(`${serviceUrl}?${params.toString()}`);
-                if (!response.ok) {
-                    throw new Error(`Copernicus API returned status ${response.status}`);
-                }
-                const data = await response.json();
-                
-                // Extract the Chlorophyll-a value
-                const chlValue = data?.features?.[0]?.properties?.value;
-
-                if (chlValue !== undefined && chlValue !== null) {
-                    const value = parseFloat(chlValue);
-                    let status = 'clear';
-                    if (value >= 20) {
-                        status = 'high';
-                    } else if (value >= 5) {
-                        status = 'moderate';
-                    }
-                    reports.push(this.createReportFromStatus(beach.id, status, value));
-                } else {
-                    // No data available for this point, assume clear
-                    reports.push(this.createReportFromStatus(beach.id, 'clear', null));
-                }
-
-            } catch (error) {
-                console.warn(`Could not fetch data for ${beach.name}: ${error.message}. Assuming clear.`);
-                reports.push(this.createReportFromStatus(beach.id, 'clear', null));
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || `Backend function returned status ${response.status}`);
             }
-        }
-        return reports;
-    }
-    
-    createReportFromStatus(beach_id, status, value) {
-        let report_en, report_bg;
-        const valueText = value !== null ? ` (CHL: ${value.toFixed(2)} mg/m³)` : '';
-        
-        switch (status) {
-            case 'high':
-                report_en = `High Chlorophyll-a concentration detected${valueText}. Widespread algae bloom likely.`;
-                report_bg = `Открита е висока концентрация на Хлорофил-a${valueText}. Вероятен е масов цъфтеж на водорасли.`;
-                break;
-            case 'moderate':
-                report_en = `Moderate Chlorophyll-a concentration detected${valueText}. Some algae patches possible.`;
-                report_bg = `Открита е умерена концентрация на Хлорофил-a${valueText}. Възможни са петна от водорасли.`;
-                break;
-            default: // clear
-                report_en = `Chlorophyll-a concentration is low${valueText}. Water is expected to be clear.`;
-                report_bg = `Концентрацията на Хлорофил-a е ниска${valueText}. Очаква се водата да е чиста.`;
-        }
-        return { beach_id, status, report_en, report_bg };
-    }
 
-    generateDemoCleanlinessData() {
-        const statuses = ["clear", "moderate", "high"];
-        return this.beaches.map(beach => {
-            const randomStatus = statuses[Math.floor(Math.random() * 2.2)]; // Skew towards clear/moderate
-            return this.createReportFromStatus(beach.id, randomStatus, null);
-        });
-    }
-
-    mergeCleanlinessData(reports) {
-        this.beaches.forEach(beach => {
-            const report = reports.find(r => r.beach_id === beach.id);
-            if (report) {
-                beach.cleanliness = report;
+            const liveBeachData = await response.json();
+            
+            this.beaches = liveBeachData;
+            localStorage.setItem('beach-app-data', JSON.stringify({
+                timestamp: new Date().toISOString(),
+                beaches: this.beaches
+            }));
+            
+        } catch (error) {
+            console.error('Error fetching data from backend function:', error);
+            // Fallback to cached data if it exists, otherwise the app will show an error state.
+            if (cachedData) {
+                this.beaches = JSON.parse(cachedData).beaches;
+                console.log("Backend fetch failed. Using stale cached data.");
             } else {
-                // This is a fallback in case a beach was missed in the reports
-                beach.cleanliness = this.createReportFromStatus(beach.id, 'clear', null);
+                console.error("No cached data available and backend fetch failed.");
+                // Optionally, show an error message to the user.
             }
-        });
+        }
     }
 
     setupEventListeners() {
@@ -497,12 +350,13 @@ class BeachSafetyApp {
     }
 
     addBeachMarkers() {
-        if (!this.map) return;
+        if (!this.map || !this.beaches.length) return;
         // Clear existing markers
         this.markers.forEach(marker => marker.remove());
         this.markers = [];
 
         this.beaches.forEach(beach => {
+            if (!beach.conditions) return; // Don't render markers if live data isn't available
             const flagEmoji = beach.conditions.flag === 'red' ? '🔴' : beach.conditions.flag === 'yellow' ? '🟡' : '🟢';
             const cleanlinessStatus = beach.cleanliness?.status || 'clear';
 
@@ -529,6 +383,11 @@ class BeachSafetyApp {
     renderBeachList(containerId) {
         const listContainer = document.getElementById(containerId);
         listContainer.innerHTML = '';
+        if (!this.beaches.length || !this.beaches[0].conditions) {
+            listContainer.innerHTML = `<div class="no-results"><p>${this.isOffline ? 'No cached data.' : 'Loading live data...'}</p></div>`;
+            return;
+        }
+
         const searchTerm = (containerId.includes('desktop') ? document.getElementById('search-input-desktop') : document.getElementById('search-input')).value.toLowerCase();
         
         const filteredBeaches = this.beaches.filter(beach => {
@@ -580,6 +439,7 @@ class BeachSafetyApp {
     }
 
     getFacilityIcons(facilities) {
+        if (!facilities) return '<span>-</span>';
         let icons = '';
         if (facilities.lifeguards) icons += '<span class="facility-icon" title="Lifeguards"> lifeguard </span>';
         if (facilities.restaurants) icons += '<span class="facility-icon" title="Restaurants">🍽️</span>';
@@ -590,7 +450,7 @@ class BeachSafetyApp {
 
     openBeachDetailModal(beachId) {
         this.currentBeach = this.beaches.find(b => b.id === beachId);
-        if (!this.currentBeach) return;
+        if (!this.currentBeach || !this.currentBeach.conditions) return;
         
         this.refreshBeachDetailModal();
         this.toggleModal('beach-modal', true);
@@ -627,7 +487,7 @@ class BeachSafetyApp {
 
         // Facilities
         const facilitiesEl = document.getElementById('beach-facilities');
-        facilitiesEl.innerHTML = `<h4>${this.translations[lang].facilities}</h4><div class="facilities-list">${Object.keys(beach.facilities).filter(f => beach.facilities[f]).map(f => `<span class="facility-tag">${this.translations[lang].facilityNames[f] || f}</span>`).join('')}</div>`;
+        facilitiesEl.innerHTML = `<h4>${this.translations[lang].facilities}</h4><div class="facilities-list">${Object.keys(beach.facilities || {}).filter(f => beach.facilities[f]).map(f => `<span class="facility-tag">${this.translations[lang].facilityNames[f] || f}</span>`).join('')}</div>`;
 
         // Last updated
         const lastUpdatedDate = new Date(beach.conditions.lastUpdated);
@@ -765,8 +625,7 @@ class BeachSafetyApp {
         if (!this.isOffline) {
             console.log("Back online. Refreshing data...");
             // If we came back online, refresh data
-            await this.loadBeachData();
-            await this.loadCleanlinessData();
+            await this.fetchAllData();
             this.updateAllViews();
         }
     }
@@ -777,17 +636,15 @@ class BeachSafetyApp {
             const name = this.currentLanguage === 'bg' ? beach.name_bg : beach.name;
             const flagStatus = this.translations[this.currentLanguage].flags[beach.conditions.flag];
             const text = `Checking out ${name}! Current status is ${flagStatus}. #FlagWatch`;
-            const url = `https://www.google.com/maps?q=${beach.coordinates.lat},${beach.coordinates.lng}`;
-
+            
             navigator.share({
                 title: 'FlagWatch Beach Status',
                 text: text,
-                url: window.location.href // Or a specific URL for the beach
+                url: window.location.href 
             }).then(() => {
                 console.log('Thanks for sharing!');
             }).catch(console.error);
         } else {
-            // Fallback for browsers that don't support Web Share API
             alert(this.translations[this.currentLanguage].sharingNotSupported);
         }
     }
