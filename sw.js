@@ -1,6 +1,4 @@
-
-
-const CACHE_NAME = 'beach-safety-v9'; // Incremented version to force update
+const CACHE_NAME = 'beach-safety-v10'; // Incremented version to force update
 const urlsToCache = [
     '/',
     '/index.html',
@@ -41,12 +39,12 @@ self.addEventListener('activate', event => {
 
 // Serve cached content when offline, otherwise try network first
 self.addEventListener('fetch', event => {
-    // For app-owned assets, use network-first strategy
+    // For app-owned assets, including the new function endpoint, use network-first strategy
     if (event.request.url.startsWith(self.location.origin)) {
         event.respondWith(
             fetch(event.request).then(response => {
                 // If the fetch is successful, update the cache
-                if (response && response.status === 200) {
+                if (response && response.status === 200 && event.request.method === 'GET') {
                     const responseToCache = response.clone();
                     caches.open(CACHE_NAME).then(cache => {
                         cache.put(event.request, responseToCache);
