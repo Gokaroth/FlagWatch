@@ -117,4 +117,3 @@ Contributions are welcome! Please feel free to fork the repository and submit a 
 For questions or issues:
 - 🐛 [Open an issue](https://github.com/Gokaroth/flagwatch/issues)
 - 🌐 Live demo: [flagwatch.netlify.app](https://flagwatch.netlify.app)
-
