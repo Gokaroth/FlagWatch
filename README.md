@@ -7,7 +7,7 @@ FlagWatch is a real-time beach safety and water cleanliness dashboard for the Bu
 -   **🌊 Real-Time Safety Flags**: Live, color-coded flag status (🟢 Safe, 🟡 Caution, 🔴 Danger) automatically calculated from wave height and wind speed.
 -   **🔬 Scientific Algae Reports**: Near-real-time water cleanliness reports based on satellite data (**Chlorophyll-a concentration**) from the **Copernicus Marine Service**, indicating potential algae blooms.
 -   **🌗 Light & Dark Mode**: A beautiful, user-selectable dark theme for comfortable viewing in all lighting conditions, with automatic system preference detection.
--   **🗺️ Interactive Map & List**: A fully interactive Leaflet map and a searchable, filterable list of 15+ major beaches.
+-   **🗺️ Interactive Map & List**: A fully interactive Leaflet map and a searchable, filterable list of nearly 50 beaches covering the entire coastline.
 -   **🌡️ Detailed Live Data**: Access up-to-date information on wave height, water & air temperature, wind speed, and UV Index.
 -   **🌐 Bilingual Support**: Full interface and data translation for both **English** and **Bulgarian**.
 -   **📱 Progressive Web App (PWA)**: Installable on mobile devices with offline access to cached data for a fast, native-app-like experience.
@@ -110,12 +110,11 @@ Contributions are welcome! Please feel free to fork the repository and submit a 
 
 ***
 
+**Made with ❤️ for safer and cleaner beach experiences on the Bulgarian Black Sea coast.**
+
 ## 📞 Support
 
 For questions or issues:
 - 🐛 [Open an issue](https://github.com/Gokaroth/flagwatch/issues)
 - 🌐 Live demo: [flagwatch.netlify.app](https://flagwatch.netlify.app)
 
-***
-
-**Made with ❤️ for safer beach experiences on the Bulgarian Black Sea coast**
