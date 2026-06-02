@@ -1,54 +1,110 @@
-# FlagWatch Project - AI Context Memo
-**Date:** August 28, 2025 (for context preservation)
-**Subject:** Save state for FlagWatch development. Resume with Phase 2 implementation.
+# FlagWatch — Technical Context Memo
+
+**Last updated:** 2026-06-02
+
+A concise orientation for any developer or AI agent picking up this project. It describes the
+*current* architecture after the 2026 honesty/reliability overhaul. For data-source detail see
+`DATA_SOURCES.md`; for direction see `ROADMAP.md`.
 
 ---
 
-## 1. Project Goal
+## 1. What FlagWatch is
 
-To create a highly accurate, reliable, and user-friendly beach safety and water cleanliness application for the entire Bulgarian Black Sea coast. The primary focus is on data trustworthiness.
+A real-time **beach safety + water-cleanliness** Progressive Web App for the Bulgarian Black Sea
+coast (**47 beaches**, Durankulak → Rezovo). Live at **flagwatch.netlify.app**. Bilingual EN/BG,
+light/dark theme, installable PWA, offline-capable. Hosted on Netlify.
 
-## 2. Current State & Key Progress
+**Guiding principle: never fabricate.** This is a safety tool. Missing data is shown as
+unknown/unavailable — it is never papered over with a plausible-looking number or a reassuring
+"green / clear". (The previous version generated "plausible demo data" on failure; that has been
+removed.)
 
--   **Massive Scope Expansion:** The app has been successfully expanded from 15 to 49 beaches.
--   **Scientific Data Integration:** We have moved beyond fictional data. The app uses real scientific data from two primary sources:
-    -   **Open-Meteo:** For weather and marine data (wave height, wind speed, temps) to calculate safety flags.
-    -   **Copernicus Marine Service:** For Chlorophyll-a satellite data to determine water cleanliness and algae bloom risk.
--   **CRITICAL ARCHITECTURAL SHIFT (Phase 1 Complete):** We have successfully refactored the application from a frontend-only model to a client-server model using Netlify Functions.
-    -   A backend function at `netlify/functions/get-beach-data.js` now handles ALL external API calls.
-    -   The frontend (`app.js`) has been simplified to make a single call to our own backend endpoint.
-    -   This change was foundational for improving security (hiding future API keys) and reliability.
+## 2. Architecture
 
-## 3. The Next Challenge & Agreed-Upon Solution
+Buildless static frontend + Netlify Functions backend. No bundler.
 
--   **Challenge:** The user provided on-the-ground feedback that regional model data (from Open-Meteo) can differ from hyper-local conditions at a specific beach (e.g., Kamchia).
--   **Brilliant User Idea:** Instead of paying for a premium API, we can leverage the **free tier** of a service like **Stormglass.io** (which offers 10 high-quality calls per day).
--   **The Solution (The New Phase 2):** We will implement a **proactive caching system**.
-    -   **Architecture:** We will create a new **Scheduled Netlify Function** (`fetch-and-store-data`) that acts as a "Collector."
-    -   **Functionality:** This Collector will run on a timer (e.g., a few times a day). It will use our 10 precious Stormglass API calls on the 10 most popular beaches to get premium, cross-validated data. It will also fetch standard data for the other 39 beaches.
-    -   **Storage:** The Collector will save the combined result (a single JSON file for all 49 beaches) to **Netlify Blobs**.
-    -   **Serving:** Our existing `get-beach-data` function will be modified to become a "Server." Its only job will be to instantly read the pre-built JSON file from Netlify Blobs and serve it to the user. This will make the app load almost instantly.
+```
+data/beaches.json          ← single source of truth (47 beaches: id, names EN/BG, coordinates,
+                             region, type, facilities, descriptions). Frontend fetches it for an
+                             instant first render; functions import it.
 
-## 4. New User Feedback & Future Scope (UI/UX Enhancements)
+Frontend (repo root, served statically):
+  index.html               DOM + PWA head (real /manifest.webmanifest + /icons)
+  app.js                   class BeachSafetyApp — Leaflet map, list, modal, i18n, theme, PWA,
+                           geolocation. Fetches /data/beaches.json then GET /api/beaches.
+  style.css                themes + responsive
+  sw.js                    service worker (cache v11), precaches core assets + beaches.json
 
--   **New Requirements Received:** We have just received valuable user feedback regarding UI/UX and new features.
--   **Feasibility Analysis:** All suggestions are feasible with our current tech stack, with one exception that has a viable alternative.
--   **Key Enhancements (Queued for Phase 4):**
-    1.  **Map Pin Filtering:** Confirmed as actionable. This will involve updating the filtering logic in `app.js` to also show/hide markers on the map.
-    2.  **Kitesurfing Data:** Confirmed as actionable. Open-Meteo provides `wind_gusts` and `wind_direction`. This data needs to be fetched in our Netlify function and passed to the frontend.
-    3.  **UI Redesign:** Confirmed as actionable. This will involve restructuring the HTML in `index.html` for the modal and updating the corresponding CSS in `style.css`.
-    4.  **Map Visuals:**
-        -   **Map Style:** Confirmed as easily actionable. Switching the tile URL in `app.js` is a simple change.
-        -   **Heatmap:** Researched and confirmed as **not feasible** with our sparse data points.
-        -   **Alternative (Status Circles):** The proposed alternative of using colored circles (`L.circle`) around markers is confirmed as a feasible and effective way to achieve the user's goal of regional visualization.
-        -   **Algae Markers:** Using emojis is a simple and actionable change to the marker creation logic.
--   **Strategic Decision:** These UI/UX improvements have been formally added to the `ROADMAP.md` as **Phase 4**. The current focus remains on completing the data accuracy improvements in Phase 2 and 3 first.
+Backend (Netlify Functions v2, ESM, export default => Response):
+  lib/copernicus.mjs       Copernicus Marine WMTS GetFeatureInfo (KEYLESS today). CHL water
+                           quality + Black Sea SST. Returns honest "unavailable"/null on any
+                           failure. Optional auth wiring is dormant (env vars below).
+  lib/fetch-beach-data.mjs buildAllBeachData({fast}) — batched Open-Meteo (current=) + per-beach
+                           Copernicus; computes flag + cleanliness. fast=true skips Copernicus.
+  netlify/functions/collect.mjs        SCHEDULED every 2h → writes the full snapshot to Netlify
+                                       Blobs (store "flagwatch", key "latest").
+  netlify/functions/get-beach-data.mjs On-demand, served at /api/beaches (netlify.toml redirect).
+                                       Reads the Blobs snapshot (instant). Cold start: fast
+                                       Open-Meteo-only build, persists, serves.
+```
 
-## 5. IMMEDIATE NEXT STEPS
+**Why collector + Blobs:** users get a precomputed snapshot instantly instead of waiting on
+~94 external calls per request; the slow/uncertain Copernicus work happens in the background
+where it can fail gracefully; and it decouples user load from third-party APIs.
 
-1.  **Awaiting User Action:** The user needs to sign up for a **free account at Stormglass.io** and obtain their API key.
-2.  **My Next Action (Upon Receiving Key):**
-    -   Guide the user on how to add the Stormglass API key as a secure **Environment Variable** in their Netlify project settings.
-    -   Provide the complete code for the new scheduled "Collector" function (`fetch-and-store-data.js`).
-    -   Provide the modified code for the existing "Server" function (`get-beach-data.js`) to read from Netlify Blobs.
-    -   Provide instructions for configuring the schedule in `netlify.toml`.
+### Merged beach record (what `/api/beaches` returns — an array of these)
+```
+{ ...static fields from beaches.json,
+  conditions: { waveHeight, waterTemp, waterTempSource, airTemp, windSpeed, windGust,
+                windDirection, uvIndex, flag, lastUpdated },   // numbers or null; flag green|yellow|red|null
+  cleanliness: { status, value, source, observedAt, report_en, report_bg } }  // status clear|moderate|high|unavailable
+```
+
+## 3. Data sources (verified live 2026-06-02)
+
+- **Open-Meteo** (keyless): forecast `current=temperature_2m,wind_speed_10m,wind_gusts_10m,wind_direction_10m,uv_index`;
+  marine `current=wave_height,sea_surface_temperature`. Batched multi-location (one array response).
+  Using `current=` fixed an earlier UTC `getHours()` hourly-index bug.
+- **Copernicus Marine WMTS** `https://wmts.marine.copernicus.eu/teroWmts` (the old
+  `nrt.cmems-du.eu` WMS was decommissioned April 2024). GetFeatureInfo, `INFOFORMAT=application/json`:
+  - CHL (algae): `OCEANCOLOUR_BLK_BGC_L4_NRT_009_152` — gap-free daily L4, 1 km (chosen so coastal
+    point queries return a value instead of cloud-gapped nulls). CHL lags ~1 day; code tries recent dates.
+  - SST: `BLKSEA_ANALYSISFORECAST_PHY_007_001` — Black Sea physics ~2.5 km, surface `thetao`.
+    Falls back to Open-Meteo SST (labeled `waterTempSource:"open-meteo"`) when the model pixel is null/land.
+
+## 4. Honesty rules (do not regress these)
+
+- Missing/failed numeric → `null` → UI renders `—`. **Never** default to `0`.
+- `cleanliness.status` is `clear/moderate/high` **only** with a real numeric CHL value; any failure
+  (network, non-2xx, 401/403, null, NaN) → `unavailable` (neutral grey, never implies clean water).
+- Safety **flag requires BOTH** wave height and wind speed; if either is missing the flag is `null`
+  → "⚪ Unknown" (never an implied-safe green).
+- Water temp shows a disclaimer (modeled estimate; shoreline may differ 2–4 °C).
+- Thresholds: flag red `wave>2m OR wind>40km/h`, yellow `>1.25m OR >25km/h`, else green.
+  CHL `>=20 high, >=5 moderate, else clear`.
+
+## 5. Config / env / local dev
+
+- `package.json`: `"type":"module"`; dep `@netlify/blobs`. (`@google/genai` + vite removed.)
+- `netlify.toml`: `command=""`, `publish="."` (stops Netlify's Vite auto-detect), functions dir,
+  `/api/beaches` → `/.netlify/functions/get-beach-data` redirect.
+- **Copernicus creds are OPTIONAL** — WMTS is currently keyless. Dormant auth uses
+  `COPERNICUS_USERNAME`/`COPERNICUS_PASSWORD` or `COPERNICUS_TOKEN` (see `.env.example`). Set them
+  as Netlify env vars only if Copernicus ever starts requiring auth.
+- Local: `npm install` then `npx netlify-cli dev` → http://localhost:8888 (static + functions +
+  local Blobs). `/api/beaches` works; first hit cold-starts a fast build. Node 18+ (global fetch).
+- Deploy: push to GitHub `main`; Netlify builds (no build step) and registers the scheduled `collect`.
+
+## 6. Known limitations / next steps
+
+- Coastal **SST accuracy** is bounded by model resolution → disclaimer shown.
+- ~Half the beaches currently report CHL **`unavailable`** because the exact shoreline point lands on
+  a land/coastal-masked grid cell. **Refinement idea:** sample a point nudged slightly seaward.
+- L4 CHL is gap-filled/modeled (not a single raw observation) — stated transparently.
+- On a brand-new deploy, cleanliness is `unavailable` until the first scheduled collector run (≤2h).
+- ROADMAP **Phase 3** = official ground-truth (NIMH / buoys) fusion (future).
+
+## 7. Repo hygiene note
+
+A prior version of this file contained a pasted personal conversation. It has been replaced; see
+`HISTORY_SCRUB.md` for removing that content from past git history.

@@ -1,39 +1,64 @@
-
 # FlagWatch Data Sources
 
-This document explains where the data for the FlagWatch app comes from and how it is interpreted. We are committed to providing the most accurate and transparent information possible by using reputable, scientific data sources.
+This document explains where FlagWatch's data comes from and how it is interpreted. We use
+reputable, scientific sources and are transparent about their limitations. **FlagWatch never
+fabricates data**: when a value is unavailable it is reported as such, never guessed.
 
-## 1. Beach Safety Conditions (Flags: 🟢 🟡 🔴)
+## 1. Beach Safety Conditions (Flags: 🟢 🟡 🔴 ⚪)
 
-The primary safety status for each beach is determined by real-time meteorological and marine data.
+Live meteorological + marine data from the **Open-Meteo API** (keyless).
 
--   **Source**: [Open-Meteo Marine Weather API](https://open-meteo.com/en/docs/marine-weather-api)
--   **Data Points Used**:
-    -   `wave_height`: The significant height of combined wind-waves and swell.
-    -   `wind_speed_10m`: The wind speed at 10 meters above sea level.
-    -   `sea_surface_temperature`: The temperature of the water at the surface.
-    -   `temperature_2m`: The air temperature at 2 meters above ground.
-    -   `uv_index`: The Ultraviolet Index.
+-   **Weather** — `https://api.open-meteo.com/v1/forecast` with
+    `current=temperature_2m,wind_speed_10m,wind_gusts_10m,wind_direction_10m,uv_index`
+-   **Marine** — `https://marine-api.open-meteo.com/v1/marine` with
+    `current=wave_height,sea_surface_temperature`
+-   All 47 beaches are queried in a single batched multi-location request per endpoint. Using the
+    `current=` parameter (rather than indexing hourly arrays) avoids timezone-offset errors.
 
--   **Flag Calculation Logic**:
-    A simple but effective ruleset is applied to determine the flag status:
-    -   `🔴 Danger`: Wave height is greater than 2 meters OR wind speed is greater than 40 km/h.
-    -   `🟡 Caution`: Wave height is greater than 1.25 meters OR wind speed is greater than 25 km/h.
-    -   `🟢 Safe`: All other conditions.
+**Flag logic** — requires **both** wave height and wind speed; if either is missing the flag is
+**⚪ Unknown** (never an assumed-safe green):
+-   `🔴 Danger`: wave height > 2 m OR wind speed > 40 km/h
+-   `🟡 Caution`: wave height > 1.25 m OR wind speed > 25 km/h
+-   `🟢 Safe`: both known and below the above
 
 ## 2. Water Cleanliness (Algae Reports)
 
-The algae reports are based on near-real-time satellite measurements of Chlorophyll-a concentration, which is the primary scientific indicator used to estimate the amount of phytoplankton (algae) in the water.
+Near-real-time satellite **Chlorophyll-a (CHL)** — the primary indicator of phytoplankton (algae).
 
--   **Source**: [Copernicus Marine Service](https://marine.copernicus.eu/)
--   **Specific Product**: Black Sea Ocean Colour Plankton (Near Real Time L3 Observations)
--   **Data Point Used**:
-    -   `CHL`: Mass concentration of chlorophyll-a in the water, measured in milligrams per cubic meter (mg/m³).
+-   **Source**: [Copernicus Marine Service](https://marine.copernicus.eu/) via the **WMTS** service
+    `https://wmts.marine.copernicus.eu/teroWmts` (`GetFeatureInfo`, `INFOFORMAT=application/json`).
+    *(The previous `nrt.cmems-du.eu` WMS was decommissioned in April 2024.)*
+-   **Product**: `OCEANCOLOUR_BLK_BGC_L4_NRT_009_152` — Black Sea ocean-colour, **gap-free daily
+    L4**, 1 km. The gap-free L4 is chosen over raw L3 so coastal point queries return a value
+    instead of cloud-gapped nulls.
+-   **Data point**: `CHL`, milligrams per cubic metre (mg/m³). The NRT product lags ~1 day, so the
+    app requests the most recent available date.
 
--   **Status Calculation Logic**:
-    The raw Chlorophyll-a data is converted into a user-friendly status based on standard oceanographic thresholds:
-    -   `Clear`: Chlorophyll-a concentration is **less than 5 mg/m³**. This indicates low biological activity and clear water.
-    -   `Moderate`: Chlorophyll-a concentration is **between 5 and 20 mg/m³**. This can indicate the beginning of a bloom or patches of algae.
-    -   `High`: Chlorophyll-a concentration is **greater than 20 mg/m³**. This indicates a high concentration of algae, characteristic of a widespread bloom.
+**Status logic**:
+-   `Clear`: CHL **< 5 mg/m³**
+-   `Moderate`: CHL **5–20 mg/m³**
+-   `High`: CHL **> 20 mg/m³**
+-   `Unavailable`: no recent satellite value for the point (e.g. a land/coastal-masked grid cell, or
+    a service error). Shown as a neutral state — **it never implies the water is clean.**
 
-**Fallback Mechanism**: If the Copernicus Marine Service is unavailable, the app will generate plausible demo data to ensure the user interface remains functional.
+## 3. Sea-Surface Temperature
+
+-   Primary: Copernicus Marine **`BLKSEA_ANALYSISFORECAST_PHY_007_001`** (Black Sea physics, ~2.5 km,
+    surface temperature) via the same WMTS, labeled `waterTempSource: "copernicus-blksea-3km"`.
+-   Fallback: **Open-Meteo** `sea_surface_temperature` (labeled `"open-meteo"`) when the Black Sea
+    model pixel is null/land.
+-   **Transparency**: sea temperature is a **modeled estimate**; at the shoreline it can differ from
+    the modeled offshore value by roughly 2–4 °C. The app shows this disclaimer in the detail view.
+
+## 4. Honesty & failure behavior
+
+There is **no demo/synthetic-data fallback**. On any failure (network error, non-2xx response,
+auth rejection, missing/NaN value) the affected field is `null` (rendered `—`), cleanliness is
+`unavailable`, and the safety flag is `unknown`. The cleanliness status can only be `clear`/
+`moderate`/`high` when a real numeric CHL value was returned.
+
+## 5. Notes on method
+-   L4 CHL is **gap-filled / interpolated**, not a single raw satellite pass — a deliberate trade
+    for daily coverage.
+-   Authentication: the Copernicus WMTS is currently **keyless**. Optional credential wiring exists
+    (`COPERNICUS_USERNAME`/`COPERNICUS_PASSWORD` or `COPERNICUS_TOKEN`) and is dormant.
