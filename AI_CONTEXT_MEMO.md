@@ -41,8 +41,10 @@ Backend (Netlify Functions v2, ESM, export default => Response):
                            failure. Optional auth wiring is dormant (env vars below).
   lib/fetch-beach-data.mjs buildAllBeachData({fast}) — batched Open-Meteo (current=) + per-beach
                            Copernicus; computes flag + cleanliness. fast=true skips Copernicus.
-  netlify/functions/collect.mjs        SCHEDULED every 2h → writes the full snapshot to Netlify
-                                       Blobs (store "flagwatch", key "latest").
+  netlify/functions/collect.mjs        SCHEDULED every 2h → just triggers collect-background
+                                       (scheduled fns have a 30s limit; the full build is longer).
+  netlify/functions/collect-background.mjs  BACKGROUND (15-min limit) → does the full build and
+                                       writes the snapshot to Netlify Blobs (store "flagwatch", key "latest").
   netlify/functions/get-beach-data.mjs On-demand, served at /api/beaches (netlify.toml redirect).
                                        Reads the Blobs snapshot (instant). Cold start: fast
                                        Open-Meteo-only build, persists, serves.

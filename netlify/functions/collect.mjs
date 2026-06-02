@@ -1,35 +1,24 @@
 // netlify/functions/collect.mjs
-// Scheduled collector (Netlify Functions v2, ESM).
+// Scheduled trigger (Netlify Functions v2). Runs every 2 hours (UTC).
 //
-// Runs every 2 hours (UTC). Builds the full merged beach dataset via
-// buildAllBeachData() and writes it to the "flagwatch" blob store under
-// the key "latest". The on-demand get-beach-data function reads this blob.
+// Scheduled functions have a 30s execution limit, but the full Copernicus build can take
+// longer. So this function just FIRES the background worker (collect-background.mjs, 15-min
+// limit) and returns immediately. The worker does the build and writes Netlify Blobs.
 
-import { getStore } from "@netlify/blobs";
-import { buildAllBeachData } from "../../lib/fetch-beach-data.mjs";
-
-export default async (req) => {
-  const startedAt = new Date().toISOString();
-  console.log(`collect: starting scheduled build at ${startedAt}`);
-
+export default async () => {
+  const base =
+    process.env.URL ||
+    process.env.DEPLOY_PRIME_URL ||
+    process.env.DEPLOY_URL ||
+    "";
+  const target = `${base}/.netlify/functions/collect-background`;
   try {
-    const beaches = await buildAllBeachData();
-    console.log(`collect: built ${beaches.length} beach records`);
-
-    const store = getStore("flagwatch");
-    const payload = {
-      updatedAt: new Date().toISOString(),
-      beaches,
-    };
-    await store.setJSON("latest", payload);
-    console.log(`collect: wrote "latest" to blob store at ${payload.updatedAt}`);
-
-    return new Response("ok", { status: 200 });
+    const res = await fetch(target, { method: "POST" });
+    console.log(`collect: triggered collect-background -> HTTP ${res.status}`);
   } catch (err) {
-    const message = err && err.message ? err.message : String(err);
-    console.error("collect: failed:", message);
-    return new Response(`collect failed: ${message}`, { status: 500 });
+    console.error("collect: failed to trigger collect-background:", err && err.message ? err.message : err);
   }
+  return new Response("ok", { status: 200 });
 };
 
 // Every 2 hours, on the hour (UTC).
