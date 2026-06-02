@@ -104,7 +104,8 @@ where it can fail gracefully; and it decouples user load from third-party APIs.
 - On a brand-new deploy, cleanliness is `unavailable` until the first scheduled collector run (≤2h).
 - ROADMAP **Phase 3** = official ground-truth (NIMH / buoys) fusion (future).
 
-## 7. Repo hygiene note
+## 7. Note
 
-A prior version of this file contained a pasted personal conversation. It has been replaced; see
-`HISTORY_SCRUB.md` for removing that content from past git history.
+This memo replaced an earlier, shorter one. (A long personal chat log once lived in a *local,
+uncommitted* copy of this file but was never committed to git — verified: no personal content
+appears anywhere in the repo's history.)
