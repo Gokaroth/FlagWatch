@@ -1,9 +1,13 @@
-const CACHE_NAME = 'beach-safety-v10'; // Incremented version to force update
+const CACHE_NAME = 'beach-safety-v11'; // Incremented version to force update
 const urlsToCache = [
     '/',
     '/index.html',
     '/style.css',
     '/app.js',
+    '/manifest.webmanifest',
+    '/icons/icon-192.png',
+    '/icons/icon-512.png',
+    '/data/beaches.json',
     'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css',
     'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js',
     'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
@@ -39,12 +43,18 @@ self.addEventListener('activate', event => {
 
 // Serve cached content when offline, otherwise try network first
 self.addEventListener('fetch', event => {
-    // For app-owned assets, including the new function endpoint, use network-first strategy
+    // For app-owned assets, including the /api/beaches endpoint, use network-first strategy
     if (event.request.url.startsWith(self.location.origin)) {
         event.respondWith(
             fetch(event.request).then(response => {
-                // If the fetch is successful, update the cache
-                if (response && response.status === 200 && event.request.method === 'GET') {
+                // Only cache successful, non-opaque GET responses.
+                // 'basic' = same-origin; never cache opaque ('opaqueredirect'/cors) or error responses.
+                if (
+                    response &&
+                    response.ok &&
+                    response.type === 'basic' &&
+                    event.request.method === 'GET'
+                ) {
                     const responseToCache = response.clone();
                     caches.open(CACHE_NAME).then(cache => {
                         cache.put(event.request, responseToCache);
@@ -52,7 +62,7 @@ self.addEventListener('fetch', event => {
                 }
                 return response;
             }).catch(() => {
-                // If the network fails, serve from cache
+                // If the network fails, serve a cached copy (e.g. last-known /api/beaches data offline)
                 return caches.match(event.request);
             })
         );
