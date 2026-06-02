@@ -29,7 +29,20 @@
   --color-text-light: var(--color-gray-600);
   --color-border: var(--color-gray-300);
   --color-surface: var(--color-white);
+  --color-surface-2: var(--color-gray-100);
   --color-shadow: rgba(0, 0, 0, 0.1);
+
+  /* Accessible status TEXT tokens — meet WCAG AA 4.5:1 on light surfaces.
+     The vivid --color-success/warning/danger/info above stay for dots/swatches/borders
+     (graphical objects, 3:1). These darker variants are used wherever status is rendered as text. */
+  --color-success-text: #157347;
+  --color-warning-text: #8a6500;
+  --color-danger-text: #b02a37;
+  --color-info-text: #0c6c7a;
+  --color-muted-strong: var(--color-gray-700); /* readable muted text (e.g. inactive filter chips) */
+
+  /* Focus ring — >=3:1 against adjacent colors in this theme. */
+  --color-focus: #0a58ca;
 
   /* Sizing & Spacing */
   --spacing-xs: 4px;
@@ -75,7 +88,18 @@ body.dark-mode {
   --color-text-light: #adb5bd;
   --color-border: #495057;
   --color-surface: #2c2e33;
+  --color-surface-2: #25262b;
   --color-shadow: rgba(0, 0, 0, 0.5);
+
+  /* On the dark surface (#2c2e33) the bright variants already clear AA, so the
+     status TEXT tokens reuse them. */
+  --color-success-text: #51cf66;
+  --color-warning-text: #fcc419;
+  --color-danger-text: #ff6b6b;
+  --color-info-text: #66d9e8;
+  --color-muted-strong: var(--color-text-light);
+
+  --color-focus: #74c0fc;
 }
 
 /* Global Styles & Resets */
@@ -140,7 +164,8 @@ body.dark-mode .loading-spinner { border-top-color: var(--color-primary); }
 .header-title { margin: 0; font-size: var(--font-size-lg); font-weight: var(--font-weight-bold); color: var(--color-primary); }
 .header-controls { display: flex; gap: var(--spacing-sm); }
 .nav-tabs { display: flex; background-color: var(--color-surface); border-bottom: 1px solid var(--color-border); }
-.nav-tab { flex: 1; padding: var(--spacing-sm) var(--spacing-md); text-align: center; cursor: pointer; border: none; background: none; font-size: var(--font-size-md); color: var(--color-text-light); border-bottom: 3px solid transparent; transition: all var(--transition-fast); }
+.nav-tab { flex: 1; min-height: 48px; padding: var(--spacing-sm) var(--spacing-md); text-align: center; cursor: pointer; border: none; background: none; font-size: var(--font-size-md); color: var(--color-muted-strong); border-bottom: 3px solid transparent; transition: all var(--transition-fast); }
+body.dark-mode .nav-tab { color: var(--color-text-light); }
 .nav-tab.active { color: var(--color-primary); border-bottom-color: var(--color-primary); font-weight: var(--font-weight-bold); }
 .search-container-mobile { padding: var(--spacing-md); background: var(--color-surface); border-bottom: 1px solid var(--color-border); display: none; }
 .filter-controls-container { padding-top: var(--spacing-md); }
@@ -151,8 +176,8 @@ body.dark-mode .loading-spinner { border-top-color: var(--color-primary); }
 
 /* Map View */
 #map-view { position: relative; }
-.map-container { flex-grow: 1; width: 100%; background-color: #aaa; }
-body.dark-mode .map-container { filter: invert(1) hue-rotate(180deg) brightness(0.8) contrast(1.2); }
+.map-container { flex-grow: 1; width: 100%; background-color: #aaccdd; }
+body.dark-mode .map-container { background-color: #14202b; }
 .map-controls { position: absolute; bottom: var(--spacing-lg); right: var(--spacing-md); z-index: 401; }
 .map-control-btn { border-radius: 50%; width: 50px; height: 50px; font-size: 1.5rem; box-shadow: var(--box-shadow-md); }
 
@@ -177,16 +202,18 @@ body.dark-mode .modal-backdrop { background-color: rgba(0, 0, 0, 0.8); }
 .modal-content { background-color: var(--color-surface); border-radius: var(--border-radius-lg); box-shadow: var(--box-shadow-lg); width: 90%; max-width: 500px; max-height: 90vh; display: flex; flex-direction: column; z-index: 1; animation: slideInUp 0.3s; }
 .modal-header { display: flex; justify-content: space-between; align-items: center; padding: var(--spacing-md); border-bottom: 1px solid var(--color-border); }
 .modal-title { margin: 0; font-size: var(--font-size-lg); }
-.modal-close { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--color-text-light); }
+.modal-close { display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; background: none; border: none; font-size: 1.75rem; line-height: 1; cursor: pointer; color: var(--color-text-light); border-radius: var(--border-radius-sm); }
+.modal-close:hover { color: var(--color-text); background: var(--color-surface-2); }
 .modal-body { padding: var(--spacing-md); overflow-y: auto; }
 .modal-footer { padding: var(--spacing-md); border-top: 1px solid var(--color-border); text-align: right; }
 @keyframes slideInUp { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
 /* Beach Detail Modal specific styles */
 .flag-indicator { font-weight: var(--font-weight-bold); font-size: 1.1rem; text-align: center; margin-bottom: var(--spacing-md); }
-.flag-indicator.green { color: var(--color-success); }
-.flag-indicator.yellow { color: var(--color-warning); }
-.flag-indicator.red { color: var(--color-danger); }
+.flag-indicator.green { color: var(--color-success-text); }
+.flag-indicator.yellow { color: var(--color-warning-text); }
+.flag-indicator.red { color: var(--color-danger-text); }
+.flag-indicator.unknown { color: var(--color-text-light); }
 
 .conditions-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: var(--spacing-md); margin-bottom: var(--spacing-md); text-align: center; }
 .condition-label { font-size: var(--font-size-sm); color: var(--color-text-light); }
@@ -199,9 +226,9 @@ body.dark-mode .facility-tag { background-color: var(--color-gray-800); }
 .last-updated { text-align: center; font-size: var(--font-size-sm); color: var(--color-text-light); margin-top: var(--spacing-md); }
 .cleanliness-section { margin-top: var(--spacing-md); }
 .cleanliness-status { font-weight: bold; text-align: center; margin-bottom: var(--spacing-sm); }
-.cleanliness-status.clear { color: var(--color-info); }
-.cleanliness-status.moderate { color: var(--color-warning); }
-.cleanliness-status.high { color: var(--color-danger); }
+.cleanliness-status.clear { color: var(--color-info-text); }
+.cleanliness-status.moderate { color: var(--color-warning-text); }
+.cleanliness-status.high { color: var(--color-danger-text); }
 .cleanliness-report-text { font-size: var(--font-size-sm); color: var(--color-text-light); }
 
 /* Settings Modal specific styles */
@@ -212,7 +239,7 @@ body.dark-mode .facility-tag { background-color: var(--color-gray-800); }
 #safety-tips-list { padding-left: var(--spacing-lg); }
 
 /* Form Controls & Buttons */
-.btn { display: inline-block; font-weight: var(--font-weight-bold); text-align: center; vertical-align: middle; cursor: pointer; user-select: none; background-color: transparent; border: 1px solid transparent; padding: 0.375rem 0.75rem; font-size: var(--font-size-md); border-radius: var(--border-radius-sm); transition: all var(--transition-fast); }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: var(--spacing-xs); min-height: 44px; font-weight: var(--font-weight-bold); text-align: center; vertical-align: middle; cursor: pointer; user-select: none; background-color: transparent; border: 1px solid transparent; padding: 0.375rem 0.75rem; font-size: var(--font-size-md); border-radius: var(--border-radius-sm); transition: all var(--transition-fast); }
 .btn--primary { color: var(--color-white); background-color: var(--color-primary); border-color: var(--color-primary); }
 .btn--primary:hover { background-color: var(--color-primary-hover); border-color: var(--color-primary-hover); }
 body.dark-mode .btn--primary { color: var(--color-black); }
@@ -225,8 +252,9 @@ body.dark-mode .btn--secondary { color: var(--color-text); background-color: var
 body.dark-mode .btn--outline:hover { color: var(--color-black); }
 
 
-.btn--sm { padding: 0.25rem 0.5rem; font-size: var(--font-size-sm); }
-.filter-btn { background-color: var(--color-gray-200); color: var(--color-text-light); }
+/* Header icon/text buttons: still tappable (>=44px) but not as tall as primary buttons. */
+.btn--sm { min-height: 40px; min-width: 40px; padding: 0.25rem 0.6rem; font-size: var(--font-size-sm); }
+.filter-btn { min-height: 40px; background-color: var(--color-gray-200); color: var(--color-muted-strong); }
 body.dark-mode .filter-btn { background-color: var(--color-gray-800); color: var(--color-text-light); }
 .filter-btn.active { background-color: var(--color-primary); color: var(--color-white); box-shadow: var(--box-shadow-sm); }
 body.dark-mode .filter-btn.active { color: var(--color-black); }
@@ -334,7 +362,7 @@ input:checked + .slider:before { transform: translateX(24px); }
 /* Data-error banner: visible warm/red-tinted warning. Hidden by default via .hidden. */
 .data-error {
   background-color: rgba(220, 53, 69, 0.12);
-  color: var(--color-danger);
+  color: var(--color-danger-text);
   border: 1px solid var(--color-danger);
   border-radius: var(--border-radius-md);
   padding: var(--spacing-sm) var(--spacing-md);
@@ -344,6 +372,148 @@ input:checked + .slider:before { transform: translateX(24px); }
 }
 body.dark-mode .data-error {
   background-color: rgba(250, 82, 82, 0.18);
-  color: var(--color-danger);
+  color: var(--color-danger-text);
   border-color: var(--color-danger);
 }
+
+/* ==========================================================================
+   Accessibility + UX pass (WCAG 2.2 AA): utilities, focus, motion, widgets,
+   stretched-button cards, accessible markers, redesigned beach-detail modal.
+   ========================================================================== */
+
+/* Screen-reader-only text (visible to AT, hidden visually). Used for skip-link
+   target, marker accessible names, the live region, and visually-hidden labels. */
+.visually-hidden {
+  position: absolute !important;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%);
+  white-space: nowrap; border: 0;
+}
+
+/* Skip link — first focusable element, visible only on focus (WCAG 2.4.1). */
+.skip-link {
+  position: absolute; top: -200px; left: var(--spacing-sm); z-index: 2000;
+  background: var(--color-primary); color: var(--color-white);
+  padding: var(--spacing-sm) var(--spacing-md); border-radius: var(--border-radius-sm);
+  font-weight: var(--font-weight-bold); text-decoration: none;
+  transition: top var(--transition-fast);
+}
+.skip-link:focus { top: var(--spacing-sm); }
+body.dark-mode .skip-link { color: var(--color-black); }
+
+/* Visible, high-contrast focus ring for keyboard users (WCAG 2.4.7 / 2.4.11).
+   Mouse clicks don't trigger :focus-visible, so the ring only shows for keyboard. */
+:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+:focus:not(:focus-visible) { outline: none; }
+.form-control:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 1px; }
+
+/* Respect prefers-reduced-motion: neutralise non-essential animation/transition
+   (bounce, slide-in, theme transitions); the loading icon stops bouncing. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+  .loading-icon { animation: none !important; }
+}
+
+/* Filter chips as an ARIA radiogroup: visual selected state keyed off aria-checked
+   (kept in sync with the legacy .active class by JS). */
+.filter-controls[role="radiogroup"] { align-items: center; }
+.filter-btn[aria-checked="true"] { background-color: var(--color-primary); color: var(--color-white); box-shadow: var(--box-shadow-sm); }
+body.dark-mode .filter-btn[aria-checked="true"] { color: var(--color-black); }
+.filter-btn .flag-glyph { font-size: 1rem; }
+
+/* Beach list as a semantic list of stretched-button cards.
+   The <button> holds the name (its accessible name); ::after stretches the hit
+   area over the whole <li>, so the entire card is one keyboard/pointer target. */
+.beach-list { list-style: none; margin: 0; }
+.beach-item { position: relative; }
+.beach-item__btn {
+  background: none; border: 0; padding: 0; margin: 0;
+  font: inherit; color: inherit; text-align: left; cursor: pointer;
+}
+.beach-item__btn::after { content: ""; position: absolute; inset: 0; border-radius: var(--border-radius-md); }
+.beach-item:has(.beach-item__btn:focus-visible) { outline: 2px solid var(--color-focus); outline-offset: 2px; }
+.beach-item:has(.beach-item__btn:focus-visible) .beach-name { text-decoration: underline; }
+.beach-item__btn:focus-visible { outline: none; }
+.beach-name { line-height: 1.25; }
+.beach-item-header .flag-glyph { font-size: 1.6rem; line-height: 1; }
+li.no-results { list-style: none; }
+
+/* Accessible map markers: the algae state is shown by SHAPE (a leaf emoji), not
+   colour alone (WCAG 1.4.1). Clear/unavailable show no leaf — the full status is
+   in the marker's visually-hidden accessible name and in the list/modal text. */
+.cleanliness-badge {
+  position: absolute; bottom: 0; right: -6px;
+  font-size: 13px; line-height: 1;
+  filter: drop-shadow(0 0 1px #fff) drop-shadow(0 0 1px #fff);
+}
+
+/* Beach-detail modal redesign: safety flag as the hero, grouped metric cards. */
+.flag-hero {
+  display: flex; align-items: center; justify-content: center; gap: var(--spacing-sm);
+  font-weight: var(--font-weight-bold); font-size: 1.25rem; text-align: center;
+  padding: var(--spacing-md); margin-bottom: var(--spacing-sm);
+  border: 1px solid transparent; border-radius: var(--border-radius-md);
+}
+.flag-hero.green   { color: var(--color-success-text); background: rgba(40,167,69,0.12);  border-color: rgba(40,167,69,0.45); }
+.flag-hero.yellow  { color: var(--color-warning-text); background: rgba(255,193,7,0.16);  border-color: rgba(255,193,7,0.55); }
+.flag-hero.red     { color: var(--color-danger-text);  background: rgba(220,53,69,0.12);  border-color: rgba(220,53,69,0.45); }
+.flag-hero.unknown { color: var(--color-text-light);   background: var(--color-surface-2); border-color: var(--color-border); }
+
+.modal-section-title {
+  font-size: var(--font-size-md); margin: var(--spacing-lg) 0 var(--spacing-sm);
+  padding-bottom: var(--spacing-xs); border-bottom: 1px solid var(--color-border);
+}
+
+/* Condition cards inside the grid: icon + label + value, scannable at a glance. */
+.condition-item {
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+  background: var(--color-surface-2); border-radius: var(--border-radius-sm);
+  padding: var(--spacing-sm) var(--spacing-xs);
+}
+.condition-icon { font-size: 1.25rem; line-height: 1; }
+.condition-value { line-height: 1.2; }
+
+/* Freshness / "last updated" chip — a trust cue, surfaced near the top of the modal. */
+.last-updated {
+  display: inline-flex; align-items: center; gap: var(--spacing-xs);
+  margin: 0 auto var(--spacing-sm); padding: 2px var(--spacing-sm);
+  background: var(--color-surface-2); border-radius: 999px;
+  font-size: var(--font-size-sm); color: var(--color-text-light);
+}
+.last-updated-wrap { text-align: center; }
+.safety-message { line-height: 1.4; }
+
+/* Trend sparklines (condition history) in the beach-detail modal. */
+.trends-section { margin-top: var(--spacing-md); }
+.trends-header { display: flex; align-items: center; justify-content: space-between; gap: var(--spacing-sm); flex-wrap: wrap; }
+.trends-header .modal-section-title { flex: 1 1 auto; margin-bottom: var(--spacing-sm); }
+.trends-range { display: flex; gap: var(--spacing-xs); }
+.range-btn {
+  min-height: 36px; padding: 2px 12px; font-size: var(--font-size-sm);
+  border: 1px solid var(--color-border); border-radius: 999px;
+  background: var(--color-surface); color: var(--color-muted-strong); cursor: pointer;
+}
+.range-btn[aria-checked="true"] { background: var(--color-primary); color: var(--color-white); border-color: var(--color-primary); }
+body.dark-mode .range-btn[aria-checked="true"] { color: var(--color-black); }
+.trends-body { display: flex; flex-direction: column; gap: var(--spacing-sm); }
+.trend-row { display: flex; flex-direction: column; gap: 2px; }
+.trend-meta { display: flex; justify-content: space-between; align-items: baseline; font-size: var(--font-size-sm); }
+.trend-label { color: var(--color-text-light); }
+.trend-current { font-weight: var(--font-weight-bold); }
+.trend-svg { width: 100%; height: 40px; display: block; }
+/* keep the line a constant 2px regardless of the non-uniform horizontal stretch */
+.trend-svg polyline, .trend-svg circle { vector-effect: non-scaling-stroke; }
+.trend-svg.temp { color: var(--color-warning-text); }
+.trend-svg.waves { color: var(--color-primary); }
+.trend-svg.algae { color: var(--color-success-text); }
+.trends-empty { font-size: var(--font-size-sm); color: var(--color-text-light); font-style: italic; margin: var(--spacing-sm) 0 0; }

@@ -6,7 +6,10 @@ node_modules/
 .env.*
 !.env.example
 
-# Netlify local
+# Local server state (snapshot + condition history on the Fly volume; dev fallback dir)
+.state/
+
+# Netlify local (legacy — backend migrated to Fly.io)
 .netlify/
 deno.lock
 

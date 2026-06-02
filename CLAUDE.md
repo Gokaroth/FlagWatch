@@ -2,7 +2,7 @@
 
 Working guide for Claude in this repo. Deeper detail: `AI_CONTEXT_MEMO.md`, `DATA_SOURCES.md`, `ROADMAP.md`.
 
-FlagWatch is a real-time **beach safety + water-cleanliness PWA** for the Bulgarian Black Sea coast (47 beaches). Live at flagwatch.netlify.app. Vanilla JS, **no build step**, Netlify Functions backend.
+FlagWatch is a real-time **beach safety + water-cleanliness PWA** for the Bulgarian Black Sea coast (47 beaches). Live at flagwatch.gokaroth.com. Vanilla JS frontend (**no build step**); a single Node server (`server.mjs`) backend on **Fly.io** (migrated off Netlify).
 
 ## ⛔ Prime directive: never fabricate data
 This is a safety app. Honor these invariants in every change:
@@ -12,45 +12,56 @@ This is a safety app. Honor these invariants in every change:
 - Water temperature is a modeled estimate and shows a disclaimer.
 Don't reintroduce any "demo"/synthetic fallback.
 
-## Architecture (buildless static + Netlify Functions v2, ESM)
+## Architecture (buildless static frontend + one Node server on Fly.io, ESM)
 ```
 data/beaches.json            single source of truth (47 beaches: id, name, name_bg,
                              coordinates{lat,lng}, region, type, facilities, description, description_bg)
-app.js                       class BeachSafetyApp — Leaflet map, list, modal, EN/BG i18n, theme, PWA
-index.html / style.css       UI + themes (CSS custom properties, light/dark)
+app.js                       class BeachSafetyApp — Leaflet map, list, modal, EN/BG i18n, theme, PWA,
+                             SSE live-refresh, trend sparklines
+index.html / style.css       UI + themes (CSS custom properties, light/dark, WCAG 2.2 AA)
 sw.js                        service worker (precache + network-first)
 lib/copernicus.mjs           Copernicus Marine WMTS (CHL + Black Sea SST), honest "unavailable" on failure
 lib/fetch-beach-data.mjs     buildAllBeachData({fast}) — Open-Meteo (batched, current=) + Copernicus
-netlify/functions/
-  collect.mjs                SCHEDULED (every 2h) — just triggers the background worker, returns <1s
-  collect-background.mjs     BACKGROUND (15-min) — full build → writes Netlify Blobs ("flagwatch"/"latest")
-  get-beach-data.mjs         on-demand at /api/beaches — serves the Blob; cold-start = FAST (Open-Meteo only)
+server.mjs                   THE BACKEND (zero deps). Serves static files + the API; runs the
+                             collector in-process. Endpoints:
+                               GET /api/beaches    current snapshot (array)
+                               GET /api/status     build metadata / freshness / counts
+                               GET /healthz        Fly health check
+                               GET /api/stream     SSE — pushes {updatedAt} after each build
+                               GET /api/history?beach=<id>&range=24h|7d   rolling samples
+                             Boot: load snapshot → fast build (Open-Meteo) → full build → 2h refresh.
+                             State persisted to STATE_DIR (Fly volume /state): snapshot.json + history.json.
+Dockerfile / fly.toml        node:22-alpine image; Fly app (region fra, /state volume, /healthz check)
 ```
-Data flow: frontend `GET /api/beaches` → merged records (static + live). Frontend also fetches `/data/beaches.json` for instant first render.
+Data flow: frontend `GET /api/beaches` → merged records; `EventSource('/api/stream')` triggers a
+refetch when a new build lands. Frontend also fetches `/data/beaches.json` for instant first render.
+No 30s/15min function limits on Fly, so the full Copernicus build runs inline (no collect/background split).
 
 ### Merged record shape (the data contract — keep field names exact)
 `conditions`: `waveHeight, waterTemp, waterTempSource, airTemp, windSpeed, windGust, windDirection, uvIndex, flag, lastUpdated` (numbers or `null`; `flag` = `green|yellow|red|null`)
 `cleanliness`: `status, value, source, observedAt, report_en, report_bg`
 
 ## Conventions
-- **No build step.** Don't add Vite/bundlers, TypeScript compilation, or `@google/genai` (all were removed). Functions are ESM (`export default async (req,context)=>Response`); never `exports.handler` (package.json is `"type":"module"`).
+- **No build step (frontend).** Don't add Vite/bundlers, TypeScript compilation, or `@google/genai` (all were removed). Everything is ESM (`"type":"module"`). The server (`server.mjs`) uses only Node built-ins + global `fetch` — **keep it dependency-free** (it ships as a plain `node server.mjs`, no install needed).
 - **i18n**: add every new UI string to BOTH `en` and `bg` in the `translations` object in `app.js`. Elements whose `id` matches a translation key are auto-filled by `applyLanguage()`.
 - **Rendering**: use the `fmt()` helper for numbers (returns `—` for null). DOM is in `index.html`; any new element id used by `app.js` must exist there.
 - **CSS**: reuse the existing custom properties / dark-mode selectors; don't hardcode colors.
 
 ## Run & verify locally
 ```bash
-npm install
-npx netlify-cli dev        # http://localhost:8888 — static + functions + local Blobs
+npm install                     # dev tooling only (jsdom/axe); server has no runtime deps
+STATE_DIR=./.state npm start    # node server.mjs → http://localhost:8080
 ```
-- `GET /api/beaches` works (first hit = fast Open-Meteo cold-start).
-- To get enriched Copernicus data locally: `curl -X POST localhost:8888/.netlify/functions/collect-background` (202; runs in background), then re-GET `/api/beaches`.
+- Boot does a fast Open-Meteo build (~2s) then the full Copernicus build; refreshes every 2h.
+- Endpoints: `/api/beaches`, `/api/status`, `/healthz`, `/api/stream` (SSE), `/api/history?beach=<id>&range=24h|7d`.
 - Quick syntax gate: `node --check <file>` on each `.js`/`.mjs`.
-- There's no test runner; a jsdom smoke test pattern was used during the overhaul (stub `L`/`fetch`/`localStorage`, load index.html + app.js, assert honest rendering).
+- `npm test` runs `test/a11y-smoke.mjs` (jsdom + axe-core): asserts honest rendering, keyboard a11y,
+  and EN/BG i18n parity. axe can't do colour-contrast in jsdom — the harness computes WCAG ratios
+  from the CSS tokens instead.
 
 ## Deploy & gotchas
-- Deploy = push to GitHub `main`; Netlify builds with **no build command** (`netlify.toml`: `command=""`, `publish="."`). `/api/beaches` → `get-beach-data` via redirect.
+- **Deploy = `fly deploy`** (manual; builds the Docker image, boots 1 machine in `fra`). App name `flagwatch`; served at `flagwatch.gokaroth.com` (Cloudflare CNAME → `flagwatch.fly.dev`, `fly certs add`).
+- The machine is **always-on** (`auto_stop_machines='off'`, `min_machines_running=1`) so the in-process 2h collector keeps running. A **Fly volume** `flagwatch_state` at `/state` persists `snapshot.json` + `history.json` across deploys (create it before the first deploy).
 - **Copernicus WMTS is keyless** — no env vars needed. Dormant auth (`COPERNICUS_USERNAME/PASSWORD/TOKEN`) only if it ever starts requiring auth.
-- **Netlify scheduled functions have a hard 30s limit** — that's why the heavy build lives in `collect-background.mjs` (15-min background). Don't move the full Copernicus build back into `collect.mjs` or the on-demand path.
-- Scheduled functions don't auto-run on deploy previews; enrich a preview by POSTing to `collect-background` once.
-- Commits: author with the GitHub noreply email (push protection blocks private emails). Pushing to `main` is the user's action.
+- The manifest `Content-Type: application/manifest+json` is set by `server.mjs`'s MIME map (no Netlify header config anymore).
+- `fly auth login` is interactive (the user's action). Commits: author with the GitHub noreply email (push protection blocks private emails). Pushing to `main` is the user's action.

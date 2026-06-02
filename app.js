@@ -1,7 +1,7 @@
 // NOTE: This app no longer uses the Gemini API for cleanliness reports.
 // It has been replaced with a real scientific data source from Copernicus Marine Service.
 
-const APP_VERSION = '9.0.0'; // Increment this to show the popup for new users/updates
+const APP_VERSION = '9.1.0'; // Increment this to show the popup for new users/updates
 
 /**
  * Configuration for the "What's New" popup.
@@ -9,8 +9,18 @@ const APP_VERSION = '9.0.0'; // Increment this to show the popup for new users/u
  * The content is dynamically built from the `features` array and supports multiple languages.
  */
 const WHATS_NEW_CONFIG = {
-    version: '9.0.0',
+    version: '9.1.0',
     features: [
+        {
+            title: {
+                en: '♿ Accessibility & Design Refresh',
+                bg: '♿ Достъпност и обновен дизайн'
+            },
+            description: {
+                en: "FlagWatch is now fully keyboard- and screen-reader-friendly (WCAG 2.2 AA): a redesigned beach card, a cleaner detail view with the safety flag front and centre, clearer high-contrast colours, and a new minimalist map with a true dark mode. Status is never shown by colour alone.",
+                bg: "FlagWatch вече е напълно достъпен с клавиатура и екранен четец (WCAG 2.2 AA): преработена карта на плажа, по-ясен изглед с флага за безопасност на видно място, по-контрастни цветове и нова минималистична карта с истински тъмен режим. Статусът никога не се показва само чрез цвят."
+            },
+        },
         {
             title: {
                 en: '🏖️ Massive Beach Expansion!',
@@ -91,7 +101,13 @@ class BeachSafetyApp {
         this.currentBeach = null;
         this.deferredPrompt = null;
         this.userLocationMarker = null;
-        
+        this.searchTerm = '';
+        this.tileLayer = null;
+        this.activeModal = null;
+        this.lastFocusedEl = null;
+        this.trendRange = '7d';
+        this.eventSource = null;
+
         // Expose the app instance to the global scope for event handlers in HTML
         window.app = this;
         
@@ -102,47 +118,43 @@ class BeachSafetyApp {
     async init() {
         // Setup event listeners
         this.setupEventListeners();
-        
+
         // Apply theme early to avoid flash of light mode
         this.applyTheme();
 
         // Apply language
         this.applyLanguage();
-        
-        // Load static beach info and then fetch all live data
+
+        // Load static beach metadata, then reveal immediately (no artificial wait).
+        // The list/map show honest "loading" states until live conditions arrive.
         await this.loadStaticBeachData();
-        await this.fetchAllData();
-        
-        // Initialize map after a short delay
-        setTimeout(() => {
-            this.initializeMap();
-        }, 500);
-        
-        // Setup PWA
-        this.setupPWA();
-        
-        // Request location permission
-        this.requestLocation();
-        
-        // Render initial views
         this.updateAllViews();
-        
-        // Hide loading screen
-        setTimeout(() => {
-            document.getElementById('loading-screen').style.display = 'none';
-            document.getElementById('app').classList.remove('hidden');
-            // Ensure map size is correct
-            if (this.map) {
-                setTimeout(() => this.map.invalidateSize(), 100);
-            }
-            // Check for new features
-            this.checkWhatsNew();
-        }, 2000);
-        
+        this.revealApp();
+
+        // Initialise the map right away; size it once it's visible.
+        this.initializeMap();
+        if (this.map) this.map.invalidateSize();
+
+        this.setupPWA();
+        this.requestLocation();
+
+        // Fetch live conditions, then re-render with them.
+        await this.fetchAllData();
+        this.updateAllViews();
+        if (this.beaches.some(b => b.conditions)) {
+            this.announce(this.t('beachesLoaded', { n: this.beaches.filter(b => b.conditions).length }));
+        }
+
+        // Check for new features
+        this.checkWhatsNew();
+
         // Setup offline/online handlers
         this.setupNetworkHandlers();
 
-        // Setup periodic data refresh
+        // Live updates: the Fly server pushes an event the moment a new build lands.
+        this.setupLiveUpdates();
+
+        // Periodic refresh as a FALLBACK in case the SSE stream is blocked/dropped.
         setInterval(async () => {
             if (!this.isOffline) {
                 console.log('Refreshing weather and cleanliness data...');
@@ -150,6 +162,14 @@ class BeachSafetyApp {
                 this.updateAllViews();
             }
         }, 30 * 60 * 1000); // 30 minutes
+    }
+
+    // Hide the loading screen and show the app (called as soon as there's honest content).
+    revealApp() {
+        const ls = document.getElementById('loading-screen');
+        if (ls) ls.style.display = 'none';
+        const app = document.getElementById('app');
+        if (app) app.classList.remove('hidden');
     }
     
     updateAllViews() {
@@ -201,11 +221,11 @@ class BeachSafetyApp {
         return null;
     }
 
-    async fetchAllData() {
+    async fetchAllData(force = false) {
         const cached = this.readValidCache();
 
-        // Use cache if it's less than 30 mins old.
-        if (cached && (new Date() - new Date(cached.timestamp) < 30 * 60 * 1000)) {
+        // Use cache if it's less than 30 mins old — unless forced (e.g. an SSE live update).
+        if (!force && cached && (new Date() - new Date(cached.timestamp) < 30 * 60 * 1000)) {
             this.beaches = cached.beaches;
             console.log("Using fresh cached data.");
             this.hideDataError();
@@ -324,22 +344,21 @@ class BeachSafetyApp {
         document.getElementById('close-modal').addEventListener('click', () => this.toggleModal('beach-modal', false));
         document.querySelector('#beach-modal .modal-backdrop').addEventListener('click', () => this.toggleModal('beach-modal', false));
 
-        // Search and filter
-        document.getElementById('search-input').addEventListener('input', (e) => this.filterAndRenderLists(e.target.value));
-        document.getElementById('search-input-desktop').addEventListener('input', (e) => this.filterAndRenderLists(e.target.value));
-        
-        document.querySelectorAll('.filter-controls').forEach(container => {
-            container.addEventListener('click', (e) => {
-                if (e.target.classList.contains('filter-btn')) {
-                    this.currentFilter = e.target.dataset.filter;
-                    // Update both sets of filter buttons
-                    document.querySelectorAll('.filter-btn').forEach(btn => {
-                        btn.classList.toggle('active', btn.dataset.filter === this.currentFilter);
-                    });
-                    this.filterAndRenderLists(document.getElementById('search-input').value);
-                }
-            });
-        });
+        // Search — single source of truth; both inputs kept in sync.
+        const onSearch = (e) => {
+            this.searchTerm = e.target.value;
+            this.syncSearchInputs(e.target);
+            this.renderAllLists();
+            this.announceListCount();
+        };
+        document.getElementById('search-input').addEventListener('input', onSearch);
+        document.getElementById('search-input-desktop').addEventListener('input', onSearch);
+
+        // Filter chips as an ARIA radiogroup (click + arrow-key roving selection).
+        this.setupFilters();
+
+        // Trend-range toggle (7d / 24h) in the beach-detail modal.
+        this.setupTrendRange();
 
         // Map controls
         document.getElementById('locate-btn').addEventListener('click', () => this.panToUserLocation());
@@ -354,16 +373,94 @@ class BeachSafetyApp {
         document.getElementById('share-location').addEventListener('click', () => this.shareBeachLocation());
     }
 
+    // Minimal HTML escaper for interpolated text (names come from controlled data,
+    // but escaping keeps innerHTML construction safe).
+    escape(s) {
+        return String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    }
+
+    syncSearchInputs(source) {
+        ['search-input', 'search-input-desktop'].forEach((id) => {
+            const el = document.getElementById(id);
+            if (el && el !== source && el.value !== this.searchTerm) el.value = this.searchTerm;
+        });
+    }
+
+    // Wire each filter radiogroup: click selects; arrow/Home/End move + select (roving).
+    setupFilters() {
+        document.querySelectorAll('.filter-controls[role="radiogroup"]').forEach((group) => {
+            group.addEventListener('click', (e) => {
+                const btn = e.target.closest('.filter-btn');
+                if (btn && group.contains(btn)) this.setFilter(btn.dataset.filter);
+            });
+            group.addEventListener('keydown', (e) => this.handleRadioKeydown(e, group));
+        });
+    }
+
+    handleRadioKeydown(e, group) {
+        const radios = Array.from(group.querySelectorAll('.filter-btn'));
+        if (!radios.length) return;
+        const current = radios.findIndex((r) => r.dataset.filter === this.currentFilter);
+        let idx = current < 0 ? 0 : current;
+        switch (e.key) {
+            case 'ArrowRight': case 'ArrowDown': idx = (idx + 1) % radios.length; break;
+            case 'ArrowLeft':  case 'ArrowUp':   idx = (idx - 1 + radios.length) % radios.length; break;
+            case 'Home': idx = 0; break;
+            case 'End': idx = radios.length - 1; break;
+            default: return;
+        }
+        e.preventDefault();
+        this.setFilter(radios[idx].dataset.filter);
+        radios[idx].focus();
+    }
+
+    // Select a flag filter and sync BOTH radiogroups (aria-checked, roving tabindex, .active).
+    setFilter(filter) {
+        if (!filter) return;
+        this.currentFilter = filter;
+        document.querySelectorAll('.filter-btn').forEach((btn) => {
+            const on = btn.dataset.filter === filter;
+            btn.setAttribute('aria-checked', on ? 'true' : 'false');
+            btn.classList.toggle('active', on);
+            btn.tabIndex = on ? 0 : -1; // one tab stop per group: the checked radio
+        });
+        this.renderAllLists();
+        if (this.map) this.addBeachMarkers();
+        this.announceListCount();
+    }
+
+    // Announce how many beaches are currently shown (filter/search result) to AT.
+    announceListCount() {
+        if (!this.beaches.some((b) => b.conditions)) return;
+        const term = (this.searchTerm || '').toLowerCase();
+        const withData = this.beaches.filter((b) => b.conditions);
+        const shown = withData.filter((b) => {
+            const name = this.currentLanguage === 'bg' ? b.name_bg : b.name;
+            const matchesSearch = name.toLowerCase().includes(term);
+            const matchesFilter = this.currentFilter === 'all' || b.conditions.flag === this.currentFilter;
+            return matchesSearch && matchesFilter;
+        }).length;
+        this.announce(this.t('filterResults', { n: shown, total: withData.length }));
+    }
+
     initializeMap() {
         if (this.map) return;
         try {
+            const reduce = this.prefersReducedMotion();
             this.map = L.map('map', {
                 center: [42.7, 27.7], // Centered on Bulgarian coast
                 zoom: 8,
                 zoomControl: false, // We have custom controls
+                zoomAnimation: !reduce,
+                fadeAnimation: !reduce,
+                markerZoomAnimation: !reduce,
             });
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            // CARTO basemap (Positron / dark_matter). A native dark style means we no longer
+            // CSS-invert the tiles — which previously corrupted the flag/algae marker colours.
+            this.tileLayer = L.tileLayer(this.getTileUrl(), {
+                subdomains: 'abcd',
+                maxZoom: 20,
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
             }).addTo(this.map);
             this.addBeachMarkers();
             console.log("Map initialized successfully");
@@ -372,12 +469,27 @@ class BeachSafetyApp {
         }
     }
 
+    prefersReducedMotion() {
+        return !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+    }
+
+    // Pick the CARTO style for the current theme.
+    getTileUrl() {
+        const dark = document.body.classList.contains('dark-mode');
+        return `https://{s}.basemaps.cartocdn.com/${dark ? 'dark_all' : 'light_all'}/{z}/{x}/{y}{r}.png`;
+    }
+
+    updateMapTiles() {
+        if (this.tileLayer && this.tileLayer.setUrl) this.tileLayer.setUrl(this.getTileUrl());
+    }
+
     addBeachMarkers() {
         if (!this.map || !this.beaches.length) return;
         // Clear existing markers
         this.markers.forEach(marker => marker.remove());
         this.markers = [];
 
+        const lang = this.currentLanguage;
         this.beaches.forEach(beach => {
             if (!beach.conditions) return; // Don't render markers if live data isn't available
             const flag = beach.conditions.flag;
@@ -386,21 +498,41 @@ class BeachSafetyApp {
             // a null flag (unknown) is shown only under 'all'.
             if (this.currentFilter !== 'all' && flag !== this.currentFilter) return;
 
+            const flagKey = flag || 'unknown';
             const flagEmoji = flag === 'red' ? '🔴' : flag === 'yellow' ? '🟡' : flag === 'green' ? '🟢' : '⚪';
-            const flagClass = flag || 'unknown';
-            // Map cleanliness status to a dot class; 'unavailable' (or missing) renders neutral/grey.
             const cleanlinessStatus = beach.cleanliness?.status || 'unavailable';
+            // Algae shown by SHAPE (a leaf), not colour alone (WCAG 1.4.1). Clear/unavailable
+            // show no leaf — the full status is in the marker's accessible name and the modal.
+            const algaeBadge = cleanlinessStatus === 'high' ? '🌿🌿' : cleanlinessStatus === 'moderate' ? '🌿' : '';
+
+            const name = lang === 'bg' ? beach.name_bg : beach.name;
+            const flagText = this.translations[lang].flags[flagKey];
+            const algaeText = this.translations[lang].algaeStatus[cleanlinessStatus] || this.translations[lang].algaeStatus.unavailable;
+            const label = `${name}: ${flagText}, ${this.t('mapStatusAlgae')} ${algaeText}`;
 
             const markerIcon = L.divIcon({
-                className: `custom-marker-icon ${flagClass}`,
-                html: `<div class="flag-emoji ${flagClass}">${flagEmoji}</div><div class="cleanliness-dot ${cleanlinessStatus}"></div>`,
+                className: `custom-marker-icon ${flagKey}`,
+                html: `<div class="flag-emoji ${flagKey}" aria-hidden="true">${flagEmoji}</div>`
+                    + (algaeBadge ? `<div class="cleanliness-badge ${cleanlinessStatus}" aria-hidden="true">${algaeBadge}</div>` : '')
+                    + `<span class="visually-hidden">${this.escape(label)}</span>`,
                 iconSize: [30, 42],
                 iconAnchor: [15, 42]
             });
 
-            const marker = L.marker([beach.coordinates.lat, beach.coordinates.lng], { icon: markerIcon })
+            const marker = L.marker([beach.coordinates.lat, beach.coordinates.lng], { icon: markerIcon, keyboard: true, title: label })
                 .addTo(this.map)
                 .on('click', () => this.openBeachDetailModal(beach.id));
+
+            // Custom divIcon markers aren't keyboard/SR-ready by default — label and wire keys.
+            const el = marker.getElement && marker.getElement();
+            if (el) {
+                el.setAttribute('role', 'button');
+                el.setAttribute('tabindex', '0');
+                el.setAttribute('aria-label', label);
+                el.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); this.openBeachDetailModal(beach.id); }
+                });
+            }
 
             this.markers.push(marker);
         });
@@ -413,80 +545,90 @@ class BeachSafetyApp {
 
     renderBeachList(containerId) {
         const listContainer = document.getElementById(containerId);
+        const lang = this.currentLanguage;
         listContainer.innerHTML = '';
         if (!this.beaches.length || !this.beaches.some(b => b.conditions)) {
-            listContainer.innerHTML = `<div class="no-results"><p>${this.isOffline ? 'No cached data.' : 'Loading live data...'}</p></div>`;
+            const msg = this.isOffline ? this.translations[lang].dataError : this.translations[lang].loadingText;
+            listContainer.innerHTML = `<li class="no-results"><p>${msg}</p></li>`;
             return;
         }
 
-        const searchTerm = (containerId.includes('desktop') ? document.getElementById('search-input-desktop') : document.getElementById('search-input')).value.toLowerCase();
-        
+        const searchTerm = (this.searchTerm || '').toLowerCase();
+
         const filteredBeaches = this.beaches.filter(beach => {
             if (!beach.conditions) return false;
-            const name = this.currentLanguage === 'bg' ? beach.name_bg : beach.name;
+            const name = lang === 'bg' ? beach.name_bg : beach.name;
             const matchesSearch = name.toLowerCase().includes(searchTerm);
             const matchesFilter = this.currentFilter === 'all' || beach.conditions.flag === this.currentFilter;
             return matchesSearch && matchesFilter;
         });
 
         if (filteredBeaches.length === 0) {
-            listContainer.innerHTML = `<div class="no-results"><p>${this.translations[this.currentLanguage].noResults}</p></div>`;
+            listContainer.innerHTML = `<li class="no-results"><p>${this.translations[lang].noResults}</p></li>`;
             return;
         }
 
         filteredBeaches.forEach(beach => {
-            const beachItem = document.createElement('div');
-            beachItem.className = 'beach-item';
-            beachItem.dataset.beachId = beach.id;
-            beachItem.addEventListener('click', () => this.openBeachDetailModal(beach.id));
+            const li = document.createElement('li');
+            li.className = 'beach-item';
+            li.dataset.beachId = beach.id;
 
             const flag = beach.conditions.flag;
+            const flagKey = flag || 'unknown';
             const flagEmoji = flag === 'red' ? '🔴' : flag === 'yellow' ? '🟡' : flag === 'green' ? '🟢' : '⚪';
-            const name = this.currentLanguage === 'bg' ? beach.name_bg : beach.name;
-            const nameSecondary = this.currentLanguage === 'bg' ? beach.name : beach.name_bg;
+            // Flag status as a word (strip the leading emoji) for the card's accessible name.
+            const flagWord = (this.translations[lang].flags[flagKey] || '').replace(/^\S+\s+/, '');
+            const name = lang === 'bg' ? beach.name_bg : beach.name;
+            const nameSecondary = lang === 'bg' ? beach.name : beach.name_bg;
 
             let distanceHTML = '';
             if (this.userLocation && beach.distance) {
                 distanceHTML = `<span class="beach-distance">${beach.distance.toFixed(1)} km</span>`;
             }
 
-            beachItem.innerHTML = `
+            // Stretched-button card: the <button> holds the name (its accessible name +
+            // a hidden flag-status suffix); ::after makes the whole <li> one click target.
+            li.innerHTML = `
                 <div class="beach-item-header">
                     <div>
-                        <h3 class="beach-name">${name}</h3>
-                        <p class="beach-name-bg">${nameSecondary}</p>
+                        <h3 class="beach-name"><button type="button" class="beach-item__btn">${this.escape(name)}<span class="visually-hidden"> — ${this.escape(flagWord)}</span></button></h3>
+                        <p class="beach-name-bg">${this.escape(nameSecondary)}</p>
                     </div>
-                    <span>${flagEmoji}</span>
+                    <span class="flag-glyph" aria-hidden="true">${flagEmoji}</span>
                 </div>
                 <div class="beach-info">
                     <div>${this.getFacilityIcons(beach.facilities)}</div>
                     ${distanceHTML}
                 </div>
             `;
-            listContainer.appendChild(beachItem);
+            li.querySelector('.beach-item__btn').addEventListener('click', () => this.openBeachDetailModal(beach.id));
+            listContainer.appendChild(li);
         });
     }
 
-    filterAndRenderLists() {
-        this.renderAllLists();
-    }
-
     getFacilityIcons(facilities) {
-        if (!facilities) return '<span>-</span>';
+        if (!facilities) return '<span aria-hidden="true">-</span>';
+        const names = this.translations[this.currentLanguage].facilityNames;
+        const map = [['lifeguards', '🛟'], ['restaurants', '🍽️'], ['blueflag', '🌊'], ['family', '👨‍👩‍👧‍👦']];
         let icons = '';
-        if (facilities.lifeguards) icons += '<span class="facility-icon" title="Lifeguards">🛟</span>';
-        if (facilities.restaurants) icons += '<span class="facility-icon" title="Restaurants">🍽️</span>';
-        if (facilities.blueflag) icons += '<span class="facility-icon" title="Blue Flag">🌊</span>';
-        if (facilities.family) icons += '<span class="facility-icon" title="Family Friendly">👨‍👩‍👧‍👦</span>';
-        return icons || '<span>-</span>';
+        for (const [key, emoji] of map) {
+            if (facilities[key]) {
+                const label = names[key] || key;
+                // role=img + aria-label gives the emoji a reliable name for screen readers
+                // (title alone is unreliable); listed as text in the modal too.
+                icons += `<span class="facility-icon" role="img" aria-label="${this.escape(label)}">${emoji}</span>`;
+            }
+        }
+        return icons || '<span aria-hidden="true">-</span>';
     }
 
     openBeachDetailModal(beachId) {
         this.currentBeach = this.beaches.find(b => b.id === beachId);
         if (!this.currentBeach || !this.currentBeach.conditions) return;
-        
+
         this.refreshBeachDetailModal();
         this.toggleModal('beach-modal', true);
+        this.loadTrends(beachId); // async; renders sparklines (or an honest empty state)
     }
     
     refreshBeachDetailModal() {
@@ -505,7 +647,7 @@ class BeachSafetyApp {
         const flagText = this.translations[lang].flags[flagKey];
         const flagIndicator = document.getElementById('beach-flag');
         flagIndicator.textContent = `${this.translations[lang].flagStatus}: ${flagText}`;
-        flagIndicator.className = `flag-indicator ${flagKey}`;
+        flagIndicator.className = `flag-hero ${flagKey}`;
 
         // Conditions — backend returns NUMBERS or null; render null-safely.
         document.getElementById('wind-value').textContent = this.fmt(c.windSpeed, ' km/h', 0);
@@ -546,26 +688,33 @@ class BeachSafetyApp {
 
         // Facilities
         const facilitiesEl = document.getElementById('beach-facilities');
-        facilitiesEl.innerHTML = `<h4>${this.translations[lang].facilities}</h4><div class="facilities-list">${Object.keys(beach.facilities || {}).filter(f => beach.facilities[f]).map(f => `<span class="facility-tag">${this.translations[lang].facilityNames[f] || f}</span>`).join('')}</div>`;
+        facilitiesEl.innerHTML = `<h3 class="modal-section-title">${this.translations[lang].facilities}</h3><div class="facilities-list">${Object.keys(beach.facilities || {}).filter(f => beach.facilities[f]).map(f => `<span class="facility-tag">${this.escape(this.translations[lang].facilityNames[f] || f)}</span>`).join('')}</div>`;
 
-        // Last updated — always surface so stale data is visible.
+        // Last updated — surface as a relative freshness cue (absolute time on hover/title)
+        // so stale data is obvious. Honest '—' when we have no timestamp.
         const lastUpdatedEl = document.getElementById('last-updated');
         if (c.lastUpdated) {
-            const lastUpdatedDate = new Date(c.lastUpdated);
-            lastUpdatedEl.textContent = `${this.translations[lang].lastUpdated}: ${lastUpdatedDate.toLocaleString()}`;
+            const rel = this.timeAgo(c.lastUpdated);
+            lastUpdatedEl.textContent = rel ? this.t('updatedAgo', { t: rel }) : `${this.translations[lang].lastUpdated}: —`;
+            lastUpdatedEl.title = `${this.translations[lang].lastUpdated}: ${new Date(c.lastUpdated).toLocaleString()}`;
         } else {
             lastUpdatedEl.textContent = `${this.translations[lang].lastUpdated}: —`;
+            lastUpdatedEl.removeAttribute('title');
         }
     }
 
     setView(view) {
         this.currentView = view;
-        document.getElementById('map-tab').classList.toggle('active', view === 'map');
-        document.getElementById('list-tab').classList.toggle('active', view === 'list');
+        const mapTab = document.getElementById('map-tab');
+        const listTab = document.getElementById('list-tab');
+        mapTab.classList.toggle('active', view === 'map');
+        listTab.classList.toggle('active', view === 'list');
+        mapTab.setAttribute('aria-pressed', view === 'map' ? 'true' : 'false');
+        listTab.setAttribute('aria-pressed', view === 'list' ? 'true' : 'false');
 
         document.getElementById('map-view').classList.toggle('active', view === 'map');
         document.getElementById('list-view').classList.toggle('active', view === 'list');
-        
+
         document.getElementById('search-container-mobile').style.display = view === 'list' ? 'block' : 'none';
 
         if (view === 'map' && this.map) {
@@ -573,18 +722,219 @@ class BeachSafetyApp {
         }
     }
 
+    // Accessible dialog open/close (WAI-ARIA APG dialog pattern): move focus in,
+    // trap Tab, close on Escape, make the background inert, restore focus on close.
     toggleModal(modalId, show) {
         const modal = document.getElementById(modalId);
-        if (show) {
-            modal.classList.remove('hidden');
-            modal.setAttribute('aria-hidden', 'false');
-        } else {
-            modal.classList.add('hidden');
-            modal.setAttribute('aria-hidden', 'true');
-            if (modalId === 'beach-modal') {
-                this.currentBeach = null;
-            }
+        if (!modal) return;
+        if (show) this.openModal(modal); else this.closeModal(modal);
+    }
+
+    openModal(modal) {
+        this.lastFocusedEl = document.activeElement;
+        modal.classList.remove('hidden');
+        modal.setAttribute('aria-hidden', 'false');
+        this.activeModal = modal;
+        this.setBackgroundInert(modal, true);
+
+        // Move focus into the dialog (close button, else first focusable, else the dialog).
+        const target = modal.querySelector('.modal-close') || this.getFocusable(modal)[0] || modal;
+        if (target && target.focus) target.focus();
+
+        if (!this.modalKeydownHandler) this.modalKeydownHandler = (e) => this.handleModalKeydown(e);
+        document.addEventListener('keydown', this.modalKeydownHandler, true);
+    }
+
+    closeModal(modal) {
+        modal.classList.add('hidden');
+        modal.setAttribute('aria-hidden', 'true');
+        this.setBackgroundInert(modal, false);
+        if (modal.id === 'beach-modal') this.currentBeach = null;
+        if (this.modalKeydownHandler) document.removeEventListener('keydown', this.modalKeydownHandler, true);
+        this.activeModal = null;
+        // Return focus to the trigger that opened the dialog.
+        if (this.lastFocusedEl && this.lastFocusedEl.focus) this.lastFocusedEl.focus();
+        this.lastFocusedEl = null;
+    }
+
+    // Visible, focusable elements inside a container (for focus + Tab trap).
+    getFocusable(container) {
+        const sel = 'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+        return Array.from(container.querySelectorAll(sel)).filter(el =>
+            !el.closest('.hidden') && !el.hasAttribute('inert') && el.getAttribute('aria-hidden') !== 'true'
+        );
+    }
+
+    // Make every top-level element except the active modal inert while it is open.
+    setBackgroundInert(modal, on) {
+        Array.from(document.body.children).forEach(el => {
+            if (el === modal || el.classList.contains('skip-link')) return;
+            el.toggleAttribute('inert', on);
+        });
+    }
+
+    handleModalKeydown(e) {
+        if (!this.activeModal) return;
+        if (e.key === 'Escape') {
+            e.preventDefault();
+            this.closeModal(this.activeModal);
+            return;
         }
+        if (e.key !== 'Tab') return;
+        const f = this.getFocusable(this.activeModal);
+        if (!f.length) { e.preventDefault(); return; }
+        const first = f[0], last = f[f.length - 1], active = document.activeElement;
+        if (e.shiftKey && (active === first || !this.activeModal.contains(active))) {
+            e.preventDefault(); last.focus();
+        } else if (!e.shiftKey && (active === last || !this.activeModal.contains(active))) {
+            e.preventDefault(); first.focus();
+        }
+    }
+
+    // Announce a message to assistive tech via the polite live region.
+    announce(message) {
+        const region = document.getElementById('sr-status');
+        if (!region || !message) return;
+        // Clearing first makes repeat/identical messages re-announce.
+        region.textContent = '';
+        // Microtask delay so SR notices the change.
+        Promise.resolve().then(() => { region.textContent = message; });
+    }
+
+    // Format a string template like "{n} of {total}…" with the given values.
+    t(key, vars = {}) {
+        let s = this.translations[this.currentLanguage][key] || '';
+        for (const k in vars) s = s.replace(`{${k}}`, vars[k]);
+        return s;
+    }
+
+    // Relative time for the freshness cue, e.g. "12 min ago" / "преди 12 мин".
+    timeAgo(date) {
+        const then = new Date(date).getTime();
+        if (Number.isNaN(then)) return null;
+        const mins = Math.round((Date.now() - then) / 60000);
+        if (mins < 1) return this.t('timeJustNow');
+        if (mins < 60) return this.t('timeMinAgo', { n: mins });
+        const hours = Math.round(mins / 60);
+        if (hours < 24) return this.t('timeHoursAgo', { n: hours });
+        return this.t('timeDaysAgo', { n: Math.round(hours / 24) });
+    }
+
+    // ---- Live updates (Server-Sent Events) ----
+    // The Fly server pushes an "update" event the instant a new build lands; we refetch and
+    // re-render. EventSource auto-reconnects, so the 30-min interval is only a fallback.
+    setupLiveUpdates() {
+        if (typeof EventSource === 'undefined') return;
+        try {
+            this.eventSource = new EventSource('/api/stream');
+            this.eventSource.addEventListener('update', async () => {
+                if (this.isOffline) return;
+                await this.fetchAllData(true); // force past the local cache
+                this.updateAllViews();
+                if (this.currentBeach) this.loadTrends(this.currentBeach.id);
+                this.announce(this.t('liveUpdated'));
+            });
+            this.eventSource.onerror = () => {}; // browser handles reconnect; stay quiet
+        } catch (e) {
+            console.warn('Live updates unavailable:', e);
+        }
+    }
+
+    // ---- Trend sparklines (condition history from /api/history) ----
+    setupTrendRange() {
+        const group = document.querySelector('.trends-range[role="radiogroup"]');
+        if (!group) return;
+        const radios = Array.from(group.querySelectorAll('.range-btn'));
+        const select = (range) => {
+            this.trendRange = range;
+            radios.forEach(r => {
+                const on = r.dataset.range === range;
+                r.setAttribute('aria-checked', on ? 'true' : 'false');
+                r.classList.toggle('active', on);
+                r.tabIndex = on ? 0 : -1;
+            });
+            if (this.currentBeach) this.loadTrends(this.currentBeach.id);
+        };
+        group.addEventListener('click', (e) => {
+            const btn = e.target.closest('.range-btn');
+            if (btn) select(btn.dataset.range);
+        });
+        group.addEventListener('keydown', (e) => {
+            const i = radios.findIndex(r => r.dataset.range === this.trendRange);
+            let idx = i < 0 ? 0 : i;
+            if (e.key === 'ArrowRight' || e.key === 'ArrowDown') idx = (idx + 1) % radios.length;
+            else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') idx = (idx - 1 + radios.length) % radios.length;
+            else if (e.key === 'Home') idx = 0;
+            else if (e.key === 'End') idx = radios.length - 1;
+            else return;
+            e.preventDefault();
+            select(radios[idx].dataset.range);
+            radios[idx].focus();
+        });
+    }
+
+    async loadTrends(beachId) {
+        const body = document.getElementById('trends-body');
+        if (!body) return;
+        try {
+            const res = await fetch(`/api/history?beach=${encodeURIComponent(beachId)}&range=${this.trendRange}`);
+            if (!res.ok) throw new Error('history ' + res.status);
+            const data = await res.json();
+            // Ignore a stale response if the user changed beach / closed the modal meanwhile.
+            if (!this.currentBeach || this.currentBeach.id !== beachId) return;
+            this.renderTrends(data.samples || []);
+        } catch {
+            this.renderTrends([]); // honest "not enough history" empty state
+        }
+    }
+
+    renderTrends(samples) {
+        const body = document.getElementById('trends-body');
+        if (!body) return;
+        const rangeLabel = this.t(this.trendRange === '24h' ? 'range24h' : 'range7d');
+        const metrics = [
+            { key: 'waterTemp', cls: 'temp', label: this.t('trendTemp'), unit: '°C', digits: 1 },
+            { key: 'waveHeight', cls: 'waves', label: this.t('trendWaves'), unit: ' m', digits: 2 },
+            { key: 'chl', cls: 'algae', label: this.t('trendAlgae'), unit: ' mg/m³', digits: 2 },
+        ];
+        const rows = metrics.map(m => this.buildSparkline(samples, m, rangeLabel)).filter(Boolean);
+        body.innerHTML = rows.length
+            ? rows.join('')
+            : `<p class="trends-empty">${this.escape(this.t('trendsEmpty'))}</p>`;
+    }
+
+    // Inline-SVG sparkline. Gaps (null samples) BREAK the line — never drawn as zero.
+    buildSparkline(samples, m, rangeLabel) {
+        const pts = samples.map(s => ({
+            t: new Date(s.t).getTime(),
+            v: (typeof s[m.key] === 'number' && Number.isFinite(s[m.key])) ? s[m.key] : null,
+        }));
+        const valid = pts.filter(p => p.v !== null);
+        if (valid.length < 2) return ''; // not enough real points to draw this metric
+        const W = 280, H = 40, pad = 4;
+        const tMin = pts[0].t, tMax = pts[pts.length - 1].t;
+        const vs = valid.map(p => p.v);
+        const vMin = Math.min(...vs), vMax = Math.max(...vs);
+        const xR = (tMax - tMin) || 1, yR = (vMax - vMin) || 1;
+        const X = t => pad + ((t - tMin) / xR) * (W - 2 * pad);
+        const Y = v => H - pad - ((v - vMin) / yR) * (H - 2 * pad);
+        const segs = []; let cur = [];
+        for (const p of pts) {
+            if (p.v === null) { if (cur.length) { segs.push(cur); cur = []; } continue; }
+            cur.push(`${X(p.t).toFixed(1)},${Y(p.v).toFixed(1)}`);
+        }
+        if (cur.length) segs.push(cur);
+        const lines = segs
+            .map(s => `<polyline points="${s.join(' ')}" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>`)
+            .join('');
+        const last = valid[valid.length - 1];
+        const dot = `<circle cx="${X(last.t).toFixed(1)}" cy="${Y(last.v).toFixed(1)}" r="2.5" fill="currentColor"/>`;
+        const fmtV = v => `${v.toFixed(m.digits)}${m.unit}`;
+        const aria = this.t('trendAria', { label: m.label, range: rangeLabel, min: fmtV(vMin), max: fmtV(vMax), unit: '' });
+        return `<div class="trend-row">
+            <div class="trend-meta"><span class="trend-label">${this.escape(m.label)}</span><span class="trend-current">${this.escape(fmtV(last.v))}</span></div>
+            <svg class="trend-svg ${m.cls}" viewBox="0 0 ${W} ${H}" role="img" aria-label="${this.escape(aria)}" preserveAspectRatio="none">${lines}${dot}</svg>
+        </div>`;
     }
 
     requestLocation() {
@@ -644,7 +994,10 @@ class BeachSafetyApp {
 
     panToUserLocation() {
         if (this.map && this.userLocation) {
-            this.map.flyTo([this.userLocation.lat, this.userLocation.lng], 12);
+            const target = [this.userLocation.lat, this.userLocation.lng];
+            // Honour prefers-reduced-motion: jump instead of an animated fly-to.
+            if (this.prefersReducedMotion()) this.map.setView(target, 12);
+            else this.map.flyTo(target, 12);
         } else if (!this.userLocation) {
             alert(this.translations[this.currentLanguage].locationNotEnabled);
         }
@@ -753,6 +1106,11 @@ class BeachSafetyApp {
         
         document.body.classList.toggle('dark-mode', isDark);
         document.getElementById('dark-mode-toggle').checked = isDark;
+
+        // Keep the PWA theme-color and the CARTO basemap in sync with the theme.
+        const themeMeta = document.querySelector('meta[name="theme-color"]');
+        if (themeMeta) themeMeta.setAttribute('content', isDark ? '#1a1b1e' : '#0077be');
+        if (this.map) this.updateMapTiles();
     }
 
     toggleLanguage() {
@@ -760,6 +1118,9 @@ class BeachSafetyApp {
         localStorage.setItem('beach-app-language', this.currentLanguage);
         this.applyLanguage();
         this.updateAllViews();
+        if (this.currentBeach) this.loadTrends(this.currentBeach.id); // re-render sparklines in new lang
+        // Announce in the language just switched TO.
+        this.announce(this.translations[this.currentLanguage].languageSwitched);
     }
 
     applyLanguage() {
@@ -773,7 +1134,19 @@ class BeachSafetyApp {
                 el.textContent = translations[el.id];
             }
         });
-        
+
+        // data-i18n: set textContent from a translation key (for elements whose id
+        // does not match a key, e.g. filter chips and new labels).
+        document.querySelectorAll('[data-i18n]').forEach(el => {
+            const key = el.getAttribute('data-i18n');
+            if (translations[key]) el.textContent = translations[key];
+        });
+        // data-i18n-aria: set a translated aria-label (icon-only buttons, landmarks, map region).
+        document.querySelectorAll('[data-i18n-aria]').forEach(el => {
+            const key = el.getAttribute('data-i18n-aria');
+            if (translations[key]) el.setAttribute('aria-label', translations[key]);
+        });
+
         // Update placeholders
         document.getElementById('search-input').placeholder = translations.searchPlaceholder;
         document.getElementById('search-input-desktop').placeholder = translations.searchPlaceholder;
@@ -829,6 +1202,44 @@ class BeachSafetyApp {
             "waterTempDisclaimer": "Water temp is a modeled estimate; shoreline may differ by 2–4°C.",
             "dataError": "Couldn't load live conditions. Check your connection and try again.",
             "staleData": "Showing saved data — live update failed.",
+            "skipToContent": "Skip to content",
+            "loadingText": "Loading beach conditions…",
+            "searchLabel": "Search beaches",
+            "beachListHeading": "Beaches",
+            "installApp": "Install App",
+            "conditionsTitle": "Conditions",
+            "filterAll": "All",
+            "filterGreen": "Safe",
+            "filterYellow": "Caution",
+            "filterRed": "Danger",
+            "sidebarLabel": "Beaches: search, filter and list",
+            "langSwitchLabel": "Switch language (English / Bulgarian)",
+            "whatsNewLabel": "What's new",
+            "settingsLabel": "Settings",
+            "filterGroupLabel": "Filter beaches by flag status",
+            "mapRegionLabel": "Map of Black Sea beaches. The same beaches are listed in the List tab.",
+            "viewTablistLabel": "Choose map or list view",
+            "locateLabel": "Find my location",
+            "closeLabel": "Close",
+            "mapStatusAlgae": "algae",
+            "beachesLoaded": "{n} beaches loaded.",
+            "filterResults": "{n} of {total} beaches shown.",
+            "languageSwitched": "Language changed to English.",
+            "timeJustNow": "just now",
+            "timeMinAgo": "{n} min ago",
+            "timeHoursAgo": "{n} h ago",
+            "timeDaysAgo": "{n} d ago",
+            "updatedAgo": "Updated {t}",
+            "trendsTitle": "Trends",
+            "range7d": "7 days",
+            "range24h": "24 hours",
+            "trendsRangeLabel": "Trend time range",
+            "trendTemp": "Water temp",
+            "trendWaves": "Waves",
+            "trendAlgae": "Algae (CHL)",
+            "trendsEmpty": "Not enough history yet — check back after a few updates.",
+            "trendAria": "{label}, {range}: {min}–{max}{unit}",
+            "liveUpdated": "Conditions updated.",
             flags: {
                 green: "🟢 Safe",
                 yellow: "🟡 Caution",
@@ -890,6 +1301,44 @@ class BeachSafetyApp {
             "waterTempDisclaimer": "Температурата на водата е моделирана оценка; на брега може да се различава с 2–4°C.",
             "dataError": "Неуспешно зареждане на актуалните условия. Проверете връзката си и опитайте отново.",
             "staleData": "Показват се запазени данни — неуспешно обновяване на живо.",
+            "skipToContent": "Към съдържанието",
+            "loadingText": "Зареждане на условията на плажа…",
+            "searchLabel": "Търсене на плажове",
+            "beachListHeading": "Плажове",
+            "installApp": "Инсталирай",
+            "conditionsTitle": "Условия",
+            "filterAll": "Всички",
+            "filterGreen": "Безопасно",
+            "filterYellow": "Внимание",
+            "filterRed": "Опасно",
+            "sidebarLabel": "Плажове: търсене, филтър и списък",
+            "langSwitchLabel": "Смяна на езика (английски / български)",
+            "whatsNewLabel": "Какво ново",
+            "settingsLabel": "Настройки",
+            "filterGroupLabel": "Филтриране на плажове по статус на флага",
+            "mapRegionLabel": "Карта на черноморските плажове. Същите плажове са в раздела „Списък“.",
+            "viewTablistLabel": "Изберете изглед карта или списък",
+            "locateLabel": "Намери моето местоположение",
+            "closeLabel": "Затвори",
+            "mapStatusAlgae": "водорасли",
+            "beachesLoaded": "Заредени са {n} плажа.",
+            "filterResults": "Показани са {n} от {total} плажа.",
+            "languageSwitched": "Езикът е променен на български.",
+            "timeJustNow": "току-що",
+            "timeMinAgo": "преди {n} мин",
+            "timeHoursAgo": "преди {n} ч",
+            "timeDaysAgo": "преди {n} д",
+            "updatedAgo": "Обновено {t}",
+            "trendsTitle": "Тенденции",
+            "range7d": "7 дни",
+            "range24h": "24 часа",
+            "trendsRangeLabel": "Период на тенденцията",
+            "trendTemp": "Темп. вода",
+            "trendWaves": "Вълни",
+            "trendAlgae": "Водорасли (CHL)",
+            "trendsEmpty": "Все още няма достатъчно история — проверете отново след няколко обновявания.",
+            "trendAria": "{label}, {range}: {min}–{max}{unit}",
+            "liveUpdated": "Условията са обновени.",
             flags: {
                 green: "🟢 Безопасно",
                 yellow: "🟡 Внимание",

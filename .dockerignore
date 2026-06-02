@@ -1,0 +1,14 @@
+# Keep the image lean: only the runtime needs to ship.
+node_modules
+.git
+.gitignore
+test/
+netlify/
+.state/
+.github/
+*.md
+.env
+.env.*
+.DS_Store
+npm-debug.log*
+fly.toml

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'beach-safety-v11'; // Incremented version to force update
+const CACHE_NAME = 'beach-safety-v12'; // Incremented version to force update
 const urlsToCache = [
     '/',
     '/index.html',

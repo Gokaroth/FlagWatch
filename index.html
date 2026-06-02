@@ -25,47 +25,52 @@
     <link rel="apple-touch-icon" href="/icons/icon-192.png">
 </head>
 <body>
+    <a href="#main-content" class="skip-link" data-i18n="skipToContent">Skip to content</a>
+
     <!-- Loading Screen -->
-    <div id="loading-screen" class="loading-screen">
+    <div id="loading-screen" class="loading-screen" role="status" aria-live="polite">
         <div class="loading-content">
-            <div class="loading-icon">🏖️</div>
+            <div class="loading-icon" aria-hidden="true">🏖️</div>
             <h2 id="loading-title">FlagWatch</h2>
-            <div class="loading-spinner"></div>
+            <div class="loading-spinner" aria-hidden="true"></div>
+            <p class="visually-hidden" data-i18n="loadingText">Loading beach conditions…</p>
         </div>
     </div>
 
     <!-- Main App Container -->
     <div id="app" class="app hidden">
         <!-- Desktop Sidebar -->
-        <aside class="sidebar">
+        <aside class="sidebar" data-i18n-aria="sidebarLabel">
             <div class="sidebar-header">
                 <div class="header-content">
                     <h1 id="app-title-desktop" class="header-title">FlagWatch</h1>
                     <div class="header-controls">
-                        <button id="language-toggle-desktop" class="btn btn--sm btn--outline" aria-label="Switch language">EN</button>
-                        <button id="whats-new-btn-desktop" class="btn btn--sm btn--outline" aria-label="What's New">🎁</button>
-                        <button id="settings-btn-desktop" class="btn btn--sm btn--outline" aria-label="Settings">⚙️</button>
+                        <button id="language-toggle-desktop" class="btn btn--sm btn--outline" data-i18n-aria="langSwitchLabel">EN</button>
+                        <button id="whats-new-btn-desktop" class="btn btn--sm btn--outline" data-i18n-aria="whatsNewLabel"><span aria-hidden="true">🎁</span></button>
+                        <button id="settings-btn-desktop" class="btn btn--sm btn--outline" data-i18n-aria="settingsLabel"><span aria-hidden="true">⚙️</span></button>
                     </div>
                 </div>
             </div>
             <div class="sidebar-search">
-                 <input type="text" id="search-input-desktop" class="form-control search-input" placeholder="Search beaches...">
+                <label for="search-input-desktop" class="visually-hidden" data-i18n="searchLabel">Search beaches</label>
+                <input type="text" id="search-input-desktop" class="form-control search-input" placeholder="Search beaches...">
                 <div id="filters-container-desktop" class="filter-controls-container">
-                    <div class="filter-controls active" data-filter-group="conditions">
-                        <button class="filter-btn active" data-filter="all">All</button>
-                        <button class="filter-btn" data-filter="green">🟢 Safe</button>
-                        <button class="filter-btn" data-filter="yellow">🟡 Caution</button>
-                        <button class="filter-btn" data-filter="red">🔴 Danger</button>
+                    <div class="filter-controls active" role="radiogroup" data-filter-group="conditions" data-i18n-aria="filterGroupLabel">
+                        <button class="filter-btn active" role="radio" aria-checked="true" tabindex="0" data-filter="all" data-i18n="filterAll">All</button>
+                        <button class="filter-btn" role="radio" aria-checked="false" tabindex="-1" data-filter="green"><span class="flag-glyph" aria-hidden="true">🟢</span> <span data-i18n="filterGreen">Safe</span></button>
+                        <button class="filter-btn" role="radio" aria-checked="false" tabindex="-1" data-filter="yellow"><span class="flag-glyph" aria-hidden="true">🟡</span> <span data-i18n="filterYellow">Caution</span></button>
+                        <button class="filter-btn" role="radio" aria-checked="false" tabindex="-1" data-filter="red"><span class="flag-glyph" aria-hidden="true">🔴</span> <span data-i18n="filterRed">Danger</span></button>
                     </div>
                 </div>
             </div>
             <div class="beach-list-container">
-                <div class="beach-list" id="beach-list-desktop">
+                <h2 class="visually-hidden" data-i18n="beachListHeading">Beaches</h2>
+                <ul class="beach-list" id="beach-list-desktop">
                     <!-- Beach items will be populated by JavaScript -->
-                </div>
+                </ul>
             </div>
             <div class="sidebar-footer">
-                <button id="install-btn" class="btn btn--sm btn--primary hidden" aria-label="Install app">📱 Install App</button>
+                <button id="install-btn" class="btn btn--sm btn--primary hidden"><span aria-hidden="true">📱</span> <span data-i18n="installApp">Install App</span></button>
             </div>
         </aside>
 
@@ -74,125 +79,153 @@
             <div class="header-content">
                 <h1 id="app-title" class="header-title">FlagWatch</h1>
                 <div class="header-controls">
-                    <button id="language-toggle" class="btn btn--sm btn--outline" aria-label="Switch language">EN</button>
-                    <button id="whats-new-btn" class="btn btn--sm btn--outline" aria-label="What's New">🎁</button>
-                    <button id="settings-btn" class="btn btn--sm btn--outline" aria-label="Settings">⚙️</button>
+                    <button id="language-toggle" class="btn btn--sm btn--outline" data-i18n-aria="langSwitchLabel">EN</button>
+                    <button id="whats-new-btn" class="btn btn--sm btn--outline" data-i18n-aria="whatsNewLabel"><span aria-hidden="true">🎁</span></button>
+                    <button id="settings-btn" class="btn btn--sm btn--outline" data-i18n-aria="settingsLabel"><span aria-hidden="true">⚙️</span></button>
                 </div>
             </div>
         </header>
 
-        <!-- Mobile Navigation -->
-        <nav class="nav-tabs">
-            <button id="map-tab" class="nav-tab active" data-view="map">
+        <!-- Mobile Navigation (segmented map/list switch inside a nav landmark) -->
+        <nav class="nav-tabs" data-i18n-aria="viewTablistLabel">
+            <button id="map-tab" class="nav-tab active" aria-pressed="true" aria-controls="map-view" data-view="map">
                 <span id="map-tab-text">Map</span>
             </button>
-            <button id="list-tab" class="nav-tab" data-view="list">
+            <button id="list-tab" class="nav-tab" aria-pressed="false" aria-controls="list-view" data-view="list">
                 <span id="list-tab-text">List</span>
             </button>
         </nav>
 
         <!-- Main Content (Map and Mobile List) -->
-        <main class="main-content">
+        <main id="main-content" class="main-content" tabindex="-1">
             <!-- Data Error Banner -->
             <div id="data-error" class="data-error hidden" role="alert">
                 <span id="data-error-text"></span>
             </div>
 
+            <!-- Polite live region for async status / filter / language announcements -->
+            <div id="sr-status" class="visually-hidden" role="status" aria-live="polite"></div>
+
             <!-- Mobile Search Bar -->
             <div id="search-container-mobile" class="search-container-mobile">
+                <label for="search-input" class="visually-hidden" data-i18n="searchLabel">Search beaches</label>
                 <input type="text" id="search-input" class="form-control search-input" placeholder="Search beaches...">
                 <div id="filters-container" class="filter-controls-container">
-                    <div class="filter-controls active" data-filter-group="conditions">
-                        <button class="filter-btn active" data-filter="all">All</button>
-                        <button class="filter-btn" data-filter="green">🟢 Safe</button>
-                        <button class="filter-btn" data-filter="yellow">🟡 Caution</button>
-                        <button class="filter-btn" data-filter="red">🔴 Danger</button>
+                    <div class="filter-controls active" role="radiogroup" data-filter-group="conditions" data-i18n-aria="filterGroupLabel">
+                        <button class="filter-btn active" role="radio" aria-checked="true" tabindex="0" data-filter="all" data-i18n="filterAll">All</button>
+                        <button class="filter-btn" role="radio" aria-checked="false" tabindex="-1" data-filter="green"><span class="flag-glyph" aria-hidden="true">🟢</span> <span data-i18n="filterGreen">Safe</span></button>
+                        <button class="filter-btn" role="radio" aria-checked="false" tabindex="-1" data-filter="yellow"><span class="flag-glyph" aria-hidden="true">🟡</span> <span data-i18n="filterYellow">Caution</span></button>
+                        <button class="filter-btn" role="radio" aria-checked="false" tabindex="-1" data-filter="red"><span class="flag-glyph" aria-hidden="true">🔴</span> <span data-i18n="filterRed">Danger</span></button>
                     </div>
                 </div>
             </div>
-            
+
             <!-- Map View -->
             <div id="map-view" class="view active">
-                <div id="map" class="map-container"></div>
+                <div id="map" class="map-container" role="region" data-i18n-aria="mapRegionLabel"></div>
                 <div class="map-controls">
-                    <button id="locate-btn" class="btn btn--primary map-control-btn" aria-label="Find my location">📍</button>
+                    <button id="locate-btn" class="btn btn--primary map-control-btn" data-i18n-aria="locateLabel"><span aria-hidden="true">📍</span></button>
                 </div>
             </div>
 
             <!-- List View (Mobile) -->
             <div id="list-view" class="view">
-                <div class="beach-list" id="beach-list">
+                <h2 class="visually-hidden" data-i18n="beachListHeading">Beaches</h2>
+                <ul class="beach-list" id="beach-list">
                     <!-- Beach items will be populated by JavaScript -->
-                </div>
+                </ul>
             </div>
         </main>
     </div>
 
     <!-- Modals -->
     <!-- Beach Detail Modal -->
-    <div id="beach-modal" class="modal hidden" role="dialog" aria-labelledby="beach-modal-title" aria-hidden="true">
+    <div id="beach-modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="beach-modal-title" aria-hidden="true">
         <div class="modal-backdrop"></div>
         <div class="modal-content">
-            <header class="modal-header">
+            <div class="modal-header">
                 <h2 id="beach-modal-title" class="modal-title"></h2>
-                <button id="close-modal" class="modal-close" aria-label="Close">&times;</button>
-            </header>
+                <button id="close-modal" class="modal-close" data-i18n-aria="closeLabel"><span aria-hidden="true">&times;</span></button>
+            </div>
             <div class="modal-body">
-                <div id="beach-flag" class="flag-indicator"></div>
+                <!-- Safety verdict (hero) + message + freshness, surfaced first -->
+                <div id="beach-flag" class="flag-hero"></div>
+                <div id="safety-message" class="safety-message"></div>
+                <p class="last-updated-wrap"><span id="last-updated" class="last-updated"></span></p>
+
+                <h3 class="modal-section-title" id="conditions-title" data-i18n="conditionsTitle">Conditions</h3>
                 <div id="beach-conditions" class="conditions-grid">
                     <div class="condition-item">
-                        <span class="condition-label" id="wind-label">Wind</span>
-                        <span id="wind-value" class="condition-value">--</span>
-                    </div>
-                    <div class="condition-item">
-                        <span class="condition-label" id="wind-gust-label">Wind Gusts</span>
-                        <span id="wind-gust-value" class="condition-value">--</span>
-                    </div>
-                    <div class="condition-item">
-                        <span class="condition-label" id="wind-direction-label">Wind Direction</span>
-                        <span id="wind-direction-value" class="condition-value">--</span>
-                    </div>
-                    <div class="condition-item">
+                        <span class="condition-icon" aria-hidden="true">🌊</span>
                         <span class="condition-label" id="waves-label">Waves</span>
                         <span id="waves-value" class="condition-value">--</span>
                     </div>
                     <div class="condition-item">
+                        <span class="condition-icon" aria-hidden="true">💨</span>
+                        <span class="condition-label" id="wind-label">Wind</span>
+                        <span id="wind-value" class="condition-value">--</span>
+                    </div>
+                    <div class="condition-item">
+                        <span class="condition-icon" aria-hidden="true">🌡️</span>
                         <span class="condition-label" id="water-temp-label">Water Temp</span>
                         <span id="water-temp-value" class="condition-value">--</span>
                     </div>
                     <div class="condition-item">
+                        <span class="condition-icon" aria-hidden="true">🌥️</span>
                         <span class="condition-label" id="air-temp-label">Air Temp</span>
                         <span id="air-temp-value" class="condition-value">--</span>
                     </div>
-                     <div class="condition-item">
+                    <div class="condition-item">
+                        <span class="condition-icon" aria-hidden="true">☀️</span>
                         <span class="condition-label" id="uv-index-label">UV Index</span>
                         <span id="uv-index-value" class="condition-value">--</span>
                     </div>
+                    <div class="condition-item">
+                        <span class="condition-icon" aria-hidden="true">🌬️</span>
+                        <span class="condition-label" id="wind-gust-label">Wind Gusts</span>
+                        <span id="wind-gust-value" class="condition-value">--</span>
+                    </div>
+                    <div class="condition-item">
+                        <span class="condition-icon" aria-hidden="true">🧭</span>
+                        <span class="condition-label" id="wind-direction-label">Wind Direction</span>
+                        <span id="wind-direction-value" class="condition-value">--</span>
+                    </div>
                 </div>
                 <p class="data-disclaimer" id="water-temp-disclaimer"></p>
+
                 <div id="beach-cleanliness" class="cleanliness-section">
-                    <h4 id="cleanliness-title">Algae Report</h4>
+                    <h3 id="cleanliness-title" class="modal-section-title">Algae Report</h3>
                     <div id="cleanliness-status" class="cleanliness-status">--</div>
                     <p id="cleanliness-report" class="cleanliness-report-text"></p>
                 </div>
-                <div id="safety-message" class="safety-message"></div>
+
+                <div id="beach-trends" class="trends-section">
+                    <div class="trends-header">
+                        <h3 class="modal-section-title" id="trends-title" data-i18n="trendsTitle">Trends</h3>
+                        <div class="trends-range" role="radiogroup" data-i18n-aria="trendsRangeLabel">
+                            <button class="range-btn active" role="radio" aria-checked="true" tabindex="0" data-range="7d" data-i18n="range7d">7 days</button>
+                            <button class="range-btn" role="radio" aria-checked="false" tabindex="-1" data-range="24h" data-i18n="range24h">24 hours</button>
+                        </div>
+                    </div>
+                    <div id="trends-body" class="trends-body"></div>
+                </div>
+
                 <div id="beach-facilities" class="facilities"></div>
-                <div id="last-updated" class="last-updated"></div>
             </div>
             <div class="modal-footer">
-                <button id="share-location" class="btn btn--secondary">📤 <span id="share-location-text">Share Location</span></button>
+                <button id="share-location" class="btn btn--secondary"><span aria-hidden="true">📤</span> <span id="share-location-text">Share Location</span></button>
             </div>
         </div>
     </div>
 
     <!-- Settings Modal -->
-    <div id="settings-modal" class="modal hidden" role="dialog" aria-labelledby="settings-modal-title" aria-hidden="true">
+    <div id="settings-modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="settings-modal-title" aria-hidden="true">
         <div class="modal-backdrop"></div>
         <div class="modal-content">
-            <header class="modal-header">
+            <div class="modal-header">
                 <h2 id="settings-modal-title" class="modal-title">Settings</h2>
-                <button id="close-settings" class="modal-close" aria-label="Close">&times;</button>
-            </header>
+                <button id="close-settings" class="modal-close" data-i18n-aria="closeLabel"><span aria-hidden="true">&times;</span></button>
+            </div>
             <div class="modal-body">
                  <div class="settings-section">
                     <h3 id="theme-title">Theme</h3>
@@ -208,15 +241,15 @@
                     <h3 id="flag-legend-title">Flag Legend</h3>
                     <div class="legend-items">
                         <div class="legend-item">
-                            <span class="flag-icon green">🟢</span>
+                            <span class="flag-icon green" aria-hidden="true">🟢</span>
                             <span id="legend-green">Safe swimming conditions</span>
                         </div>
                         <div class="legend-item">
-                            <span class="flag-icon yellow">🟡</span>
+                            <span class="flag-icon yellow" aria-hidden="true">🟡</span>
                             <span id="legend-yellow">Caution advised</span>
                         </div>
                         <div class="legend-item">
-                            <span class="flag-icon red">🔴</span>
+                            <span class="flag-icon red" aria-hidden="true">🔴</span>
                             <span id="legend-red">Dangerous conditions</span>
                         </div>
                     </div>
@@ -256,13 +289,13 @@
     </div>
 
     <!-- What's New Modal -->
-    <div id="whats-new-modal" class="modal hidden" role="dialog" aria-labelledby="whats-new-modal-title" aria-hidden="true">
+    <div id="whats-new-modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="whats-new-modal-title" aria-hidden="true">
         <div class="modal-backdrop"></div>
         <div class="modal-content">
-            <header class="modal-header">
+            <div class="modal-header">
                 <h2 id="whats-new-modal-title" class="modal-title">What's New!</h2>
-                <button id="close-whats-new" class="modal-close" aria-label="Close">&times;</button>
-            </header>
+                <button id="close-whats-new" class="modal-close" data-i18n-aria="closeLabel"><span aria-hidden="true">&times;</span></button>
+            </div>
             <div id="whats-new-body" class="modal-body">
                 <!-- Content will be dynamically inserted here by JavaScript -->
             </div>
@@ -273,7 +306,7 @@
     </div>
 
     <!-- Offline Indicator -->
-    <div id="offline-indicator" class="offline-indicator hidden">
+    <div id="offline-indicator" class="offline-indicator hidden" role="status" aria-live="polite">
         <span id="offline-text">Offline Mode - Showing cached data</span>
     </div>
 

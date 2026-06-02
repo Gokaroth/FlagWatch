@@ -1,115 +1,75 @@
-# 🏖️ FlagWatch - Bulgarian Black Sea Beach Safety & Cleanliness Monitor
+# FlagWatch
 
-FlagWatch is a real-time beach safety and water cleanliness dashboard for the Bulgarian Black Sea coast. It combines live weather data with scientific satellite measurements to provide a comprehensive overview of swimming conditions, helping locals and tourists make informed decisions for a safe and enjoyable beach day.
+Beach conditions for the Bulgarian Black Sea coast: swim-safety flag, water and air
+temperature, wind, and an algae/water-cleanliness read for 47 beaches between Durankulak and
+Rezovo. It's a small progressive web app, a Leaflet map plus a searchable list and a detail view,
+in English and Bulgarian, with a dark mode.
 
-### ✨ Key Features
+Live at https://flagwatch.gokaroth.com
 
--   **🌊 Real-Time Safety Flags**: Live, color-coded flag status (🟢 Safe, 🟡 Caution, 🔴 Danger) calculated from wave height and wind speed. When live inputs are missing the flag is shown as **⚪ Unknown** — never an assumed "safe".
--   **🔬 Scientific Algae Reports**: Near-real-time water cleanliness based on satellite **Chlorophyll-a** data from the **Copernicus Marine Service**. When no recent satellite value is available for a point, it is honestly marked **Unavailable** rather than guessed.
--   **🌗 Light & Dark Mode**: A user-selectable dark theme with automatic system-preference detection.
--   **🗺️ Interactive Map & List**: A Leaflet map and a searchable, filterable list of 47 beaches. The flag filter applies to **both** the list and the map pins.
--   **🌡️ Detailed Live Data**: Wave height, water & air temperature, wind speed, **wind gusts & direction** (for kite/wind-surfers), and UV index.
--   **🌐 Bilingual Support**: Full EN / BG interface and data.
--   **📱 Progressive Web App (PWA)**: Installable, with offline access to cached data.
+## The one rule: don't invent data
 
-> **Honesty first.** FlagWatch is a safety tool, so it never fabricates data. Missing measurements
-> render as `—`, water cleanliness can be `Unavailable`, and the safety flag is `Unknown` when its
-> inputs are incomplete.
+This is a safety tool, so it never fills in a number it doesn't have. A missing value shows up as
+"—", not a zero. The flag needs both wave height and wind speed; without both it reads "Unknown"
+instead of a reassuring green. Water cleanliness has a real "Unavailable" state, shown in neutral
+grey, which does not mean the water is clean, only that there's no reading. Water temperature is a
+model estimate and says as much.
 
-## 🚀 Live Demo
+If you ever see green, it's because the actual numbers say so.
 
-Visit the live app: **[flagwatch.netlify.app](https://flagwatch.netlify.app)**
+## How it decides
 
-## 🛠️ Technology Stack
+- **Flag** (from Open-Meteo wave height and wind speed): danger above 2 m or 40 km/h, caution
+  above 1.25 m or 25 km/h, otherwise safe, and only when both numbers are known.
+- **Algae** (from Copernicus Marine chlorophyll-a satellite data): roughly clear below 5 mg/m³,
+  moderate up to 20, high above that. About half the beaches come back "unavailable" because the
+  exact shoreline point sits on a masked land pixel.
+- **Water temperature**: the Copernicus Black Sea model when it has a value, otherwise Open-Meteo.
 
--   **Frontend**: Vanilla JavaScript (ES6+), HTML5, CSS3 — no build step.
--   **Mapping**: Leaflet.js with OpenStreetMap tiles.
--   **Backend**: **Netlify Functions** (v2, ESM) + **Netlify Blobs**. A scheduled "collector"
-    function fetches & precomputes all beach data every 2 hours and stores a snapshot in Blobs; an
-    on-demand function serves that snapshot instantly at `/api/beaches`.
--   **Data APIs**:
-    -   **Open-Meteo**: real-time atmospheric & marine weather (keyless).
-    -   **Copernicus Marine Service** (WMTS): satellite Chlorophyll-a (algae) and Black Sea sea-surface temperature.
--   **Styling**: CSS Custom Properties, responsive mobile-first design.
--   **PWA**: Service Worker (offline cache) + Web App Manifest.
--   **Deployment**: Netlify.
+`DATA_SOURCES.md` has the exact products and endpoints.
 
-## 📊 Data Algorithms
+## How it's built
 
-### 1. Beach Safety Algorithm (Flags)
-Calculated from real-time **Open-Meteo** data. The flag requires **both** wave height and wind
-speed; if either is missing it is reported as **⚪ Unknown**, never green.
--   **🔴 Danger** — wave height > **2.0 m** OR wind speed > **40 km/h**
--   **🟡 Caution** — wave height > **1.25 m** OR wind speed > **25 km/h**
--   **🟢 Safe** — both known and below the caution thresholds
+A single Node server (`server.mjs`, no dependencies) serves the static frontend and a small
+read-only JSON API. It rebuilds the dataset every two hours, keeps the latest snapshot and a
+rolling history on disk, and pushes updates to open browsers over Server-Sent Events. The frontend
+is plain JavaScript, HTML and CSS with no build step; the map is Leaflet on CARTO tiles. It runs on
+Fly.io as one always-on machine in Frankfurt, behind a Cloudflare domain. `CLAUDE.md` covers the
+architecture in more detail.
 
-### 2. Water Cleanliness Algorithm (Algae Reports)
-Based on **Chlorophyll-a (CHL)** concentration from the **Copernicus Marine Service**.
--   **High (potential bloom)** — CHL > **20 mg/m³**
--   **Moderate** — CHL between **5 and 20 mg/m³**
--   **Clear** — CHL < **5 mg/m³**
--   **Unavailable** — no recent satellite value for the point (shown neutrally; never implies clean water)
+## Running it
 
-See `DATA_SOURCES.md` for endpoints, product IDs, and transparency notes.
+Needs Node 22 or newer.
 
-## 📁 Project Structure
-
-```
-flagwatch/
-├── index.html              # App shell, DOM, PWA head
-├── app.js                  # Core app logic (BeachSafetyApp), rendering, i18n, map
-├── style.css               # Themes + responsive layout
-├── sw.js                   # Service Worker (offline cache)
-├── manifest.webmanifest    # PWA manifest
-├── icons/                  # PWA icons (192/512 PNG + SVG)
-├── data/
-│   └── beaches.json        # Single source of truth: 47 beaches (metadata)
-├── lib/
-│   ├── copernicus.mjs      # Copernicus Marine WMTS (CHL + SST), honest "unavailable"
-│   └── fetch-beach-data.mjs# Open-Meteo + Copernicus -> merged beach records
-├── netlify/functions/
-│   ├── collect.mjs         # Scheduled (2h) collector -> Netlify Blobs
-│   └── get-beach-data.mjs  # On-demand server at /api/beaches (reads Blobs)
-├── netlify.toml            # Build/publish/redirect config
-├── DATA_SOURCES.md         # Data-source documentation
-├── ROADMAP.md              # Roadmap & status
-└── AI_CONTEXT_MEMO.md      # Technical context memo
-```
-
-## 📦 Local Development
-
-### Prerequisites
--   Node.js 18+ (uses global `fetch`)
-
-### Setup
 ```bash
-git clone https://github.com/Gokaroth/FlagWatch.git
-cd FlagWatch
-npm install
-npx netlify-cli dev      # serves static files + functions + local Blobs at http://localhost:8888
+npm install                      # dev tooling only; the server itself has no runtime deps
+STATE_DIR=./.state npm start     # http://localhost:8080
 ```
-`/api/beaches` works locally — the first request cold-starts a fast build, and the scheduled
-collector (or hitting `/.netlify/functions/collect`) enriches the snapshot with Copernicus data.
 
-> Copernicus access is currently **keyless**, so no credentials are needed. If that ever changes,
-> set `COPERNICUS_USERNAME` / `COPERNICUS_PASSWORD` (or `COPERNICUS_TOKEN`) — see `.env.example`.
+The first request is up in a couple of seconds (weather only). The full satellite build fills in
+shortly after and refreshes every two hours. Copernicus is currently keyless, so there's nothing to
+configure; if that ever changes, set `COPERNICUS_USERNAME` / `COPERNICUS_PASSWORD` (see
+`.env.example`).
 
-## 🤝 Contributing
-1.  Follow the existing code style and conventions.
-2.  Keep features responsive and tested on mobile + desktop.
-3.  **Never fabricate data** — missing values must surface as `—` / `Unknown` / `Unavailable`.
-4.  Update docs (`README.md`, `DATA_SOURCES.md`, etc.) for any changes.
+`npm test` runs a jsdom + axe check covering the honesty rules, keyboard accessibility, and the
+EN/BG string parity.
 
-## 🙏 Acknowledgments
--   **Open-Meteo** — free, high-quality weather & marine API.
--   **Copernicus Marine Service** — public scientific satellite data.
--   **Leaflet.js** & **OpenStreetMap** — mapping.
--   **Netlify** — hosting, functions, and blob storage.
+## Deploying
 
-***
+```bash
+fly deploy
+```
 
-**Made with ❤️ for safer and cleaner beach experiences on the Bulgarian Black Sea coast.**
+First-time setup (app and volume creation, the TLS certificate, the Cloudflare CNAME) is written up
+in `CLAUDE.md`.
 
-## 📞 Support
-- 🐛 [Open an issue](https://github.com/Gokaroth/FlagWatch/issues)
-- 🌐 Live demo: [flagwatch.netlify.app](https://flagwatch.netlify.app)
+## License
+
+MIT. See [LICENSE](LICENSE).
+
+## Credits
+
+Weather from [Open-Meteo](https://open-meteo.com), satellite data from the EU's
+[Copernicus Marine Service](https://marine.copernicus.eu), maps from
+[Leaflet](https://leafletjs.com), [CARTO](https://carto.com) and
+[OpenStreetMap](https://www.openstreetmap.org).
