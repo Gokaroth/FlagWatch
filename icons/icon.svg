@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-label="FlagWatch">
+  <!-- Rounded-square brand background (theme color) -->
+  <rect width="512" height="512" rx="112" ry="112" fill="#0077be"/>
+
+  <!--
+    Brand glyph centered within the maskable safe zone (~center 320x320).
+    A white circular badge holds three blue wave bands (mirrors the original
+    FlagWatch favicon), with a small white flag accent for the "Flag" motif.
+  -->
+  <g transform="translate(256 272)">
+    <!-- White circular badge -->
+    <circle cx="0" cy="0" r="150" fill="#ffffff"/>
+
+    <!-- Three blue wave ribbons clipped to the badge circle -->
+    <clipPath id="badge">
+      <circle cx="0" cy="0" r="150"/>
+    </clipPath>
+    <g clip-path="url(#badge)" fill="none" stroke="#0077be" stroke-width="26" stroke-linecap="round">
+      <path d="M-150 -58 C-100 -98 -50 -18 0 -58 C50 -98 100 -18 150 -58"/>
+      <path d="M-150 8 C-100 -32 -50 48 0 8 C50 -32 100 48 150 8"/>
+      <path d="M-150 74 C-100 34 -50 114 0 74 C50 34 100 114 150 74"/>
+    </g>
+  </g>
+
+  <!-- Small white flag accent (the "Flag" in FlagWatch) -->
+  <g transform="translate(252 92)">
+    <rect x="-5" y="-6" width="10" height="96" rx="5" fill="#ffffff"/>
+    <path d="M5 -4
+             C30 8 54 -16 78 -4
+             L78 40
+             C54 28 30 52 5 40 Z" fill="#ffffff"/>
+  </g>
+</svg>

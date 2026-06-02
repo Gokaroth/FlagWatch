@@ -110,7 +110,7 @@ class BeachSafetyApp {
         this.applyLanguage();
         
         // Load static beach info and then fetch all live data
-        this.loadStaticBeachData();
+        await this.loadStaticBeachData();
         await this.fetchAllData();
         
         // Initialize map after a short delay
@@ -166,59 +166,30 @@ class BeachSafetyApp {
         }
     }
 
-    loadStaticBeachData() {
-        // This method now only loads the static, unchanging data for all beaches.
-        // The live data (conditions, cleanliness) will be fetched separately.
-        this.beaches = [
-            // North Coast
-            { "id": "durankulak_north", "name": "Durankulak North", "name_bg": "Дуранкулак - Север", "coordinates": {"lat": 43.684, "lng": 28.575}, "region": "Dobrich", "type": "wild", "facilities": {"camping": true}, "description": "Pristine wild beach near the Romanian border, next to Durankulak Lake.", "description_bg": "Девствен див плаж до румънската граница, до Дуранкулашкото езеро." },
-            { "id": "krapets", "name": "Krapets", "name_bg": "Крапец", "coordinates": {"lat": 43.633, "lng": 28.570}, "region": "Dobrich", "type": "wild", "facilities": {"camping": true, "restaurants": true}, "description": "Long, quiet sandy beach backed by dunes and fields.", "description_bg": "Дълъг, тих пясъчен плаж, заобиколен от дюни и поля." },
-            { "id": "shabla", "name": "Shabla Lighthouse Beach", "name_bg": "Плаж при фар Шабла", "coordinates": {"lat": 43.545, "lng": 28.599}, "region": "Dobrich", "type": "wild", "facilities": {}, "description": "Rugged, scenic beach near Bulgaria's oldest lighthouse.", "description_bg": "Скалист, живописен плаж до най-стария фар в България." },
-            { "id": "bolata", "name": "Bolata Beach", "name_bg": "Болата", "coordinates": {"lat": 43.433, "lng": 28.467}, "region": "Dobrich", "type": "nature", "facilities": {"nature_reserve": true, "parking": true}, "description": "Horseshoe-shaped bay protected by red cliffs, a former fishing cove.", "description_bg": "Залив във форма на подкова, защитен от червени скали, бивш рибарски пристан." },
-            { "id": "rusalka", "name": "Rusalka", "name_bg": "Русалка", "coordinates": {"lat": 43.411, "lng": 28.508}, "region": "Dobrich", "type": "resort", "facilities": {"resort_complex": true, "scenic": true}, "description": "Rocky coves and small beaches within a holiday resort.", "description_bg": "Скалъпи заливчета и малки плажове в рамките на ваканционен комплекс." },
-            { "id": "kavarna", "name": "Kavarna Central Beach", "name_bg": "Каварна - Централен", "coordinates": {"lat": 43.419, "lng": 28.344}, "region": "Dobrich", "type": "urban", "facilities": {"lifeguards": true, "restaurants": true}, "description": "The main city beach of Kavarna, located in a calm bay.", "description_bg": "Основният градски плаж на Каварна, разположен в спокоен залив." },
-            { "id": "topola", "name": "Topola", "name_bg": "Топола", "coordinates": {"lat": 43.376, "lng": 28.257}, "region": "Dobrich", "type": "resort", "facilities": {"resort_complex": true, "scenic": true}, "description": "Known for its golf courses and therapeutic white mud.", "description_bg": "Известен със своите голф игрища и лечебна бяла кал." },
-            { "id": "balchik_central", "name": "Balchik Central", "name_bg": "Балчик - Централен", "coordinates": {"lat": 43.407, "lng": 28.163}, "region": "Dobrich", "type": "urban", "facilities": {"lifeguards": true, "restaurants": true}, "description": "City beach near the famous Balchik Palace and Botanical Garden.", "description_bg": "Градски плаж до известния Дворец и Ботаническата градина в Балчик." },
-            { "id": "albena", "name": "Albena Beach", "name_bg": "Албена", "coordinates": {"lat": 43.367, "lng": 28.083}, "region": "Dobrich", "type": "resort", "facilities": {"lifeguards": true, "blueflag": true, "family": true, "medical": true}, "description": "Family-friendly resort with mineral springs and a vast sandy beach.", "description_bg": "Семеен курорт с минерални извори и огромен пясъчен плаж." },
-            { "id": "kranevo", "name": "Kranevo", "name_bg": "Кранево", "coordinates": {"lat": 43.340, "lng": 28.066}, "region": "Dobrich", "type": "resort", "facilities": {"lifeguards": true, "restaurants": true}, "description": "A long and wide beach connecting to Albena's beach to the north.", "description_bg": "Дълъг и широк плаж, който се свързва с плажа на Албена на север." },
-            { "id": "golden_sands", "name": "Golden Sands", "name_bg": "Златни пясъци", "coordinates": {"lat": 43.283, "lng": 28.033}, "region": "Varna", "type": "resort", "facilities": {"lifeguards": true, "blueflag": true, "medical": true, "restaurants": true, "hotels": true}, "description": "Major resort with fine golden sand and excellent facilities.", "description_bg": "Голям курорт с фин златен пясък и отлични съоръжения." },
-            { "id": "saints_constantine", "name": "Sts. Constantine & Helena", "name_bg": "Св. Св. Константин и Елена", "coordinates": {"lat": 43.232, "lng": 28.010}, "region": "Varna", "type": "resort", "facilities": {"lifeguards": true, "restaurants": true}, "description": "Bulgaria's oldest seaside resort, known for its spas.", "description_bg": "Най-старият морски курорт в България, известен със своите спа центрове." },
-            { "id": "varna_beach", "name": "Varna Beach", "name_bg": "Варна - Централен", "coordinates": {"lat": 43.205, "lng": 27.916}, "region": "Varna", "type": "urban", "facilities": {"lifeguards": true, "urban": true, "transport": true, "restaurants": true, "shops": true}, "description": "Main city beach accessible by public transport, next to the Sea Garden.", "description_bg": "Основният градски плаж, достъпен с обществен транспорт, до Морската градина." },
-            { "id": "asparuhovo", "name": "Asparuhovo Beach", "name_bg": "Аспарухово", "coordinates": {"lat": 43.181, "lng": 27.915}, "region": "Varna", "type": "urban", "facilities": {"lifeguards": true, "restaurants": true}, "description": "A large beach in a Varna suburb, south of the Asparuhov Bridge.", "description_bg": "Голям плаж в предградие на Варна, южно от Аспаруховия мост." },
-            { "id": "fichoza", "name": "Fichoza", "name_bg": "Фичоза", "coordinates": {"lat": 43.136, "lng": 27.937}, "region": "Varna", "type": "wild", "facilities": {"camping": true}, "description": "A series of small, wild beaches popular with locals and campers.", "description_bg": "Поредица от малки, диви плажове, популярни сред местните и къмпингуващите." },
-            { "id": "kamchia", "name": "Kamchia", "name_bg": "Камчия", "coordinates": {"lat": 43.023, "lng": 27.886}, "region": "Varna", "type": "nature", "facilities": {"lifeguards": true, "nature_reserve": true}, "description": "A vast beach where the Kamchia River meets the sea, part of a UNESCO biosphere reserve.", "description_bg": "Огромен плаж, където река Камчия се влива в морето, част от биосферен резерват на ЮНЕСКО." },
-            { "id": "shkorpilovtsi", "name": "Shkorpilovtsi Beach", "name_bg": "Шкорпиловци", "coordinates": {"lat": 42.966, "lng": 27.889}, "region": "Varna", "type": "wild", "facilities": {"camping": true, "length_km": 13}, "description": "Longest beach in Bulgaria, known for its wild nature and wide sandy strip.", "description_bg": "Най-дългият плаж в България, известен със своята дива природа и широка пясъчна ивица." },
-            { "id": "byala", "name": "Byala Beach", "name_bg": "Бяла", "coordinates": {"lat": 42.875, "lng": 27.888}, "region": "Varna", "type": "urban", "facilities": {"lifeguards": true, "restaurants": true}, "description": "Known for its clean water and the nearby Palaeontological site at the White Cliffs.", "description_bg": "Известен с чистата си вода и близкия палеонтологичен обект при Белите скали." },
-            { "id": "obzor", "name": "Obzor Beach", "name_bg": "Обзор", "coordinates": {"lat": 42.821, "lng": 27.880}, "region": "Burgas", "type": "resort", "facilities": {"lifeguards": true, "restaurants": true}, "description": "A long beach strip located halfway between Varna and Burgas.", "description_bg": "Дълга плажна ивица, разположена по средата между Варна и Бургас." },
-            { "id": "irakli", "name": "Irakli Beach", "name_bg": "Иракли", "coordinates": {"lat": 42.775, "lng": 27.872}, "region": "Burgas", "type": "wild", "facilities": {"nudist_friendly": true, "camping": true}, "description": "Protected area with pristine nature and a river mouth, popular with campers.", "description_bg": "Защитена зона с девствена природа и устие на река, популярна сред къмпингуващите." },
-            { "id": "elenite", "name": "Elenite", "name_bg": "Елените", "coordinates": {"lat": 42.715, "lng": 27.795}, "region": "Burgas", "type": "resort", "facilities": {"lifeguards": true, "resort_complex": true}, "description": "A private-access resort beach at the foot of the Stara Planina mountain.", "description_bg": "Частен курортен плаж в подножието на Стара планина." },
-            { "id": "svetivlas_central", "name": "Sveti Vlas Central", "name_bg": "Свети Влас - Централен", "coordinates": {"lat": 42.709, "lng": 27.760}, "region": "Burgas", "type": "resort", "facilities": {"lifeguards": true, "blueflag": true}, "description": "A clean, well-maintained beach next to the modern Marina Dinevi yacht port.", "description_bg": "Чист, добре поддържан плаж до модерното яхтено пристанище Марина Диневи." },
-            { "id": "sunny_beach", "name": "Sunny Beach", "name_bg": "Слънчев бряг", "coordinates": {"lat": 42.688, "lng": 27.714}, "region": "Burgas", "type": "resort", "facilities": {"lifeguards": true, "blueflag": true, "nightlife": true, "restaurants": true, "hotels": true}, "description": "Largest and most famous beach resort with vibrant nightlife.", "description_bg": "Най-големият и известен плажен курорт с оживен нощен живот." },
-            { "id": "nessebar_south", "name": "Nessebar South", "name_bg": "Несебър - Южен", "coordinates": {"lat": 42.653, "lng": 27.721}, "region": "Burgas", "type": "urban", "facilities": {"lifeguards": true, "restaurants": true}, "description": "The main beach of the new town of Nessebar, offering views to the old town.", "description_bg": "Основният плаж на новия град на Несебър, с гледка към стария град." },
-            { "id": "pomorie", "name": "Pomorie East", "name_bg": "Поморие - Източен", "coordinates": {"lat": 42.564, "lng": 27.636}, "region": "Burgas", "type": "urban", "facilities": {"lifeguards": true, "restaurants": true}, "description": "Famous for its dark, iron-rich sand and the nearby Pomorie salt lake.", "description_bg": "Известен с тъмния си, богат на желязо пясък и близкото Поморийско езеро." },
-            { "id": "burgas_north", "name": "Burgas North", "name_bg": "Бургас - Северен", "coordinates": {"lat": 42.508, "lng": 27.481}, "region": "Burgas", "type": "urban", "facilities": {"lifeguards": true, "sea_garden": true}, "description": "The main city beach next to the famous Sea Garden.", "description_bg": "Основният градски плаж до известната Морска градина." },
-            { "id": "kraymorie", "name": "Kraymorie", "name_bg": "Крайморие", "coordinates": {"lat": 42.441, "lng": 27.514}, "region": "Burgas", "type": "urban", "facilities": {"lifeguards": true, "restaurants": true}, "description": "A small beach in a Burgas suburb, popular with local families.", "description_bg": "Малък плаж в предградие на Бургас, популярен сред местните семейства." },
-            { "id": "chernomorets", "name": "Chernomorets Central", "name_bg": "Черноморец - Централен", "coordinates": {"lat": 42.446, "lng": 27.641}, "region": "Burgas", "type": "urban", "facilities": {"lifeguards": true}, "description": "The main beach of the town of Chernomorets.", "description_bg": "Основният плаж на град Черноморец." },
-            { "id": "gradina", "name": "Gradina Camping", "name_bg": "Къмпинг Градина", "coordinates": {"lat": 42.417, "lng": 27.671}, "region": "Burgas", "type": "wild", "facilities": {"lifeguards": true, "camping": true, "water_sports": true}, "description": "Famous camping beach, popular for kitesurfing and windsurfing.", "description_bg": "Известен къмпинг плаж, популярен за кайтсърф и уиндсърф." },
-            { "id": "sozopol_harmanite", "name": "Sozopol - Harmanite", "name_bg": "Созопол - Харманите", "coordinates": {"lat": 42.413, "lng": 27.695}, "region": "Burgas", "type": "urban", "facilities": {"lifeguards": true, "blueflag": true, "restaurants": true}, "description": "Popular beach in the new town of Sozopol.", "description_bg": "Популярен плаж в новия град на Созопол." },
-            { "id": "kavatsite", "name": "Kavatsite", "name_bg": "Каваците", "coordinates": {"lat": 42.390, "lng": 27.705}, "region": "Burgas", "type": "wild", "facilities": {"lifeguards": true, "camping": true}, "description": "A long sandy beach south of Sozopol, bordered by a forest.", "description_bg": "Дълъг пясъчен плаж южно от Созопол, граничещ с гора." },
-            { "id": "dyuni", "name": "Dyuni Beach", "name_bg": "Дюни", "coordinates": {"lat": 42.365, "lng": 27.714}, "region": "Burgas", "type": "resort", "facilities": {"lifeguards": true, "resort_complex": true, "water_sports": true}, "description": "Long sandy beach part of a holiday resort complex.", "description_bg": "Дълъг пясъчен плаж, част от курортен комплекс." },
-            { "id": "arkutino", "name": "Arkutino", "name_bg": "Аркутино", "coordinates": {"lat": 42.338, "lng": 27.739}, "region": "Burgas", "type": "nature", "facilities": {"nature_reserve": true}, "description": "Pristine beach known for its sand lilies, part of the Ropotamo Reserve.", "description_bg": "Девствен плаж, известен със своите пясъчни лилии, част от резерват Ропотамо." },
-            { "id": "primorsko_north", "name": "Primorsko North", "name_bg": "Приморско - Северен", "coordinates": {"lat": 42.275, "lng": 27.755}, "region": "Burgas", "type": "resort", "facilities": {"lifeguards": true, "blueflag": true, "dunes": true, "restaurants": true}, "description": "Wide beach with impressive sand dunes, separated from the town by a river.", "description_bg": "Широк плаж с впечатляващи пясъчни дюни, отделен от града с река." },
-            { "id": "perla", "name": "Perla Beach", "name_bg": "Перла", "coordinates": {"lat": 42.290, "lng": 27.750}, "region": "Burgas", "type": "wild", "facilities": {"scenic": true}, "description": "A quiet beach located near the former residence of Todor Zhivkov.", "description_bg": "Тих плаж, разположен до бившата резиденция на Тодор Живков." },
-            { "id": "kiten_atliman", "name": "Kiten - Atliman", "name_bg": "Китен - Атлиман", "coordinates": {"lat": 42.245, "lng": 27.772}, "region": "Burgas", "type": "resort", "facilities": {"lifeguards": true, "bay": true, "family": true}, "description": "Calm bay beach, very suitable for families with children.", "description_bg": "Спокоен заливен плаж, много подходящ за семейства с деца." },
-            { "id": "lozenets", "name": "Lozenets Beach", "name_bg": "Лозенец", "coordinates": {"lat": 42.210, "lng": 27.808}, "region": "Burgas", "type": "resort", "facilities": {"lifeguards": true, "surfing": true, "restaurants": true}, "description": "Popular with young people and water sports enthusiasts.", "description_bg": "Популярен сред младите хора и любителите на водни спортове." },
-            { "id": "korala", "name": "Oasis/Korala", "name_bg": "Оазис/Корал", "coordinates": {"lat": 42.200, "lng": 27.820}, "region": "Burgas", "type": "wild", "facilities": {"camping": true}, "description": "One of the last remaining truly wild beaches, a favorite for campers.", "description_bg": "Един от последните останали истински диви плажове, любим на къмпингуващите." },
-            { "id": "tsarevo_central", "name": "Tsarevo Central", "name_bg": "Царево - Централен", "coordinates": {"lat": 42.170, "lng": 27.854}, "region": "Burgas", "type": "urban", "facilities": {"lifeguards": true}, "description": "The small central beach of the town of Tsarevo.", "description_bg": "Малкият централен плаж на град Царево." },
-            { "id": "nestinarka", "name": "Nestinarka", "name_bg": "Нестинарка", "coordinates": {"lat": 42.160, "lng": 27.868}, "region": "Burgas", "type": "resort", "facilities": {"lifeguards": true, "camping": true}, "description": "A large camping beach just south of Tsarevo.", "description_bg": "Голям къмпинг плаж, южно от Царево." },
-            { "id": "varvara", "name": "Varvara", "name_bg": "Варвара", "coordinates": {"lat": 42.121, "lng": 27.909}, "region": "Burgas", "type": "wild", "facilities": {"scenic": true}, "description": "A small, picturesque beach nestled among rocks, popular for diving.", "description_bg": "Малък, живописен плаж, сгушен сред скали, популярен за гмуркане." },
-            { "id": "ahtopol", "name": "Ahtopol", "name_bg": "Ахтопол", "coordinates": {"lat": 42.095, "lng": 27.935}, "region": "Burgas", "type": "urban", "facilities": {"lifeguards": true}, "description": "The main beach of the southernmost town on the coast.", "description_bg": "Основният плаж на най-южния град по крайбрежието." },
-            { "id": "sinemorets_veleka", "name": "Sinemorets Veleka Beach", "name_bg": "Синеморец - Велека", "coordinates": {"lat": 42.067, "lng": 27.973}, "region": "Burgas", "type": "nature", "facilities": {"river_mouth": true, "scenic": true}, "description": "Stunning beach where the Veleka River meets the sea, creating a sandbar.", "description_bg": "Зашеметяващ плаж, където река Велека се влива в морето, образувайки пясъчна коса." },
-            { "id": "sinemorets_butamyata", "name": "Sinemorets Butamyata", "name_bg": "Синеморец - Бутамята", "coordinates": {"lat": 42.057, "lng": 27.981}, "region": "Burgas", "type": "resort", "facilities": {"lifeguards": true}, "description": "The main, southern beach of Sinemorets, located in a calm bay.", "description_bg": "Основният, южен плаж на Синеморец, разположен в спокоен залив." },
-            { "id": "lipite", "name": "Lipite", "name_bg": "Липите", "coordinates": {"lat": 42.049, "lng": 27.992}, "region": "Burgas", "type": "wild", "facilities": {"nudist_friendly": true}, "description": "A secluded wild beach accessible by a walk from Sinemorets.", "description_bg": "Уединен див плаж, достъпен пеша от Синеморец." },
-            { "id": "silistar", "name": "Silistar Beach", "name_bg": "Силистар", "coordinates": {"lat": 42.019, "lng": 28.006}, "region": "Burgas", "type": "nature", "facilities": {"protected_area": true, "camping": true}, "description": "One of the most beautiful southern beaches, located in a protected area.", "description_bg": "Един от най-красивите южни плажове, разположен в защитена местност." },
-            { "id": "rezovo", "name": "Rezovo Beach", "name_bg": "Резово", "coordinates": {"lat": 41.985, "lng": 28.026}, "region": "Burgas", "type": "wild", "facilities": {}, "description": "The southernmost beach in Bulgaria, right at the border with Turkey.", "description_bg": "Най-южният плаж в България, точно на границата с Турция." }
-        ];
+    async loadStaticBeachData() {
+        // Loads the static, unchanging metadata for all beaches from /data/beaches.json.
+        // This gives an instant render before the live data (conditions, cleanliness) is fetched.
+        try {
+            const response = await fetch('/data/beaches.json');
+            if (!response.ok) {
+                throw new Error(`Static beach data returned status ${response.status}`);
+            }
+            this.beaches = await response.json();
+        } catch (error) {
+            console.error('Error loading static beach data:', error);
+            // Fall back to a previous live-data cache if present so the app can still render something.
+            const cachedData = localStorage.getItem('beach-app-data');
+            if (cachedData) {
+                try {
+                    this.beaches = JSON.parse(cachedData).beaches || [];
+                    console.log('Static data fetch failed. Using cached beach data.');
+                } catch (e) {
+                    this.beaches = [];
+                }
+            } else {
+                this.beaches = [];
+            }
+        }
     }
     
     async fetchAllData() {
@@ -230,51 +201,82 @@ class BeachSafetyApp {
             if (new Date() - new Date(parsedData.timestamp) < 30 * 60 * 1000) {
                 this.beaches = parsedData.beaches;
                 console.log("Using fresh cached data.");
+                this.hideDataError();
                 return;
             }
         }
 
         if (this.isOffline) {
             console.log("Offline mode, using cached beach data if available.");
-            if (cachedData) this.beaches = JSON.parse(cachedData).beaches;
+            if (cachedData) {
+                this.beaches = JSON.parse(cachedData).beaches;
+                this.hideDataError();
+            } else {
+                this.showDataError();
+            }
             return;
         }
 
         try {
-            console.log("Fetching all live data from backend function...");
-            // The body of the request will be our static beach data.
-            const response = await fetch('/.netlify/functions/get-beach-data', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(this.beaches),
-            });
+            console.log("Fetching all live data from /api/beaches...");
+            // GET the merged static + live records as a JSON array (no request body).
+            const response = await fetch('/api/beaches');
 
             if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.error || `Backend function returned status ${response.status}`);
+                throw new Error(`Live data endpoint returned status ${response.status}`);
             }
 
             const liveBeachData = await response.json();
-            
+
             this.beaches = liveBeachData;
             localStorage.setItem('beach-app-data', JSON.stringify({
                 timestamp: new Date().toISOString(),
                 beaches: this.beaches
             }));
-            
+            this.hideDataError();
+
         } catch (error) {
-            console.error('Error fetching data from backend function:', error);
-            // Fallback to cached data if it exists, otherwise the app will show an error state.
+            console.error('Error fetching live data from /api/beaches:', error);
+            // Fallback to cached data if it exists, otherwise reveal the data-error banner.
             if (cachedData) {
                 this.beaches = JSON.parse(cachedData).beaches;
-                console.log("Backend fetch failed. Using stale cached data.");
+                console.log("Live fetch failed. Using stale cached data.");
+                this.hideDataError();
             } else {
-                console.error("No cached data available and backend fetch failed.");
-                // Optionally, show an error message to the user.
+                console.error("No cached data available and live fetch failed.");
+                this.showDataError();
             }
         }
+    }
+
+    showDataError() {
+        const banner = document.getElementById('data-error');
+        const textEl = document.getElementById('data-error-text');
+        if (textEl) textEl.textContent = this.translations[this.currentLanguage].dataError;
+        if (banner) banner.classList.remove('hidden');
+    }
+
+    hideDataError() {
+        const banner = document.getElementById('data-error');
+        if (banner) banner.classList.add('hidden');
+    }
+
+    // Null-safe formatter: returns '—' for null/undefined/NaN, else the number formatted with the unit.
+    fmt(v, unit = '', digits = 1) {
+        if (v === null || v === undefined || (typeof v === 'number' && Number.isNaN(v))) {
+            return '—';
+        }
+        const num = Number(v);
+        if (Number.isNaN(num)) return '—';
+        return `${num.toFixed(digits)}${unit}`;
+    }
+
+    // Convert a wind direction in degrees to a 16-point compass cardinal.
+    degToCardinal(deg) {
+        if (deg === null || deg === undefined || Number.isNaN(Number(deg))) return null;
+        const dirs = ['N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE', 'S', 'SSW', 'SW', 'WSW', 'W', 'WNW', 'NW', 'NNW'];
+        const idx = Math.round((Number(deg) % 360) / 22.5) % 16;
+        return dirs[idx];
     }
 
     setupEventListeners() {
@@ -357,12 +359,20 @@ class BeachSafetyApp {
 
         this.beaches.forEach(beach => {
             if (!beach.conditions) return; // Don't render markers if live data isn't available
-            const flagEmoji = beach.conditions.flag === 'red' ? '🔴' : beach.conditions.flag === 'yellow' ? '🟡' : '🟢';
-            const cleanlinessStatus = beach.cleanliness?.status || 'clear';
+            const flag = beach.conditions.flag;
+
+            // Respect the current filter. A specific colour filter only matches that flag;
+            // a null flag (unknown) is shown only under 'all'.
+            if (this.currentFilter !== 'all' && flag !== this.currentFilter) return;
+
+            const flagEmoji = flag === 'red' ? '🔴' : flag === 'yellow' ? '🟡' : flag === 'green' ? '🟢' : '⚪';
+            const flagClass = flag || 'unknown';
+            // Map cleanliness status to a dot class; 'unavailable' (or missing) renders neutral/grey.
+            const cleanlinessStatus = beach.cleanliness?.status || 'unavailable';
 
             const markerIcon = L.divIcon({
-                className: 'custom-marker-icon',
-                html: `<div class="flag-emoji">${flagEmoji}</div><div class="cleanliness-dot ${cleanlinessStatus}"></div>`,
+                className: `custom-marker-icon ${flagClass}`,
+                html: `<div class="flag-emoji ${flagClass}">${flagEmoji}</div><div class="cleanliness-dot ${cleanlinessStatus}"></div>`,
                 iconSize: [30, 42],
                 iconAnchor: [15, 42]
             });
@@ -370,7 +380,7 @@ class BeachSafetyApp {
             const marker = L.marker([beach.coordinates.lat, beach.coordinates.lng], { icon: markerIcon })
                 .addTo(this.map)
                 .on('click', () => this.openBeachDetailModal(beach.id));
-            
+
             this.markers.push(marker);
         });
     }
@@ -408,7 +418,8 @@ class BeachSafetyApp {
             beachItem.dataset.beachId = beach.id;
             beachItem.addEventListener('click', () => this.openBeachDetailModal(beach.id));
 
-            const flagEmoji = beach.conditions.flag === 'red' ? '🔴' : beach.conditions.flag === 'yellow' ? '🟡' : '🟢';
+            const flag = beach.conditions.flag;
+            const flagEmoji = flag === 'red' ? '🔴' : flag === 'yellow' ? '🟡' : flag === 'green' ? '🟢' : '⚪';
             const name = this.currentLanguage === 'bg' ? beach.name_bg : beach.name;
             const nameSecondary = this.currentLanguage === 'bg' ? beach.name : beach.name_bg;
 
@@ -441,7 +452,7 @@ class BeachSafetyApp {
     getFacilityIcons(facilities) {
         if (!facilities) return '<span>-</span>';
         let icons = '';
-        if (facilities.lifeguards) icons += '<span class="facility-icon" title="Lifeguards"> lifeguard </span>';
+        if (facilities.lifeguards) icons += '<span class="facility-icon" title="Lifeguards">🛟</span>';
         if (facilities.restaurants) icons += '<span class="facility-icon" title="Restaurants">🍽️</span>';
         if (facilities.blueflag) icons += '<span class="facility-icon" title="Blue Flag">🌊</span>';
         if (facilities.family) icons += '<span class="facility-icon" title="Family Friendly">👨‍👩‍👧‍👦</span>';
@@ -461,37 +472,68 @@ class BeachSafetyApp {
         const beach = this.currentBeach;
         const lang = this.currentLanguage;
         
+        const c = beach.conditions || {};
+        const cleanliness = beach.cleanliness || {};
+
         const name = lang === 'bg' ? beach.name_bg : beach.name;
         document.getElementById('beach-modal-title').textContent = name;
-        
-        const flagText = this.translations[lang].flags[beach.conditions.flag];
+
+        // Flag — null flag means UNKNOWN (neutral), never green.
+        const flagKey = c.flag || 'unknown';
+        const flagText = this.translations[lang].flags[flagKey];
         const flagIndicator = document.getElementById('beach-flag');
         flagIndicator.textContent = `${this.translations[lang].flagStatus}: ${flagText}`;
-        flagIndicator.className = `flag-indicator ${beach.conditions.flag}`;
-        
-        // Conditions
-        document.getElementById('wind-value').textContent = `${beach.conditions.windSpeed} km/h`;
-        document.getElementById('waves-value').textContent = `${beach.conditions.waveHeight} m`;
-        document.getElementById('water-temp-value').textContent = `${beach.conditions.waterTemp}°C`;
-        document.getElementById('air-temp-value').textContent = `${beach.conditions.airTemp}°C`;
-        document.getElementById('uv-index-value').textContent = `${beach.conditions.uvIndex}`;
-        
-        // Cleanliness
-        const cleanlinessStatusEl = document.getElementById('cleanliness-status');
-        cleanlinessStatusEl.textContent = this.translations[lang].algaeStatus[beach.cleanliness.status];
-        cleanlinessStatusEl.className = `cleanliness-status ${beach.cleanliness.status}`;
-        document.getElementById('cleanliness-report').textContent = lang === 'bg' ? beach.cleanliness.report_bg : beach.cleanliness.report_en;
+        flagIndicator.className = `flag-indicator ${flagKey}`;
 
-        // Safety message
-        document.getElementById('safety-message').textContent = this.translations[lang].safetyMessages[beach.conditions.flag];
+        // Conditions — backend returns NUMBERS or null; render null-safely.
+        document.getElementById('wind-value').textContent = this.fmt(c.windSpeed, ' km/h', 0);
+        document.getElementById('waves-value').textContent = this.fmt(c.waveHeight, ' m', 2);
+        document.getElementById('water-temp-value').textContent = this.fmt(c.waterTemp, '°C', 1);
+        document.getElementById('air-temp-value').textContent = this.fmt(c.airTemp, '°C', 1);
+        document.getElementById('uv-index-value').textContent = this.fmt(c.uvIndex, '', 1);
+
+        // Wind gusts (km/h) and wind direction (degrees, with compass cardinal when available).
+        const gustEl = document.getElementById('wind-gust-value');
+        if (gustEl) gustEl.textContent = this.fmt(c.windGust, ' km/h', 0);
+
+        const dirEl = document.getElementById('wind-direction-value');
+        if (dirEl) {
+            if (c.windDirection === null || c.windDirection === undefined || Number.isNaN(Number(c.windDirection))) {
+                dirEl.textContent = '—';
+            } else {
+                const cardinal = this.degToCardinal(c.windDirection);
+                dirEl.textContent = cardinal
+                    ? `${this.fmt(c.windDirection, '°', 0)} (${cardinal})`
+                    : this.fmt(c.windDirection, '°', 0);
+            }
+        }
+
+        // Water temp disclaimer note.
+        const disclaimerEl = document.getElementById('water-temp-disclaimer');
+        if (disclaimerEl) disclaimerEl.textContent = this.translations[lang].waterTempDisclaimer;
+
+        // Cleanliness — 'unavailable' renders neutral and never implies clean water.
+        const cleanlinessStatus = cleanliness.status || 'unavailable';
+        const cleanlinessStatusEl = document.getElementById('cleanliness-status');
+        cleanlinessStatusEl.textContent = this.translations[lang].algaeStatus[cleanlinessStatus] || this.translations[lang].algaeStatus.unavailable;
+        cleanlinessStatusEl.className = `cleanliness-status ${cleanlinessStatus}`;
+        document.getElementById('cleanliness-report').textContent = (lang === 'bg' ? cleanliness.report_bg : cleanliness.report_en) || this.translations[lang].algaeStatus.unavailable;
+
+        // Safety message.
+        document.getElementById('safety-message').textContent = this.translations[lang].safetyMessages[flagKey];
 
         // Facilities
         const facilitiesEl = document.getElementById('beach-facilities');
         facilitiesEl.innerHTML = `<h4>${this.translations[lang].facilities}</h4><div class="facilities-list">${Object.keys(beach.facilities || {}).filter(f => beach.facilities[f]).map(f => `<span class="facility-tag">${this.translations[lang].facilityNames[f] || f}</span>`).join('')}</div>`;
 
-        // Last updated
-        const lastUpdatedDate = new Date(beach.conditions.lastUpdated);
-        document.getElementById('last-updated').textContent = `${this.translations[lang].lastUpdated}: ${lastUpdatedDate.toLocaleTimeString()}`;
+        // Last updated — always surface so stale data is visible.
+        const lastUpdatedEl = document.getElementById('last-updated');
+        if (c.lastUpdated) {
+            const lastUpdatedDate = new Date(c.lastUpdated);
+            lastUpdatedEl.textContent = `${this.translations[lang].lastUpdated}: ${lastUpdatedDate.toLocaleString()}`;
+        } else {
+            lastUpdatedEl.textContent = `${this.translations[lang].lastUpdated}: —`;
+        }
     }
 
     setView(view) {
@@ -634,7 +676,7 @@ class BeachSafetyApp {
         if (navigator.share && this.currentBeach) {
             const beach = this.currentBeach;
             const name = this.currentLanguage === 'bg' ? beach.name_bg : beach.name;
-            const flagStatus = this.translations[this.currentLanguage].flags[beach.conditions.flag];
+            const flagStatus = this.translations[this.currentLanguage].flags[beach.conditions.flag || 'unknown'];
             const text = `Checking out ${name}! Current status is ${flagStatus}. #FlagWatch`;
             
             navigator.share({
@@ -714,6 +756,12 @@ class BeachSafetyApp {
         document.getElementById('search-input').placeholder = translations.searchPlaceholder;
         document.getElementById('search-input-desktop').placeholder = translations.searchPlaceholder;
 
+        // Explicit wiring for elements whose ids don't match their i18n keys.
+        const disclaimerEl = document.getElementById('water-temp-disclaimer');
+        if (disclaimerEl) disclaimerEl.textContent = translations.waterTempDisclaimer;
+        const dataErrorTextEl = document.getElementById('data-error-text');
+        if (dataErrorTextEl) dataErrorTextEl.textContent = translations.dataError;
+
         // Update language toggle button text
         document.getElementById('language-toggle').textContent = lang === 'en' ? 'BG' : 'EN';
         document.getElementById('language-toggle-desktop').textContent = lang === 'en' ? 'BG' : 'EN';
@@ -730,6 +778,8 @@ class BeachSafetyApp {
             "water-temp-label": "Water Temp",
             "air-temp-label": "Air Temp",
             "uv-index-label": "UV Index",
+            "wind-gust-label": "Wind Gusts",
+            "wind-direction-label": "Wind Direction",
             "cleanliness-title": "Algae Report",
             "share-location-text": "Share",
             "settings-modal-title": "Settings",
@@ -743,6 +793,7 @@ class BeachSafetyApp {
             "legend-clear": "Clear: Low Chlorophyll",
             "legend-moderate": "Moderate: Potential algae bloom",
             "legend-high": "High: Widespread algae bloom",
+            "legend-unavailable": "Unavailable: No recent satellite data",
             "safety-tips-title": "Safety Tips",
             "whats-new-modal-title": "What's New!",
             "offline-text": "Offline Mode - Showing cached data",
@@ -753,20 +804,25 @@ class BeachSafetyApp {
             "noResults": "No beaches match your criteria.",
             "locationNotEnabled": "Location permission is not enabled. Please enable it in your browser settings to use this feature.",
             "sharingNotSupported": "Web Share API is not supported in your browser.",
+            "waterTempDisclaimer": "Water temp is a modeled estimate; shoreline may differ by 2–4°C.",
+            "dataError": "Couldn't load live conditions. Check your connection and try again.",
             flags: {
                 green: "🟢 Safe",
                 yellow: "🟡 Caution",
-                red: "🔴 Danger"
+                red: "🔴 Danger",
+                unknown: "⚪ Unknown"
             },
             safetyMessages: {
                 green: "Enjoy the water, conditions are safe for swimming.",
                 yellow: "Be cautious when swimming. Conditions are moderate.",
-                red: "Swimming is prohibited. Conditions are dangerous."
+                red: "Swimming is prohibited. Conditions are dangerous.",
+                unknown: "Live safety data is unavailable right now."
             },
             algaeStatus: {
                 clear: "Clear",
                 moderate: "Moderate",
-                high: "High"
+                high: "High",
+                unavailable: "Unavailable"
             },
             facilityNames: {
                 lifeguards: "Lifeguards", blueflag: "Blue Flag", medical: "Medical", restaurants: "Restaurants", hotels: "Hotels", family: "Family Friendly", urban: "Urban", transport: "Public Transport", shops: "Shops", nature_reserve: "Nature Reserve", parking: "Parking", camping: "Camping", length_km: "Long Beach", nudist_friendly: "Nudist Friendly", nightlife: "Nightlife", sea_garden: "Sea Garden", water_sports: "Water Sports", dunes: "Dunes", bay: "Bay", surfing: "Surfing", river_mouth: "River Mouth", scenic: "Scenic View", protected_area: "Protected Area", resort_complex: "Resort Complex"
@@ -782,6 +838,8 @@ class BeachSafetyApp {
             "water-temp-label": "Темп. вода",
             "air-temp-label": "Темп. въздух",
             "uv-index-label": "UV индекс",
+            "wind-gust-label": "Пориви на вятъра",
+            "wind-direction-label": "Посока на вятъра",
             "cleanliness-title": "Доклад за водорасли",
             "share-location-text": "Сподели",
             "settings-modal-title": "Настройки",
@@ -795,6 +853,7 @@ class BeachSafetyApp {
             "legend-clear": "Чисто: Ниска концентрация на хлорофил",
             "legend-moderate": "Умерено: Възможен цъфтеж на водорасли",
             "legend-high": "Високо: Масов цъфтеж на водорасли",
+            "legend-unavailable": "Недостъпно: Няма скорошни сателитни данни",
             "safety-tips-title": "Съвети за безопасност",
             "whats-new-modal-title": "Какво ново!",
             "offline-text": "Офлайн режим - Показват се кеширани данни",
@@ -805,20 +864,25 @@ class BeachSafetyApp {
             "noResults": "Няма плажове, отговарящи на вашите критерии.",
             "locationNotEnabled": "Разрешението за местоположение не е активирано. Моля, активирайте го в настройките на браузъра си, за да използвате тази функция.",
             "sharingNotSupported": "API за споделяне в мрежата не се поддържа от вашия браузър.",
+            "waterTempDisclaimer": "Температурата на водата е моделирана оценка; на брега може да се различава с 2–4°C.",
+            "dataError": "Неуспешно зареждане на актуалните условия. Проверете връзката си и опитайте отново.",
             flags: {
                 green: "🟢 Безопасно",
                 yellow: "🟡 Внимание",
-                red: "🔴 Опасно"
+                red: "🔴 Опасно",
+                unknown: "⚪ Неизвестно"
             },
             safetyMessages: {
                 green: "Наслаждавайте се на водата, условията са безопасни за плуване.",
                 yellow: "Бъдете внимателни при плуване. Условията са умерени.",
-                red: "Плуването е забранено. Условията са опасни."
+                red: "Плуването е забранено. Условията са опасни.",
+                unknown: "Данните за безопасност в момента са недостъпни."
             },
             algaeStatus: {
                 clear: "Чисто",
                 moderate: "Умерено",
-                high: "Високо"
+                high: "Високо",
+                unavailable: "Недостъпно"
             },
             facilityNames: {
                 lifeguards: "Спасители", blueflag: "Син флаг", medical: "Медицински пункт", restaurants: "Ресторанти", hotels: "Хотели", family: "Подходящ за семейства", urban: "Градски", transport: "Обществен транспорт", shops: "Магазини", nature_reserve: "Природен резерват", parking: "Паркинг", camping: "Къмпинг", length_km: "Дълга ивица", nudist_friendly: "Нудистки", nightlife: "Нощен живот", sea_garden: "Морска градина", water_sports: "Водни спортове", dunes: "Дюни", bay: "Залив", surfing: "Сърф", river_mouth: "Устие на река", scenic: "Живописна гледка", protected_area: "Защитена местност", resort_complex: "Курортен комплекс"
