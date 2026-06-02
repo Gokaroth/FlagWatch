@@ -244,15 +244,6 @@ body.dark-mode .form-control:focus { box-shadow: 0 0 0 0.2rem rgba(77, 171, 247,
 .cleanliness-dot.moderate { background-color: var(--color-warning); }
 .cleanliness-dot.high { background-color: var(--color-danger); }
 
-.beach-popup h3 { margin: 0 0 5px; }
-.beach-popup .flag-status { font-weight: bold; margin-bottom: 5px; }
-.beach-popup .cleanliness-status-popup { font-size: 0.9em; margin-bottom: 10px; }
-.beach-popup .cleanliness-status-popup.clear { color: var(--color-info); }
-.beach-popup .cleanliness-status-popup.moderate { color: var(--color-warning); }
-.beach-popup .cleanliness-status-popup.high { color: var(--color-danger); }
-body.dark-mode .leaflet-popup-content-wrapper, body.dark-mode .leaflet-popup-tip { background: var(--color-surface); color: var(--color-text); }
-
-
 .user-location-marker { font-size: 20px; }
 
 /* Offline Indicator */
@@ -312,8 +303,6 @@ input:checked + .slider:before { transform: translateX(24px); }
    Mirrors .cleanliness-dot.clear/moderate/high and .cleanliness-status.clear/moderate/high */
 .cleanliness-dot.unavailable { background-color: var(--color-gray-500); }
 .cleanliness-status.unavailable { color: var(--color-text-light); }
-/* Map popup cleanliness, mirroring .beach-popup .cleanliness-status-popup.* */
-.beach-popup .cleanliness-status-popup.unavailable { color: var(--color-text-light); }
 
 /* Grey legend swatch for the "unavailable" algae legend row.
    Sized/spaced to align with the existing .flag-icon emoji-based legend markers. */
@@ -326,6 +315,9 @@ input:checked + .slider:before { transform: translateX(24px); }
   flex-shrink: 0;
   border: 1px solid var(--color-border);
 }
+.legend-swatch.clear { background-color: var(--color-info); }
+.legend-swatch.moderate { background-color: var(--color-warning); }
+.legend-swatch.high { background-color: var(--color-danger); }
 .legend-swatch.unavailable { background-color: var(--color-gray-500); }
 
 /* Water-temp disclaimer / general data-disclaimer helper text under the conditions grid:
