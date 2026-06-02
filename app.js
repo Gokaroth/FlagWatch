@@ -177,40 +177,46 @@ class BeachSafetyApp {
             this.beaches = await response.json();
         } catch (error) {
             console.error('Error loading static beach data:', error);
-            // Fall back to a previous live-data cache if present so the app can still render something.
-            const cachedData = localStorage.getItem('beach-app-data');
-            if (cachedData) {
-                try {
-                    this.beaches = JSON.parse(cachedData).beaches || [];
-                    console.log('Static data fetch failed. Using cached beach data.');
-                } catch (e) {
-                    this.beaches = [];
-                }
-            } else {
-                this.beaches = [];
-            }
+            // Fall back to a previous (validated) live-data cache so the app can still render something.
+            const cached = this.readValidCache();
+            this.beaches = cached ? cached.beaches : [];
+            if (cached) console.log('Static data fetch failed. Using cached beach data.');
         }
     }
     
-    async fetchAllData() {
-        // Caching logic
-        const cachedData = localStorage.getItem('beach-app-data');
-        if (cachedData) {
-            const parsedData = JSON.parse(cachedData);
-            // Use cache if it's less than 30 mins old
-            if (new Date() - new Date(parsedData.timestamp) < 30 * 60 * 1000) {
-                this.beaches = parsedData.beaches;
-                console.log("Using fresh cached data.");
-                this.hideDataError();
-                return;
+    // Read and validate the cached snapshot. Returns { timestamp, beaches } or null.
+    // A corrupt entry is dropped so one bad write can never brick the app on load.
+    readValidCache() {
+        const raw = localStorage.getItem('beach-app-data');
+        if (!raw) return null;
+        try {
+            const parsed = JSON.parse(raw);
+            if (parsed && Array.isArray(parsed.beaches) && parsed.beaches.length) {
+                return parsed;
             }
+        } catch (e) {
+            console.warn('Discarding corrupt cached beach data:', e);
+            localStorage.removeItem('beach-app-data');
+        }
+        return null;
+    }
+
+    async fetchAllData() {
+        const cached = this.readValidCache();
+
+        // Use cache if it's less than 30 mins old.
+        if (cached && (new Date() - new Date(cached.timestamp) < 30 * 60 * 1000)) {
+            this.beaches = cached.beaches;
+            console.log("Using fresh cached data.");
+            this.hideDataError();
+            return;
         }
 
         if (this.isOffline) {
             console.log("Offline mode, using cached beach data if available.");
-            if (cachedData) {
-                this.beaches = JSON.parse(cachedData).beaches;
-                this.hideDataError();
+            if (cached) {
+                this.beaches = cached.beaches;
+                this.showStaleNotice(cached.timestamp);
             } else {
                 this.showDataError();
             }
@@ -227,6 +233,9 @@ class BeachSafetyApp {
             }
 
             const liveBeachData = await response.json();
+            if (!Array.isArray(liveBeachData) || !liveBeachData.length) {
+                throw new Error('Live data was not a usable array');
+            }
 
             this.beaches = liveBeachData;
             localStorage.setItem('beach-app-data', JSON.stringify({
@@ -237,11 +246,11 @@ class BeachSafetyApp {
 
         } catch (error) {
             console.error('Error fetching live data from /api/beaches:', error);
-            // Fallback to cached data if it exists, otherwise reveal the data-error banner.
-            if (cachedData) {
-                this.beaches = JSON.parse(cachedData).beaches;
+            // Fall back to cached data if valid; surface that it is stale (not live).
+            if (cached) {
+                this.beaches = cached.beaches;
                 console.log("Live fetch failed. Using stale cached data.");
-                this.hideDataError();
+                this.showStaleNotice(cached.timestamp);
             } else {
                 console.error("No cached data available and live fetch failed.");
                 this.showDataError();
@@ -253,6 +262,18 @@ class BeachSafetyApp {
         const banner = document.getElementById('data-error');
         const textEl = document.getElementById('data-error-text');
         if (textEl) textEl.textContent = this.translations[this.currentLanguage].dataError;
+        if (banner) banner.classList.remove('hidden');
+    }
+
+    // Shown when serving saved (possibly stale) data because the live fetch failed —
+    // so a user never mistakes hours-old conditions for live ones.
+    showStaleNotice(timestamp) {
+        const banner = document.getElementById('data-error');
+        const textEl = document.getElementById('data-error-text');
+        if (textEl) {
+            const t = timestamp ? new Date(timestamp).toLocaleString() : '—';
+            textEl.textContent = `${this.translations[this.currentLanguage].staleData} (${t})`;
+        }
         if (banner) banner.classList.remove('hidden');
     }
 
@@ -393,7 +414,7 @@ class BeachSafetyApp {
     renderBeachList(containerId) {
         const listContainer = document.getElementById(containerId);
         listContainer.innerHTML = '';
-        if (!this.beaches.length || !this.beaches[0].conditions) {
+        if (!this.beaches.length || !this.beaches.some(b => b.conditions)) {
             listContainer.innerHTML = `<div class="no-results"><p>${this.isOffline ? 'No cached data.' : 'Loading live data...'}</p></div>`;
             return;
         }
@@ -401,6 +422,7 @@ class BeachSafetyApp {
         const searchTerm = (containerId.includes('desktop') ? document.getElementById('search-input-desktop') : document.getElementById('search-input')).value.toLowerCase();
         
         const filteredBeaches = this.beaches.filter(beach => {
+            if (!beach.conditions) return false;
             const name = this.currentLanguage === 'bg' ? beach.name_bg : beach.name;
             const matchesSearch = name.toLowerCase().includes(searchTerm);
             const matchesFilter = this.currentFilter === 'all' || beach.conditions.flag === this.currentFilter;
@@ -806,6 +828,7 @@ class BeachSafetyApp {
             "sharingNotSupported": "Web Share API is not supported in your browser.",
             "waterTempDisclaimer": "Water temp is a modeled estimate; shoreline may differ by 2–4°C.",
             "dataError": "Couldn't load live conditions. Check your connection and try again.",
+            "staleData": "Showing saved data — live update failed.",
             flags: {
                 green: "🟢 Safe",
                 yellow: "🟡 Caution",
@@ -866,6 +889,7 @@ class BeachSafetyApp {
             "sharingNotSupported": "API за споделяне в мрежата не се поддържа от вашия браузър.",
             "waterTempDisclaimer": "Температурата на водата е моделирана оценка; на брега може да се различава с 2–4°C.",
             "dataError": "Неуспешно зареждане на актуалните условия. Проверете връзката си и опитайте отново.",
+            "staleData": "Показват се запазени данни — неуспешно обновяване на живо.",
             flags: {
                 green: "🟢 Безопасно",
                 yellow: "🟡 Внимание",
