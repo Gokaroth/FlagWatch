@@ -1,2 +1,11 @@
+[build]
+  command = ""
+  publish = "."
+
 [functions]
   directory = "netlify/functions/"
+
+[[redirects]]
+  from = "/api/beaches"
+  to = "/.netlify/functions/get-beach-data"
+  status = 200
