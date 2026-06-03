@@ -1,7 +1,7 @@
 # FlagWatch
 
 Beach conditions for the Bulgarian Black Sea coast: swim-safety flag, water and air
-temperature, wind, and an algae/water-cleanliness read for 47 beaches between Durankulak and
+temperature, wind, and an algae/water-cleanliness read for 56 beaches between Durankulak and
 Rezovo. It's a small progressive web app, a Leaflet map plus a searchable list and a detail view,
 in English and Bulgarian, with a dark mode.
 
@@ -71,5 +71,5 @@ MIT. See [LICENSE](LICENSE).
 
 Weather from [Open-Meteo](https://open-meteo.com), satellite data from the EU's
 [Copernicus Marine Service](https://marine.copernicus.eu), maps from
-[Leaflet](https://leafletjs.com), [CARTO](https://carto.com) and
-[OpenStreetMap](https://www.openstreetmap.org).
+[Leaflet](https://leafletjs.com) and [CARTO](https://carto.com), and map data plus the verified
+beach locations from [OpenStreetMap](https://www.openstreetmap.org).

@@ -2,7 +2,7 @@
 
 Working guide for Claude in this repo. Deeper detail: `AI_CONTEXT_MEMO.md`, `DATA_SOURCES.md`, `ROADMAP.md`.
 
-FlagWatch is a real-time **beach safety + water-cleanliness PWA** for the Bulgarian Black Sea coast (47 beaches). Live at flagwatch.gokaroth.com. Vanilla JS frontend (**no build step**); a single Node server (`server.mjs`) backend on **Fly.io** (migrated off Netlify).
+FlagWatch is a real-time **beach safety + water-cleanliness PWA** for the Bulgarian Black Sea coast (56 beaches). Live at flagwatch.gokaroth.com. Vanilla JS frontend (**no build step**); a single Node server (`server.mjs`) backend on **Fly.io** (migrated off Netlify).
 
 ## ⛔ Prime directive: never fabricate data
 This is a safety app. Honor these invariants in every change:
@@ -14,10 +14,12 @@ Don't reintroduce any "demo"/synthetic fallback.
 
 ## Architecture (buildless static frontend + one Node server on Fly.io, ESM)
 ```
-data/beaches.json            single source of truth (47 beaches: id, name, name_bg,
-                             coordinates{lat,lng}, region, type, facilities, description, description_bg)
+data/beaches.json            single source of truth (56 beaches: id, name, name_bg,
+                             coordinates{lat,lng} — verified against OSM natural=beach polygons —
+                             region, type, facilities, description, description_bg)
 app.js                       class BeachSafetyApp — Leaflet map, list, modal, EN/BG i18n, theme, PWA,
-                             SSE live-refresh, trend sparklines
+                             SSE live-refresh, trend sparklines. Modal footer actions: Show on Map,
+                             Directions (Google Maps), Share (native sheet → clipboard fallback)
 index.html / style.css       UI + themes (CSS custom properties, light/dark, WCAG 2.2 AA)
 sw.js                        service worker (precache + network-first)
 lib/copernicus.mjs           Copernicus Marine WMTS (CHL + Black Sea SST), honest "unavailable" on failure
@@ -46,6 +48,10 @@ No 30s/15min function limits on Fly, so the full Copernicus build runs inline (n
 - **i18n**: add every new UI string to BOTH `en` and `bg` in the `translations` object in `app.js`. Elements whose `id` matches a translation key are auto-filled by `applyLanguage()`.
 - **Rendering**: use the `fmt()` helper for numbers (returns `—` for null). DOM is in `index.html`; any new element id used by `app.js` must exist there.
 - **CSS**: reuse the existing custom properties / dark-mode selectors; don't hardcode colors.
+- **Map markers**: `.custom-marker-icon` MUST stay `position: absolute`. Leaflet positions marker
+  icons absolutely (out of flow) via a transform; `position: relative` drops them into the pane's
+  normal flow and they drift progressively on zoom. `iconAnchor` is the box centre `[15,21]` (round
+  disc). Verify marker placement at MULTIPLE zoom levels.
 
 ## Run & verify locally
 ```bash

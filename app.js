@@ -27,8 +27,8 @@ const WHATS_NEW_CONFIG = {
                 bg: '🏖️ Мащабно разширение на плажовете!'
             },
             description: {
-                en: "We've massively expanded our database from 15 to nearly 50 beaches! The app now covers the entire Bulgarian Black Sea coast, from Durankulak to Rezovo, including popular wild beaches.",
-                bg: "Разширихме мащабно базата си данни от 15 на близо 50 плажа! Приложението вече покрива цялото българско Черноморие, от Дуранкулак до Резово, включително популярни диви плажове."
+                en: "We've massively expanded our database from 15 to 56 beaches! The app now covers the entire Bulgarian Black Sea coast, from Durankulak to Rezovo, including popular wild beaches.",
+                bg: "Разширихме мащабно базата си данни от 15 на 56 плажа! Приложението вече покрива цялото българско Черноморие, от Дуранкулак до Резово, включително популярни диви плажове."
             },
         },
         {
@@ -369,7 +369,9 @@ class BeachSafetyApp {
         // PWA Install button
         document.getElementById('install-btn').addEventListener('click', () => this.promptInstall());
 
-        // Share button
+        // Beach-modal footer actions
+        document.getElementById('show-on-map').addEventListener('click', () => this.showCurrentBeachOnMap());
+        document.getElementById('get-directions').addEventListener('click', () => this.openDirections());
         document.getElementById('share-location').addEventListener('click', () => this.shareBeachLocation());
     }
 
@@ -516,7 +518,9 @@ class BeachSafetyApp {
                     + (algaeBadge ? `<div class="cleanliness-badge ${cleanlinessStatus}" aria-hidden="true">${algaeBadge}</div>` : '')
                     + `<span class="visually-hidden">${this.escape(label)}</span>`,
                 iconSize: [30, 42],
-                iconAnchor: [15, 42]
+                // Round marker (the flag disc is vertically centred in the box),
+                // so the geographic point is the box centre — not the bottom edge.
+                iconAnchor: [15, 21]
             });
 
             const marker = L.marker([beach.coordinates.lat, beach.coordinates.lng], { icon: markerIcon, keyboard: true, title: label })
@@ -1047,22 +1051,82 @@ class BeachSafetyApp {
         }
     }
     
+    // Close the detail modal, switch to the map view, and centre on the beach.
+    showCurrentBeachOnMap() {
+        if (!this.currentBeach || !this.map) return;
+        const { lat, lng } = this.currentBeach.coordinates;
+        this.toggleModal('beach-modal', false);
+        this.setView('map');
+        // setView() calls invalidateSize() on a 100ms timeout (the map may have been
+        // display:none on mobile), so fly after that to land on the right point.
+        setTimeout(() => this.map.flyTo([lat, lng], 13), 150);
+    }
+
+    // Open Google Maps directions to the beach via the official universal URL
+    // (launches the Maps app on mobile if installed).
+    openDirections() {
+        if (!this.currentBeach) return;
+        const { lat, lng } = this.currentBeach.coordinates;
+        window.open(`https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`, '_blank', 'noopener');
+    }
+
     shareBeachLocation() {
-        if (navigator.share && this.currentBeach) {
-            const beach = this.currentBeach;
-            const name = this.currentLanguage === 'bg' ? beach.name_bg : beach.name;
-            const flagStatus = this.translations[this.currentLanguage].flags[beach.conditions.flag || 'unknown'];
-            const text = `Checking out ${name}! Current status is ${flagStatus}. #FlagWatch`;
-            
-            navigator.share({
-                title: 'FlagWatch Beach Status',
-                text: text,
-                url: window.location.href 
-            }).then(() => {
-                console.log('Thanks for sharing!');
-            }).catch(console.error);
+        if (!this.currentBeach) return;
+        const beach = this.currentBeach;
+        const name = this.currentLanguage === 'bg' ? beach.name_bg : beach.name;
+        const flagStatus = this.translations[this.currentLanguage].flags[beach.conditions?.flag || 'unknown'];
+        const text = this.t('shareText', { name, status: flagStatus });
+        const url = window.location.href;
+
+        // Prefer the native share sheet (mostly mobile). The Web Share API is absent
+        // on most desktop browsers, so fall back to copying the link instead of
+        // dead-ending in an error.
+        if (navigator.share) {
+            navigator.share({ title: 'FlagWatch', text, url }).catch((err) => {
+                // A user-cancelled share is not an error; anything else → copy fallback.
+                if (err && err.name !== 'AbortError') this.copyShareLink(`${text} ${url}`);
+            });
+            return;
+        }
+        this.copyShareLink(`${text} ${url}`);
+    }
+
+    // Copy the share text + link to the clipboard with a visible ("Copied!" on the
+    // button) and screen-reader confirmation. Degrades clipboard API → execCommand →
+    // alert(payload) so the user can always copy it manually as a last resort.
+    copyShareLink(payload) {
+        const confirm = () => {
+            this.announce(this.t('linkCopied'));
+            const label = document.getElementById('share-location-text');
+            if (label && !label._flashing) {
+                label._flashing = true;
+                label.textContent = this.t('copied');
+                setTimeout(() => {
+                    label.textContent = this.translations[this.currentLanguage]['share-location-text'];
+                    label._flashing = false;
+                }, 2000);
+            }
+        };
+        const legacy = () => {
+            try {
+                const ta = document.createElement('textarea');
+                ta.value = payload;
+                ta.setAttribute('readonly', '');
+                ta.style.position = 'fixed';
+                ta.style.opacity = '0';
+                document.body.appendChild(ta);
+                ta.select();
+                const ok = document.execCommand('copy');
+                document.body.removeChild(ta);
+                ok ? confirm() : alert(payload);
+            } catch {
+                alert(payload);
+            }
+        };
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(payload).then(confirm).catch(legacy);
         } else {
-            alert(this.translations[this.currentLanguage].sharingNotSupported);
+            legacy();
         }
     }
     
@@ -1190,6 +1254,10 @@ class BeachSafetyApp {
             "legend-high": "High: Widespread algae bloom",
             "legend-unavailable": "Unavailable: No recent satellite data",
             "safety-tips-title": "Safety Tips",
+            "safetyTip1": "Always check flag status before entering water",
+            "safetyTip2": "Stay close to lifeguarded areas when available",
+            "safetyTip3": "Never swim alone in red flag conditions",
+            "safetyTip4": "Emergency number: 112",
             "whats-new-modal-title": "What's New!",
             "offline-text": "Offline Mode - Showing cached data",
             "searchPlaceholder": "Search beaches...",
@@ -1199,6 +1267,11 @@ class BeachSafetyApp {
             "noResults": "No beaches match your criteria.",
             "locationNotEnabled": "Location permission is not enabled. Please enable it in your browser settings to use this feature.",
             "sharingNotSupported": "Web Share API is not supported in your browser.",
+            "shareText": "Checking out {name} on FlagWatch — current status: {status}.",
+            "linkCopied": "Link copied to clipboard.",
+            "copied": "Copied!",
+            "show-on-map-text": "Show on Map",
+            "get-directions-text": "Directions",
             "waterTempDisclaimer": "Water temp is a modeled estimate; shoreline may differ by 2–4°C.",
             "dataError": "Couldn't load live conditions. Check your connection and try again.",
             "staleData": "Showing saved data — live update failed.",
@@ -1289,6 +1362,10 @@ class BeachSafetyApp {
             "legend-high": "Високо: Масов цъфтеж на водорасли",
             "legend-unavailable": "Недостъпно: Няма скорошни сателитни данни",
             "safety-tips-title": "Съвети за безопасност",
+            "safetyTip1": "Винаги проверявайте статуса на флага преди влизане във водата",
+            "safetyTip2": "Стойте близо до зони със спасители, когато има такива",
+            "safetyTip3": "Никога не плувайте сами при червен флаг",
+            "safetyTip4": "Спешен телефон: 112",
             "whats-new-modal-title": "Какво ново!",
             "offline-text": "Офлайн режим - Показват се кеширани данни",
             "searchPlaceholder": "Търсене на плажове...",
@@ -1298,6 +1375,11 @@ class BeachSafetyApp {
             "noResults": "Няма плажове, отговарящи на вашите критерии.",
             "locationNotEnabled": "Разрешението за местоположение не е активирано. Моля, активирайте го в настройките на браузъра си, за да използвате тази функция.",
             "sharingNotSupported": "API за споделяне в мрежата не се поддържа от вашия браузър.",
+            "shareText": "Разглеждам {name} във FlagWatch — текущ статус: {status}.",
+            "linkCopied": "Връзката е копирана.",
+            "copied": "Копирано!",
+            "show-on-map-text": "Покажи на картата",
+            "get-directions-text": "Упътване",
             "waterTempDisclaimer": "Температурата на водата е моделирана оценка; на брега може да се различава с 2–4°C.",
             "dataError": "Неуспешно зареждане на актуалните условия. Проверете връзката си и опитайте отново.",
             "staleData": "Показват се запазени данни — неуспешно обновяване на живо.",

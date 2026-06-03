@@ -205,7 +205,7 @@ body.dark-mode .modal-backdrop { background-color: rgba(0, 0, 0, 0.8); }
 .modal-close { display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; background: none; border: none; font-size: 1.75rem; line-height: 1; cursor: pointer; color: var(--color-text-light); border-radius: var(--border-radius-sm); }
 .modal-close:hover { color: var(--color-text); background: var(--color-surface-2); }
 .modal-body { padding: var(--spacing-md); overflow-y: auto; }
-.modal-footer { padding: var(--spacing-md); border-top: 1px solid var(--color-border); text-align: right; }
+.modal-footer { padding: var(--spacing-md); border-top: 1px solid var(--color-border); display: flex; flex-wrap: wrap; gap: var(--spacing-sm); justify-content: flex-end; }
 @keyframes slideInUp { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
 /* Beach Detail Modal specific styles */
@@ -265,7 +265,12 @@ body.dark-mode .form-control:focus { box-shadow: 0 0 0 0.2rem rgba(77, 171, 247,
 
 
 /* Custom Map Markers */
-.custom-marker-icon { position: relative; display: flex; align-items: center; justify-content: center; }
+/* MUST be position:absolute — Leaflet positions marker icons absolutely (out of
+   document flow) via a transform. A `position: relative` here puts every marker
+   back into the marker-pane's normal flow, so they stack and drift progressively
+   downward (the drift scales with zoom). absolute is still a containing block for
+   the position:absolute .cleanliness-badge, so the leaf badge stays anchored. */
+.custom-marker-icon { position: absolute; display: flex; align-items: center; justify-content: center; }
 .flag-emoji { font-size: 24px; text-shadow: 0px 0px 3px rgba(0,0,0,0.5); }
 .cleanliness-dot { position: absolute; bottom: 5px; right: 0px; width: 10px; height: 10px; border-radius: 50%; border: 1.5px solid white; box-shadow: 0 0 3px rgba(0,0,0,0.5); }
 .cleanliness-dot.clear { background-color: var(--color-info); }

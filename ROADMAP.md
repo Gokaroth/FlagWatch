@@ -13,15 +13,17 @@ become a mark of confidence, not a crutch.
 ---
 
 ### **Phase 1: Backend Proxy Foundation — ✅ COMPLETE**
-All external API calls run in Netlify Functions (ESM v2), not the browser. This hides any future
-keys, sidesteps CORS, and simplifies the frontend to a single `/api/beaches` call.
+All external API calls run server-side (a single dependency-free Node server, `server.mjs`), not the
+browser. This hides any future keys, sidesteps CORS, and simplifies the frontend to a single
+`/api/beaches` call. *(Originally Netlify Functions; consolidated onto one Fly.io server in 2026.)*
 
 ### **Phase 2: Proactive Caching & Resilience — ✅ COMPLETE**
-A scheduled **collector** (`collect.mjs`, every 2 h) precomputes the full dataset and writes a
-snapshot to **Netlify Blobs**. The on-demand `get-beach-data.mjs` serves that snapshot instantly at
-`/api/beaches` (with a fast Open-Meteo-only cold-start fallback). Users no longer wait on ~94
-external calls per load, and a transient API outage during a fetch degrades gracefully to
-`unavailable` instead of breaking the app.
+An **in-process collector** rebuilds the full dataset every 2 h and persists a snapshot (+ rolling
+history) to a **Fly volume** at `/state`. `/api/beaches` serves that snapshot instantly (with a fast
+Open-Meteo-only build on cold boot), and SSE (`/api/stream`) pushes updates to open browsers. Users
+no longer wait on the external calls; the batched Open-Meteo fetch **retries on transient failure**
+(so one hiccup can't blank every flag); and any API outage degrades gracefully to `unavailable` /
+`unknown` instead of breaking the app. *(Originally a Netlify scheduled fn + Blobs.)*
 
 *Note:* the originally-considered Stormglass cross-validation was unnecessary — the migrated
 Copernicus Marine **WMTS** turned out to be **keyless**, providing both CHL (gap-free L4) and a
@@ -36,16 +38,20 @@ scrape/fetch inside the collector.
 1.  **Map Pin Filtering** — ✅ DONE. The flag filter now updates both the list and the map pins.
 2.  **Advanced Water-Sports Data** — ✅ DONE. Wind gusts + wind direction (with compass cardinal)
     are fetched and shown in the beach detail modal.
-3.  **Redesign Beach Detail Modal** — ◻️ PARTIAL. Conditions grid extended (gusts/direction,
-    water-temp disclaimer); fuller visual-hierarchy grouping still pending.
-4.  **Enhance Map Visuals** — ◻️ PENDING:
-    -   Switch base tiles to a minimalist style (e.g. CARTO Positron).
-    -   Regional status circles around markers.
-    -   Algae emoji indicators (🌿 / 🌿🌿).
+3.  **Redesign Beach Detail Modal** — ✅ DONE. Safety flag as a hero, grouped metric cards,
+    water-temp disclaimer, trend sparklines, and footer actions: **Show on Map**, **Directions**
+    (Google Maps), and **Share** (native share sheet → clipboard fallback on desktop).
+4.  **Enhance Map Visuals** — ◻️ MOSTLY DONE:
+    -   ✅ Minimalist CARTO base tiles (Positron / dark_matter, theme-aware).
+    -   ✅ Algae emoji indicators on markers (🌿 / 🌿🌿), shown by shape not colour alone (WCAG 1.4.1).
+    -   ◻️ Regional status circles around markers — still pending.
 
 ---
 
 ### Refinement ideas / backlog
+-   **Beach coordinate accuracy** — ✅ DONE (2026). Every beach pin was re-verified against
+    OpenStreetMap `natural=beach` polygons (several were 1–6 km off, landing inland), coverage grew
+    from 47 to **56 beaches**, and a marker-rendering bug that made pins drift on zoom was fixed.
 -   **Reduce CHL "unavailable" rate**: ~half the beaches currently return `unavailable` because the
     exact shoreline point lands on a land/coastal-masked grid cell. Sampling a point nudged slightly
     seaward should land on a water pixel and return a value, without lying about coverage.

@@ -12,8 +12,10 @@ Live meteorological + marine data from the **Open-Meteo API** (keyless).
     `current=temperature_2m,wind_speed_10m,wind_gusts_10m,wind_direction_10m,uv_index`
 -   **Marine** — `https://marine-api.open-meteo.com/v1/marine` with
     `current=wave_height,sea_surface_temperature`
--   All 47 beaches are queried in a single batched multi-location request per endpoint. Using the
+-   All 56 beaches are queried in a single batched multi-location request per endpoint. Using the
     `current=` parameter (rather than indexing hourly arrays) avoids timezone-offset errors.
+-   Each batched request **retries (3×, with backoff) on a transient failure** (timeout / 429 / 5xx).
+    A single hiccup must not blank wind — and therefore the flag — for every beach at once.
 
 **Flag logic** — requires **both** wave height and wind speed; if either is missing the flag is
 **⚪ Unknown** (never an assumed-safe green):
@@ -57,7 +59,15 @@ auth rejection, missing/NaN value) the affected field is `null` (rendered `—`)
 `unavailable`, and the safety flag is `unknown`. The cleanliness status can only be `clear`/
 `moderate`/`high` when a real numeric CHL value was returned.
 
-## 5. Notes on method
+## 5. Beach locations & sampling points
+
+The 56 beach coordinates in `data/beaches.json` are verified against **OpenStreetMap**
+`natural=beach` polygons (via Nominatim + an Overpass sweep of the Bulgarian coast). Each point sits
+on the actual shoreline, which keeps both the map pin and the Open-Meteo / Copernicus sample point at
+the right place. Coverage runs Durankulak → Rezovo; the southernmost beach (Rezovo) sits on the
+Bulgaria–Turkey border. No coordinate lies outside Bulgaria.
+
+## 6. Notes on method
 -   L4 CHL is **gap-filled / interpolated**, not a single raw satellite pass — a deliberate trade
     for daily coverage.
 -   Authentication: the Copernicus WMTS is currently **keyless**. Optional credential wiring exists

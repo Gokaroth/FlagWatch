@@ -4,8 +4,8 @@
     "name": "Durankulak North",
     "name_bg": "Дуранкулак - Север",
     "coordinates": {
-      "lat": 43.684,
-      "lng": 28.575
+      "lat": 43.7173,
+      "lng": 28.5748
     },
     "region": "Dobrich",
     "type": "wild",
@@ -20,8 +20,8 @@
     "name": "Krapets",
     "name_bg": "Крапец",
     "coordinates": {
-      "lat": 43.633,
-      "lng": 28.57
+      "lat": 43.6539,
+      "lng": 28.572
     },
     "region": "Dobrich",
     "type": "wild",
@@ -33,12 +33,46 @@
     "description_bg": "Дълъг, тих пясъчен плаж, заобиколен от дюни и поля."
   },
   {
+    "id": "ezerets",
+    "name": "Ezerets",
+    "name_bg": "Езерец",
+    "coordinates": {
+      "lat": 43.5892,
+      "lng": 28.5752
+    },
+    "region": "Dobrich",
+    "type": "wild",
+    "facilities": {
+      "camping": true,
+      "dunes": true
+    },
+    "description": "Wide, wild sandy beach beside the Ezerets and Shabla lakes, backed by dunes.",
+    "description_bg": "Широк, див пясъчен плаж край Езерецкото и Шабленското езеро, заобиколен от дюни."
+  },
+  {
+    "id": "shabla_central",
+    "name": "Shabla Beach",
+    "name_bg": "Шабленски плаж",
+    "coordinates": {
+      "lat": 43.5635,
+      "lng": 28.5922
+    },
+    "region": "Dobrich",
+    "type": "wild",
+    "facilities": {
+      "camping": true,
+      "dunes": true
+    },
+    "description": "Long sandy beach near Shabla town, by the former Dobrudzha campsite.",
+    "description_bg": "Дълъг пясъчен плаж край град Шабла, до бившия къмпинг „Добруджа\"."
+  },
+  {
     "id": "shabla",
     "name": "Shabla Lighthouse Beach",
     "name_bg": "Плаж при фар Шабла",
     "coordinates": {
-      "lat": 43.545,
-      "lng": 28.599
+      "lat": 43.547,
+      "lng": 28.6046
     },
     "region": "Dobrich",
     "type": "wild",
@@ -51,8 +85,8 @@
     "name": "Bolata Beach",
     "name_bg": "Болата",
     "coordinates": {
-      "lat": 43.433,
-      "lng": 28.467
+      "lat": 43.3823,
+      "lng": 28.47
     },
     "region": "Dobrich",
     "type": "nature",
@@ -68,8 +102,8 @@
     "name": "Rusalka",
     "name_bg": "Русалка",
     "coordinates": {
-      "lat": 43.411,
-      "lng": 28.508
+      "lat": 43.4152,
+      "lng": 28.5094
     },
     "region": "Dobrich",
     "type": "resort",
@@ -85,8 +119,8 @@
     "name": "Kavarna Central Beach",
     "name_bg": "Каварна - Централен",
     "coordinates": {
-      "lat": 43.419,
-      "lng": 28.344
+      "lat": 43.4134,
+      "lng": 28.3526
     },
     "region": "Dobrich",
     "type": "urban",
@@ -98,12 +132,26 @@
     "description_bg": "Основният градски плаж на Каварна, разположен в спокоен залив."
   },
   {
+    "id": "bendida",
+    "name": "Bendida Beach",
+    "name_bg": "Плаж Бендида",
+    "coordinates": {
+      "lat": 43.4164,
+      "lng": 28.2988
+    },
+    "region": "Dobrich",
+    "type": "resort",
+    "facilities": {},
+    "description": "Small sheltered cove below the Thracian Cliffs resort, between Kavarna and Topola.",
+    "description_bg": "Малък защитен залив под комплекса „Тракийски скали\", между Каварна и Топола."
+  },
+  {
     "id": "topola",
     "name": "Topola",
     "name_bg": "Топола",
     "coordinates": {
-      "lat": 43.376,
-      "lng": 28.257
+      "lat": 43.4033,
+      "lng": 28.2455
     },
     "region": "Dobrich",
     "type": "resort",
@@ -119,8 +167,8 @@
     "name": "Balchik Central",
     "name_bg": "Балчик - Централен",
     "coordinates": {
-      "lat": 43.407,
-      "lng": 28.163
+      "lat": 43.4054,
+      "lng": 28.1579
     },
     "region": "Dobrich",
     "type": "urban",
@@ -136,8 +184,8 @@
     "name": "Albena Beach",
     "name_bg": "Албена",
     "coordinates": {
-      "lat": 43.367,
-      "lng": 28.083
+      "lat": 43.3656,
+      "lng": 28.0853
     },
     "region": "Dobrich",
     "type": "resort",
@@ -155,8 +203,8 @@
     "name": "Kranevo",
     "name_bg": "Кранево",
     "coordinates": {
-      "lat": 43.34,
-      "lng": 28.066
+      "lat": 43.3435,
+      "lng": 28.0714
     },
     "region": "Dobrich",
     "type": "resort",
@@ -172,8 +220,8 @@
     "name": "Golden Sands",
     "name_bg": "Златни пясъци",
     "coordinates": {
-      "lat": 43.283,
-      "lng": 28.033
+      "lat": 43.2896,
+      "lng": 28.0465
     },
     "region": "Varna",
     "type": "resort",
@@ -188,12 +236,28 @@
     "description_bg": "Голям курорт с фин златен пясък и отлични съоръжения."
   },
   {
+    "id": "kabakum",
+    "name": "Kabakum",
+    "name_bg": "Кабакум",
+    "coordinates": {
+      "lat": 43.2585,
+      "lng": 28.0322
+    },
+    "region": "Varna",
+    "type": "resort",
+    "facilities": {
+      "restaurants": true
+    },
+    "description": "Sandy beach north of St. Constantine, popular with Varna locals and its beach bars.",
+    "description_bg": "Пясъчен плаж северно от Св. Константин, предпочитан от варненци, с плажни барове."
+  },
+  {
     "id": "saints_constantine",
     "name": "Sts. Constantine & Helena",
     "name_bg": "Св. Св. Константин и Елена",
     "coordinates": {
-      "lat": 43.232,
-      "lng": 28.01
+      "lat": 43.2305,
+      "lng": 28.0149
     },
     "region": "Varna",
     "type": "resort",
@@ -209,8 +273,8 @@
     "name": "Varna Beach",
     "name_bg": "Варна - Централен",
     "coordinates": {
-      "lat": 43.205,
-      "lng": 27.916
+      "lat": 43.2034,
+      "lng": 27.9254
     },
     "region": "Varna",
     "type": "urban",
@@ -229,8 +293,8 @@
     "name": "Asparuhovo Beach",
     "name_bg": "Аспарухово",
     "coordinates": {
-      "lat": 43.181,
-      "lng": 27.915
+      "lat": 43.1775,
+      "lng": 27.9129
     },
     "region": "Varna",
     "type": "urban",
@@ -246,8 +310,8 @@
     "name": "Fichoza",
     "name_bg": "Фичоза",
     "coordinates": {
-      "lat": 43.136,
-      "lng": 27.937
+      "lat": 43.1331,
+      "lng": 27.9382
     },
     "region": "Varna",
     "type": "wild",
@@ -258,12 +322,29 @@
     "description_bg": "Поредица от малки, диви плажове, популярни сред местните и къмпингуващите."
   },
   {
+    "id": "pasha_dere",
+    "name": "Pasha Dere",
+    "name_bg": "Паша дере",
+    "coordinates": {
+      "lat": 43.1098,
+      "lng": 27.9245
+    },
+    "region": "Varna",
+    "type": "wild",
+    "facilities": {
+      "camping": true,
+      "nudist_friendly": true
+    },
+    "description": "Remote, hard-to-reach wild beach south of Varna, popular with campers and naturists.",
+    "description_bg": "Отдалечен, труднодостъпен див плаж южно от Варна, популярен сред къмпингуващи и нудисти."
+  },
+  {
     "id": "kamchia",
     "name": "Kamchia",
     "name_bg": "Камчия",
     "coordinates": {
-      "lat": 43.023,
-      "lng": 27.886
+      "lat": 43.0337,
+      "lng": 27.8894
     },
     "region": "Varna",
     "type": "nature",
@@ -279,8 +360,8 @@
     "name": "Shkorpilovtsi Beach",
     "name_bg": "Шкорпиловци",
     "coordinates": {
-      "lat": 42.966,
-      "lng": 27.889
+      "lat": 42.9785,
+      "lng": 27.8952
     },
     "region": "Varna",
     "type": "wild",
@@ -292,12 +373,30 @@
     "description_bg": "Най-дългият плаж в България, известен със своята дива природа и широка пясъчна ивица."
   },
   {
+    "id": "kara_dere",
+    "name": "Kara Dere",
+    "name_bg": "Кара дере",
+    "coordinates": {
+      "lat": 42.904,
+      "lng": 27.899
+    },
+    "region": "Varna",
+    "type": "wild",
+    "facilities": {
+      "camping": true,
+      "nudist_friendly": true,
+      "scenic": true
+    },
+    "description": "Iconic undeveloped wild beach near Byala — no buildings, popular for free camping.",
+    "description_bg": "Емблематичен незастроен див плаж край Бяла — без сгради, популярен за свободен къмпинг."
+  },
+  {
     "id": "byala",
     "name": "Byala Beach",
     "name_bg": "Бяла",
     "coordinates": {
-      "lat": 42.875,
-      "lng": 27.888
+      "lat": 42.8694,
+      "lng": 27.8995
     },
     "region": "Varna",
     "type": "urban",
@@ -313,8 +412,8 @@
     "name": "Obzor Beach",
     "name_bg": "Обзор",
     "coordinates": {
-      "lat": 42.821,
-      "lng": 27.88
+      "lat": 42.8236,
+      "lng": 27.8852
     },
     "region": "Burgas",
     "type": "resort",
@@ -330,8 +429,8 @@
     "name": "Irakli Beach",
     "name_bg": "Иракли",
     "coordinates": {
-      "lat": 42.775,
-      "lng": 27.872
+      "lat": 42.7395,
+      "lng": 27.8918
     },
     "region": "Burgas",
     "type": "wild",
@@ -347,8 +446,8 @@
     "name": "Elenite",
     "name_bg": "Елените",
     "coordinates": {
-      "lat": 42.715,
-      "lng": 27.795
+      "lat": 42.703,
+      "lng": 27.7909
     },
     "region": "Burgas",
     "type": "resort",
@@ -364,8 +463,8 @@
     "name": "Sveti Vlas Central",
     "name_bg": "Свети Влас - Централен",
     "coordinates": {
-      "lat": 42.709,
-      "lng": 27.76
+      "lat": 42.7079,
+      "lng": 27.7579
     },
     "region": "Burgas",
     "type": "resort",
@@ -381,8 +480,8 @@
     "name": "Sunny Beach",
     "name_bg": "Слънчев бряг",
     "coordinates": {
-      "lat": 42.688,
-      "lng": 27.714
+      "lat": 42.6877,
+      "lng": 27.721
     },
     "region": "Burgas",
     "type": "resort",
@@ -401,8 +500,8 @@
     "name": "Nessebar South",
     "name_bg": "Несебър - Южен",
     "coordinates": {
-      "lat": 42.653,
-      "lng": 27.721
+      "lat": 42.655,
+      "lng": 27.7165
     },
     "region": "Burgas",
     "type": "urban",
@@ -414,12 +513,30 @@
     "description_bg": "Основният плаж на новия град на Несебър, с гледка към стария град."
   },
   {
+    "id": "ravda",
+    "name": "Ravda Beach",
+    "name_bg": "Плаж Равда",
+    "coordinates": {
+      "lat": 42.6376,
+      "lng": 27.6736
+    },
+    "region": "Burgas",
+    "type": "resort",
+    "facilities": {
+      "hotels": true,
+      "restaurants": true,
+      "family": true
+    },
+    "description": "Family-friendly resort village beach between Nessebar and Pomorie.",
+    "description_bg": "Плаж на семейно ориентираното курортно селище Равда, между Несебър и Поморие."
+  },
+  {
     "id": "pomorie",
     "name": "Pomorie East",
     "name_bg": "Поморие - Източен",
     "coordinates": {
-      "lat": 42.564,
-      "lng": 27.636
+      "lat": 42.5631,
+      "lng": 27.6433
     },
     "region": "Burgas",
     "type": "urban",
@@ -435,8 +552,8 @@
     "name": "Burgas North",
     "name_bg": "Бургас - Северен",
     "coordinates": {
-      "lat": 42.508,
-      "lng": 27.481
+      "lat": 42.5029,
+      "lng": 27.4842
     },
     "region": "Burgas",
     "type": "urban",
@@ -452,8 +569,8 @@
     "name": "Kraymorie",
     "name_bg": "Крайморие",
     "coordinates": {
-      "lat": 42.441,
-      "lng": 27.514
+      "lat": 42.4385,
+      "lng": 27.5071
     },
     "region": "Burgas",
     "type": "urban",
@@ -469,8 +586,8 @@
     "name": "Chernomorets Central",
     "name_bg": "Черноморец - Централен",
     "coordinates": {
-      "lat": 42.446,
-      "lng": 27.641
+      "lat": 42.4492,
+      "lng": 27.6374
     },
     "region": "Burgas",
     "type": "urban",
@@ -485,8 +602,8 @@
     "name": "Gradina Camping",
     "name_bg": "Къмпинг Градина",
     "coordinates": {
-      "lat": 42.417,
-      "lng": 27.671
+      "lat": 42.4097,
+      "lng": 27.6768
     },
     "region": "Burgas",
     "type": "wild",
@@ -503,8 +620,8 @@
     "name": "Sozopol - Harmanite",
     "name_bg": "Созопол - Харманите",
     "coordinates": {
-      "lat": 42.413,
-      "lng": 27.695
+      "lat": 42.4135,
+      "lng": 27.7017
     },
     "region": "Burgas",
     "type": "urban",
@@ -521,8 +638,8 @@
     "name": "Kavatsite",
     "name_bg": "Каваците",
     "coordinates": {
-      "lat": 42.39,
-      "lng": 27.705
+      "lat": 42.3918,
+      "lng": 27.7076
     },
     "region": "Burgas",
     "type": "wild",
@@ -552,12 +669,29 @@
     "description_bg": "Дълъг пясъчен плаж, част от курортен комплекс."
   },
   {
+    "id": "alepu",
+    "name": "Alepu",
+    "name_bg": "Алепу",
+    "coordinates": {
+      "lat": 42.3449,
+      "lng": 27.7269
+    },
+    "region": "Burgas",
+    "type": "nature",
+    "facilities": {
+      "protected_area": true,
+      "dunes": true
+    },
+    "description": "Long dune-backed beach beside the protected Alepu lagoon, south of Dyuni.",
+    "description_bg": "Дълъг плаж с дюни край защитената Алепска лагуна, южно от Дюни."
+  },
+  {
     "id": "arkutino",
     "name": "Arkutino",
     "name_bg": "Аркутино",
     "coordinates": {
-      "lat": 42.338,
-      "lng": 27.739
+      "lat": 42.3324,
+      "lng": 27.7358
     },
     "region": "Burgas",
     "type": "nature",
@@ -572,8 +706,8 @@
     "name": "Primorsko North",
     "name_bg": "Приморско - Северен",
     "coordinates": {
-      "lat": 42.275,
-      "lng": 27.755
+      "lat": 42.277,
+      "lng": 27.7564
     },
     "region": "Burgas",
     "type": "resort",
@@ -591,8 +725,8 @@
     "name": "Perla Beach",
     "name_bg": "Перла",
     "coordinates": {
-      "lat": 42.29,
-      "lng": 27.75
+      "lat": 42.2887,
+      "lng": 27.7571
     },
     "region": "Burgas",
     "type": "wild",
@@ -607,8 +741,8 @@
     "name": "Kiten - Atliman",
     "name_bg": "Китен - Атлиман",
     "coordinates": {
-      "lat": 42.245,
-      "lng": 27.772
+      "lat": 42.2416,
+      "lng": 27.7696
     },
     "region": "Burgas",
     "type": "resort",
@@ -625,8 +759,8 @@
     "name": "Lozenets Beach",
     "name_bg": "Лозенец",
     "coordinates": {
-      "lat": 42.21,
-      "lng": 27.808
+      "lat": 42.2131,
+      "lng": 27.8051
     },
     "region": "Burgas",
     "type": "resort",
@@ -643,8 +777,8 @@
     "name": "Oasis/Korala",
     "name_bg": "Оазис/Корал",
     "coordinates": {
-      "lat": 42.2,
-      "lng": 27.82
+      "lat": 42.2013,
+      "lng": 27.8195
     },
     "region": "Burgas",
     "type": "wild",
@@ -655,12 +789,29 @@
     "description_bg": "Един от последните останали истински диви плажове, любим на къмпингуващите."
   },
   {
+    "id": "arapya",
+    "name": "Arapya",
+    "name_bg": "Арапя",
+    "coordinates": {
+      "lat": 42.1887,
+      "lng": 27.8371
+    },
+    "region": "Burgas",
+    "type": "wild",
+    "facilities": {
+      "camping": true,
+      "scenic": true
+    },
+    "description": "Popular camping beach in a wooded bay just north of Tsarevo.",
+    "description_bg": "Популярен къмпинг плаж в залесен залив, северно от Царево."
+  },
+  {
     "id": "tsarevo_central",
     "name": "Tsarevo Central",
     "name_bg": "Царево - Централен",
     "coordinates": {
-      "lat": 42.17,
-      "lng": 27.854
+      "lat": 42.1743,
+      "lng": 27.851
     },
     "region": "Burgas",
     "type": "urban",
@@ -675,8 +826,8 @@
     "name": "Nestinarka",
     "name_bg": "Нестинарка",
     "coordinates": {
-      "lat": 42.16,
-      "lng": 27.868
+      "lat": 42.1585,
+      "lng": 27.8675
     },
     "region": "Burgas",
     "type": "resort",
@@ -692,8 +843,8 @@
     "name": "Varvara",
     "name_bg": "Варвара",
     "coordinates": {
-      "lat": 42.121,
-      "lng": 27.909
+      "lat": 42.1277,
+      "lng": 27.907
     },
     "region": "Burgas",
     "type": "wild",
@@ -708,8 +859,8 @@
     "name": "Ahtopol",
     "name_bg": "Ахтопол",
     "coordinates": {
-      "lat": 42.095,
-      "lng": 27.935
+      "lat": 42.1028,
+      "lng": 27.933
     },
     "region": "Burgas",
     "type": "urban",
@@ -724,8 +875,8 @@
     "name": "Sinemorets Veleka Beach",
     "name_bg": "Синеморец - Велека",
     "coordinates": {
-      "lat": 42.067,
-      "lng": 27.973
+      "lat": 42.0666,
+      "lng": 27.9734
     },
     "region": "Burgas",
     "type": "nature",
@@ -741,8 +892,8 @@
     "name": "Sinemorets Butamyata",
     "name_bg": "Синеморец - Бутамята",
     "coordinates": {
-      "lat": 42.057,
-      "lng": 27.981
+      "lat": 42.0553,
+      "lng": 27.9865
     },
     "region": "Burgas",
     "type": "resort",
@@ -757,8 +908,8 @@
     "name": "Lipite",
     "name_bg": "Липите",
     "coordinates": {
-      "lat": 42.049,
-      "lng": 27.992
+      "lat": 42.0475,
+      "lng": 27.9917
     },
     "region": "Burgas",
     "type": "wild",
@@ -773,8 +924,8 @@
     "name": "Silistar Beach",
     "name_bg": "Силистар",
     "coordinates": {
-      "lat": 42.019,
-      "lng": 28.006
+      "lat": 42.0224,
+      "lng": 28.0107
     },
     "region": "Burgas",
     "type": "nature",
@@ -790,8 +941,8 @@
     "name": "Rezovo Beach",
     "name_bg": "Резово",
     "coordinates": {
-      "lat": 41.985,
-      "lng": 28.026
+      "lat": 41.9832,
+      "lng": 28.0303
     },
     "region": "Burgas",
     "type": "wild",
