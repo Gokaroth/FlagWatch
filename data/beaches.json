@@ -13,7 +13,12 @@
       "camping": true
     },
     "description": "Pristine wild beach near the Romanian border, next to Durankulak Lake.",
-    "description_bg": "Девствен див плаж до румънската граница, до Дуранкулашкото езеро."
+    "description_bg": "Девствен див плаж до румънската граница, до Дуранкулашкото езеро.",
+    "waveSample": {
+      "lat": 43.7173,
+      "lng": 28.5998,
+      "offsetKm": 2.01
+    }
   },
   {
     "id": "krapets",
@@ -30,7 +35,12 @@
       "restaurants": true
     },
     "description": "Long, quiet sandy beach backed by dunes and fields.",
-    "description_bg": "Дълъг, тих пясъчен плаж, заобиколен от дюни и поля."
+    "description_bg": "Дълъг, тих пясъчен плаж, заобиколен от дюни и поля.",
+    "waveSample": {
+      "lat": 43.6539,
+      "lng": 28.597,
+      "offsetKm": 2.01
+    }
   },
   {
     "id": "ezerets",
@@ -47,7 +57,12 @@
       "dunes": true
     },
     "description": "Wide, wild sandy beach beside the Ezerets and Shabla lakes, backed by dunes.",
-    "description_bg": "Широк, див пясъчен плаж край Езерецкото и Шабленското езеро, заобиколен от дюни."
+    "description_bg": "Широк, див пясъчен плаж край Езерецкото и Шабленското езеро, заобиколен от дюни.",
+    "waveSample": {
+      "lat": 43.5892,
+      "lng": 28.6002,
+      "offsetKm": 2.01
+    }
   },
   {
     "id": "shabla_central",
@@ -64,7 +79,12 @@
       "dunes": true
     },
     "description": "Long sandy beach near Shabla town, by the former Dobrudzha campsite.",
-    "description_bg": "Дълъг пясъчен плаж край град Шабла, до бившия къмпинг „Добруджа\"."
+    "description_bg": "Дълъг пясъчен плаж край град Шабла, до бившия къмпинг „Добруджа\".",
+    "waveSample": {
+      "lat": 43.5635,
+      "lng": 28.5922,
+      "offsetKm": 0
+    }
   },
   {
     "id": "shabla",
@@ -78,7 +98,12 @@
     "type": "wild",
     "facilities": {},
     "description": "Rugged, scenic beach near Bulgaria's oldest lighthouse.",
-    "description_bg": "Скалист, живописен плаж до най-стария фар в България."
+    "description_bg": "Скалист, живописен плаж до най-стария фар в България.",
+    "waveSample": {
+      "lat": 43.547,
+      "lng": 28.6296,
+      "offsetKm": 2.01
+    }
   },
   {
     "id": "bolata",
@@ -95,7 +120,12 @@
       "parking": true
     },
     "description": "Horseshoe-shaped bay protected by red cliffs, a former fishing cove.",
-    "description_bg": "Залив във форма на подкова, защитен от червени скали, бивш рибарски пристан."
+    "description_bg": "Залив във форма на подкова, защитен от червени скали, бивш рибарски пристан.",
+    "waveSample": {
+      "lat": 43.3823,
+      "lng": 28.495,
+      "offsetKm": 2.02
+    }
   },
   {
     "id": "rusalka",
@@ -112,7 +142,12 @@
       "scenic": true
     },
     "description": "Rocky coves and small beaches within a holiday resort.",
-    "description_bg": "Скалъпи заливчета и малки плажове в рамките на ваканционен комплекс."
+    "description_bg": "Скалъпи заливчета и малки плажове в рамките на ваканционен комплекс.",
+    "waveSample": {
+      "lat": 43.4002,
+      "lng": 28.5294,
+      "offsetKm": 2.32
+    }
   },
   {
     "id": "kavarna",
@@ -129,7 +164,12 @@
       "restaurants": true
     },
     "description": "The main city beach of Kavarna, located in a calm bay.",
-    "description_bg": "Основният градски плаж на Каварна, разположен в спокоен залив."
+    "description_bg": "Основният градски плаж на Каварна, разположен в спокоен залив.",
+    "waveSample": {
+      "lat": 43.3984,
+      "lng": 28.3726,
+      "offsetKm": 2.32
+    }
   },
   {
     "id": "bendida",
@@ -143,7 +183,12 @@
     "type": "resort",
     "facilities": {},
     "description": "Small sheltered cove below the Thracian Cliffs resort, between Kavarna and Topola.",
-    "description_bg": "Малък защитен залив под комплекса „Тракийски скали\", между Каварна и Топола."
+    "description_bg": "Малък защитен залив под комплекса „Тракийски скали\", между Каварна и Топола.",
+    "waveSample": {
+      "lat": 43.4014,
+      "lng": 28.3188,
+      "offsetKm": 2.32
+    }
   },
   {
     "id": "topola",
@@ -160,7 +205,12 @@
       "scenic": true
     },
     "description": "Known for its golf courses and therapeutic white mud.",
-    "description_bg": "Известен със своите голф игрища и лечебна бяла кал."
+    "description_bg": "Известен със своите голф игрища и лечебна бяла кал.",
+    "waveSample": {
+      "lat": 43.4033,
+      "lng": 28.2455,
+      "offsetKm": 0
+    }
   },
   {
     "id": "balchik_central",
@@ -177,7 +227,12 @@
       "restaurants": true
     },
     "description": "City beach near the famous Balchik Palace and Botanical Garden.",
-    "description_bg": "Градски плаж до известния Дворец и Ботаническата градина в Балчик."
+    "description_bg": "Градски плаж до известния Дворец и Ботаническата градина в Балчик.",
+    "waveSample": {
+      "lat": 43.3754,
+      "lng": 28.1979,
+      "offsetKm": 4.64
+    }
   },
   {
     "id": "albena",
@@ -196,7 +251,12 @@
       "medical": true
     },
     "description": "Family-friendly resort with mineral springs and a vast sandy beach.",
-    "description_bg": "Семеен курорт с минерални извори и огромен пясъчен плаж."
+    "description_bg": "Семеен курорт с минерални извори и огромен пясъчен плаж.",
+    "waveSample": {
+      "lat": 43.3506,
+      "lng": 28.1053,
+      "offsetKm": 2.32
+    }
   },
   {
     "id": "kranevo",
@@ -213,7 +273,12 @@
       "restaurants": true
     },
     "description": "A long and wide beach connecting to Albena's beach to the north.",
-    "description_bg": "Дълъг и широк плаж, който се свързва с плажа на Албена на север."
+    "description_bg": "Дълъг и широк плаж, който се свързва с плажа на Албена на север.",
+    "waveSample": {
+      "lat": 43.3435,
+      "lng": 28.0964,
+      "offsetKm": 2.02
+    }
   },
   {
     "id": "golden_sands",
@@ -233,7 +298,12 @@
       "hotels": true
     },
     "description": "Major resort with fine golden sand and excellent facilities.",
-    "description_bg": "Голям курорт с фин златен пясък и отлични съоръжения."
+    "description_bg": "Голям курорт с фин златен пясък и отлични съоръжения.",
+    "waveSample": {
+      "lat": 43.2896,
+      "lng": 28.0715,
+      "offsetKm": 2.02
+    }
   },
   {
     "id": "kabakum",
@@ -249,7 +319,12 @@
       "restaurants": true
     },
     "description": "Sandy beach north of St. Constantine, popular with Varna locals and its beach bars.",
-    "description_bg": "Пясъчен плаж северно от Св. Константин, предпочитан от варненци, с плажни барове."
+    "description_bg": "Пясъчен плаж северно от Св. Константин, предпочитан от варненци, с плажни барове.",
+    "waveSample": {
+      "lat": 43.2585,
+      "lng": 28.0572,
+      "offsetKm": 2.02
+    }
   },
   {
     "id": "saints_constantine",
@@ -266,7 +341,12 @@
       "restaurants": true
     },
     "description": "Bulgaria's oldest seaside resort, known for its spas.",
-    "description_bg": "Най-старият морски курорт в България, известен със своите спа центрове."
+    "description_bg": "Най-старият морски курорт в България, известен със своите спа центрове.",
+    "waveSample": {
+      "lat": 43.2305,
+      "lng": 28.0399,
+      "offsetKm": 2.03
+    }
   },
   {
     "id": "varna_beach",
@@ -286,7 +366,12 @@
       "shops": true
     },
     "description": "Main city beach accessible by public transport, next to the Sea Garden.",
-    "description_bg": "Основният градски плаж, достъпен с обществен транспорт, до Морската градина."
+    "description_bg": "Основният градски плаж, достъпен с обществен транспорт, до Морската градина.",
+    "waveSample": {
+      "lat": 43.2034,
+      "lng": 27.9504,
+      "offsetKm": 2.03
+    }
   },
   {
     "id": "asparuhovo",
@@ -303,7 +388,12 @@
       "restaurants": true
     },
     "description": "A large beach in a Varna suburb, south of the Asparuhov Bridge.",
-    "description_bg": "Голям плаж в предградие на Варна, южно от Аспаруховия мост."
+    "description_bg": "Голям плаж в предградие на Варна, южно от Аспаруховия мост.",
+    "waveSample": {
+      "lat": 43.1775,
+      "lng": 27.9379,
+      "offsetKm": 2.03
+    }
   },
   {
     "id": "fichoza",
@@ -319,7 +409,12 @@
       "camping": true
     },
     "description": "A series of small, wild beaches popular with locals and campers.",
-    "description_bg": "Поредица от малки, диви плажове, популярни сред местните и къмпингуващите."
+    "description_bg": "Поредица от малки, диви плажове, популярни сред местните и къмпингуващите.",
+    "waveSample": {
+      "lat": 43.1331,
+      "lng": 27.9382,
+      "offsetKm": 0
+    }
   },
   {
     "id": "pasha_dere",
@@ -336,7 +431,12 @@
       "nudist_friendly": true
     },
     "description": "Remote, hard-to-reach wild beach south of Varna, popular with campers and naturists.",
-    "description_bg": "Отдалечен, труднодостъпен див плаж южно от Варна, популярен сред къмпингуващи и нудисти."
+    "description_bg": "Отдалечен, труднодостъпен див плаж южно от Варна, популярен сред къмпингуващи и нудисти.",
+    "waveSample": {
+      "lat": 43.1098,
+      "lng": 27.9495,
+      "offsetKm": 2.03
+    }
   },
   {
     "id": "kamchia",
@@ -353,7 +453,12 @@
       "nature_reserve": true
     },
     "description": "A vast beach where the Kamchia River meets the sea, part of a UNESCO biosphere reserve.",
-    "description_bg": "Огромен плаж, където река Камчия се влива в морето, част от биосферен резерват на ЮНЕСКО."
+    "description_bg": "Огромен плаж, където река Камчия се влива в морето, част от биосферен резерват на ЮНЕСКО.",
+    "waveSample": {
+      "lat": 43.0337,
+      "lng": 27.8894,
+      "offsetKm": 0
+    }
   },
   {
     "id": "shkorpilovtsi",
@@ -370,7 +475,12 @@
       "length_km": 13
     },
     "description": "Longest beach in Bulgaria, known for its wild nature and wide sandy strip.",
-    "description_bg": "Най-дългият плаж в България, известен със своята дива природа и широка пясъчна ивица."
+    "description_bg": "Най-дългият плаж в България, известен със своята дива природа и широка пясъчна ивица.",
+    "waveSample": {
+      "lat": 42.9785,
+      "lng": 27.9202,
+      "offsetKm": 2.03
+    }
   },
   {
     "id": "kara_dere",
@@ -388,7 +498,12 @@
       "scenic": true
     },
     "description": "Iconic undeveloped wild beach near Byala — no buildings, popular for free camping.",
-    "description_bg": "Емблематичен незастроен див плаж край Бяла — без сгради, популярен за свободен къмпинг."
+    "description_bg": "Емблематичен незастроен див плаж край Бяла — без сгради, популярен за свободен къмпинг.",
+    "waveSample": {
+      "lat": 42.904,
+      "lng": 27.924,
+      "offsetKm": 2.04
+    }
   },
   {
     "id": "byala",
@@ -405,7 +520,12 @@
       "restaurants": true
     },
     "description": "Known for its clean water and the nearby Palaeontological site at the White Cliffs.",
-    "description_bg": "Известен с чистата си вода и близкия палеонтологичен обект при Белите скали."
+    "description_bg": "Известен с чистата си вода и близкия палеонтологичен обект при Белите скали.",
+    "waveSample": {
+      "lat": 42.8694,
+      "lng": 27.9245,
+      "offsetKm": 2.04
+    }
   },
   {
     "id": "obzor",
@@ -422,7 +542,12 @@
       "restaurants": true
     },
     "description": "A long beach strip located halfway between Varna and Burgas.",
-    "description_bg": "Дълга плажна ивица, разположена по средата между Варна и Бургас."
+    "description_bg": "Дълга плажна ивица, разположена по средата между Варна и Бургас.",
+    "waveSample": {
+      "lat": 42.8236,
+      "lng": 27.9102,
+      "offsetKm": 2.04
+    }
   },
   {
     "id": "irakli",
@@ -439,7 +564,12 @@
       "camping": true
     },
     "description": "Protected area with pristine nature and a river mouth, popular with campers.",
-    "description_bg": "Защитена зона с девствена природа и устие на река, популярна сред къмпингуващите."
+    "description_bg": "Защитена зона с девствена природа и устие на река, популярна сред къмпингуващите.",
+    "waveSample": {
+      "lat": 42.7395,
+      "lng": 27.9168,
+      "offsetKm": 2.04
+    }
   },
   {
     "id": "elenite",
@@ -456,7 +586,12 @@
       "resort_complex": true
     },
     "description": "A private-access resort beach at the foot of the Stara Planina mountain.",
-    "description_bg": "Частен курортен плаж в подножието на Стара планина."
+    "description_bg": "Частен курортен плаж в подножието на Стара планина.",
+    "waveSample": {
+      "lat": 42.703,
+      "lng": 27.7909,
+      "offsetKm": 0
+    }
   },
   {
     "id": "svetivlas_central",
@@ -473,7 +608,12 @@
       "blueflag": true
     },
     "description": "A clean, well-maintained beach next to the modern Marina Dinevi yacht port.",
-    "description_bg": "Чист, добре поддържан плаж до модерното яхтено пристанище Марина Диневи."
+    "description_bg": "Чист, добре поддържан плаж до модерното яхтено пристанище Марина Диневи.",
+    "waveSample": {
+      "lat": 42.7079,
+      "lng": 27.7579,
+      "offsetKm": 0
+    }
   },
   {
     "id": "sunny_beach",
@@ -493,7 +633,12 @@
       "hotels": true
     },
     "description": "Largest and most famous beach resort with vibrant nightlife.",
-    "description_bg": "Най-големият и известен плажен курорт с оживен нощен живот."
+    "description_bg": "Най-големият и известен плажен курорт с оживен нощен живот.",
+    "waveSample": {
+      "lat": 42.6877,
+      "lng": 27.721,
+      "offsetKm": 0
+    }
   },
   {
     "id": "nessebar_south",
@@ -510,7 +655,12 @@
       "restaurants": true
     },
     "description": "The main beach of the new town of Nessebar, offering views to the old town.",
-    "description_bg": "Основният плаж на новия град на Несебър, с гледка към стария град."
+    "description_bg": "Основният плаж на новия град на Несебър, с гледка към стария град.",
+    "waveSample": {
+      "lat": 42.655,
+      "lng": 27.7415,
+      "offsetKm": 2.04
+    }
   },
   {
     "id": "ravda",
@@ -528,7 +678,12 @@
       "family": true
     },
     "description": "Family-friendly resort village beach between Nessebar and Pomorie.",
-    "description_bg": "Плаж на семейно ориентираното курортно селище Равда, между Несебър и Поморие."
+    "description_bg": "Плаж на семейно ориентираното курортно селище Равда, между Несебър и Поморие.",
+    "waveSample": {
+      "lat": 42.6226,
+      "lng": 27.6936,
+      "offsetKm": 2.34
+    }
   },
   {
     "id": "pomorie",
@@ -545,7 +700,12 @@
       "restaurants": true
     },
     "description": "Famous for its dark, iron-rich sand and the nearby Pomorie salt lake.",
-    "description_bg": "Известен с тъмния си, богат на желязо пясък и близкото Поморийско езеро."
+    "description_bg": "Известен с тъмния си, богат на желязо пясък и близкото Поморийско езеро.",
+    "waveSample": {
+      "lat": 42.5631,
+      "lng": 27.6683,
+      "offsetKm": 2.05
+    }
   },
   {
     "id": "burgas_north",
@@ -562,7 +722,12 @@
       "sea_garden": true
     },
     "description": "The main city beach next to the famous Sea Garden.",
-    "description_bg": "Основният градски плаж до известната Морска градина."
+    "description_bg": "Основният градски плаж до известната Морска градина.",
+    "waveSample": {
+      "lat": 42.5029,
+      "lng": 27.5092,
+      "offsetKm": 2.05
+    }
   },
   {
     "id": "kraymorie",
@@ -579,7 +744,12 @@
       "restaurants": true
     },
     "description": "A small beach in a Burgas suburb, popular with local families.",
-    "description_bg": "Малък плаж в предградие на Бургас, популярен сред местните семейства."
+    "description_bg": "Малък плаж в предградие на Бургас, популярен сред местните семейства.",
+    "waveSample": {
+      "lat": 42.4685,
+      "lng": 27.5471,
+      "offsetKm": 4.68
+    }
   },
   {
     "id": "chernomorets",
@@ -595,7 +765,12 @@
       "lifeguards": true
     },
     "description": "The main beach of the town of Chernomorets.",
-    "description_bg": "Основният плаж на град Черноморец."
+    "description_bg": "Основният плаж на град Черноморец.",
+    "waveSample": {
+      "lat": 42.4492,
+      "lng": 27.6624,
+      "offsetKm": 2.05
+    }
   },
   {
     "id": "gradina",
@@ -613,7 +788,12 @@
       "water_sports": true
     },
     "description": "Famous camping beach, popular for kitesurfing and windsurfing.",
-    "description_bg": "Известен къмпинг плаж, популярен за кайтсърф и уиндсърф."
+    "description_bg": "Известен къмпинг плаж, популярен за кайтсърф и уиндсърф.",
+    "waveSample": {
+      "lat": 42.4097,
+      "lng": 27.7268,
+      "offsetKm": 4.1
+    }
   },
   {
     "id": "sozopol_harmanite",
@@ -631,7 +811,12 @@
       "restaurants": true
     },
     "description": "Popular beach in the new town of Sozopol.",
-    "description_bg": "Популярен плаж в новия град на Созопол."
+    "description_bg": "Популярен плаж в новия град на Созопол.",
+    "waveSample": {
+      "lat": 42.4135,
+      "lng": 27.7267,
+      "offsetKm": 2.05
+    }
   },
   {
     "id": "kavatsite",
@@ -648,7 +833,12 @@
       "camping": true
     },
     "description": "A long sandy beach south of Sozopol, bordered by a forest.",
-    "description_bg": "Дълъг пясъчен плаж южно от Созопол, граничещ с гора."
+    "description_bg": "Дълъг пясъчен плаж южно от Созопол, граничещ с гора.",
+    "waveSample": {
+      "lat": 42.3918,
+      "lng": 27.7326,
+      "offsetKm": 2.05
+    }
   },
   {
     "id": "dyuni",
@@ -666,7 +856,12 @@
       "water_sports": true
     },
     "description": "Long sandy beach part of a holiday resort complex.",
-    "description_bg": "Дълъг пясъчен плаж, част от курортен комплекс."
+    "description_bg": "Дълъг пясъчен плаж, част от курортен комплекс.",
+    "waveSample": {
+      "lat": 42.365,
+      "lng": 27.714,
+      "offsetKm": 0
+    }
   },
   {
     "id": "alepu",
@@ -683,7 +878,12 @@
       "dunes": true
     },
     "description": "Long dune-backed beach beside the protected Alepu lagoon, south of Dyuni.",
-    "description_bg": "Дълъг плаж с дюни край защитената Алепска лагуна, южно от Дюни."
+    "description_bg": "Дълъг плаж с дюни край защитената Алепска лагуна, южно от Дюни.",
+    "waveSample": {
+      "lat": 42.3449,
+      "lng": 27.7519,
+      "offsetKm": 2.05
+    }
   },
   {
     "id": "arkutino",
@@ -699,7 +899,12 @@
       "nature_reserve": true
     },
     "description": "Pristine beach known for its sand lilies, part of the Ropotamo Reserve.",
-    "description_bg": "Девствен плаж, известен със своите пясъчни лилии, част от резерват Ропотамо."
+    "description_bg": "Девствен плаж, известен със своите пясъчни лилии, част от резерват Ропотамо.",
+    "waveSample": {
+      "lat": 42.3474,
+      "lng": 27.7558,
+      "offsetKm": 2.34
+    }
   },
   {
     "id": "primorsko_north",
@@ -718,7 +923,12 @@
       "restaurants": true
     },
     "description": "Wide beach with impressive sand dunes, separated from the town by a river.",
-    "description_bg": "Широк плаж с впечатляващи пясъчни дюни, отделен от града с река."
+    "description_bg": "Широк плаж с впечатляващи пясъчни дюни, отделен от града с река.",
+    "waveSample": {
+      "lat": 42.277,
+      "lng": 27.7814,
+      "offsetKm": 2.06
+    }
   },
   {
     "id": "perla",
@@ -734,7 +944,12 @@
       "scenic": true
     },
     "description": "A quiet beach located near the former residence of Todor Zhivkov.",
-    "description_bg": "Тих плаж, разположен до бившата резиденция на Тодор Живков."
+    "description_bg": "Тих плаж, разположен до бившата резиденция на Тодор Живков.",
+    "waveSample": {
+      "lat": 42.2737,
+      "lng": 27.7771,
+      "offsetKm": 2.34
+    }
   },
   {
     "id": "kiten_atliman",
@@ -752,7 +967,12 @@
       "family": true
     },
     "description": "Calm bay beach, very suitable for families with children.",
-    "description_bg": "Спокоен заливен плаж, много подходящ за семейства с деца."
+    "description_bg": "Спокоен заливен плаж, много подходящ за семейства с деца.",
+    "waveSample": {
+      "lat": 42.2416,
+      "lng": 27.7696,
+      "offsetKm": 0
+    }
   },
   {
     "id": "lozenets",
@@ -770,7 +990,12 @@
       "restaurants": true
     },
     "description": "Popular with young people and water sports enthusiasts.",
-    "description_bg": "Популярен сред младите хора и любителите на водни спортове."
+    "description_bg": "Популярен сред младите хора и любителите на водни спортове.",
+    "waveSample": {
+      "lat": 42.2131,
+      "lng": 27.8301,
+      "offsetKm": 2.06
+    }
   },
   {
     "id": "korala",
@@ -786,7 +1011,12 @@
       "camping": true
     },
     "description": "One of the last remaining truly wild beaches, a favorite for campers.",
-    "description_bg": "Един от последните останали истински диви плажове, любим на къмпингуващите."
+    "description_bg": "Един от последните останали истински диви плажове, любим на къмпингуващите.",
+    "waveSample": {
+      "lat": 42.2013,
+      "lng": 27.8445,
+      "offsetKm": 2.06
+    }
   },
   {
     "id": "arapya",
@@ -803,7 +1033,12 @@
       "scenic": true
     },
     "description": "Popular camping beach in a wooded bay just north of Tsarevo.",
-    "description_bg": "Популярен къмпинг плаж в залесен залив, северно от Царево."
+    "description_bg": "Популярен къмпинг плаж в залесен залив, северно от Царево.",
+    "waveSample": {
+      "lat": 42.1887,
+      "lng": 27.8621,
+      "offsetKm": 2.06
+    }
   },
   {
     "id": "tsarevo_central",
@@ -819,7 +1054,12 @@
       "lifeguards": true
     },
     "description": "The small central beach of the town of Tsarevo.",
-    "description_bg": "Малкият централен плаж на град Царево."
+    "description_bg": "Малкият централен плаж на град Царево.",
+    "waveSample": {
+      "lat": 42.1743,
+      "lng": 27.876,
+      "offsetKm": 2.06
+    }
   },
   {
     "id": "nestinarka",
@@ -836,7 +1076,12 @@
       "camping": true
     },
     "description": "A large camping beach just south of Tsarevo.",
-    "description_bg": "Голям къмпинг плаж, южно от Царево."
+    "description_bg": "Голям къмпинг плаж, южно от Царево.",
+    "waveSample": {
+      "lat": 42.1585,
+      "lng": 27.8925,
+      "offsetKm": 2.06
+    }
   },
   {
     "id": "varvara",
@@ -852,7 +1097,12 @@
       "scenic": true
     },
     "description": "A small, picturesque beach nestled among rocks, popular for diving.",
-    "description_bg": "Малък, живописен плаж, сгушен сред скали, популярен за гмуркане."
+    "description_bg": "Малък, живописен плаж, сгушен сред скали, популярен за гмуркане.",
+    "waveSample": {
+      "lat": 42.1277,
+      "lng": 27.932,
+      "offsetKm": 2.06
+    }
   },
   {
     "id": "ahtopol",
@@ -868,7 +1118,12 @@
       "lifeguards": true
     },
     "description": "The main beach of the southernmost town on the coast.",
-    "description_bg": "Основният плаж на най-южния град по крайбрежието."
+    "description_bg": "Основният плаж на най-южния град по крайбрежието.",
+    "waveSample": {
+      "lat": 42.1028,
+      "lng": 27.958,
+      "offsetKm": 2.06
+    }
   },
   {
     "id": "sinemorets_veleka",
@@ -885,7 +1140,12 @@
       "scenic": true
     },
     "description": "Stunning beach where the Veleka River meets the sea, creating a sandbar.",
-    "description_bg": "Зашеметяващ плаж, където река Велека се влива в морето, образувайки пясъчна коса."
+    "description_bg": "Зашеметяващ плаж, където река Велека се влива в морето, образувайки пясъчна коса.",
+    "waveSample": {
+      "lat": 42.0666,
+      "lng": 27.9734,
+      "offsetKm": 0
+    }
   },
   {
     "id": "sinemorets_butamyata",
@@ -901,7 +1161,12 @@
       "lifeguards": true
     },
     "description": "The main, southern beach of Sinemorets, located in a calm bay.",
-    "description_bg": "Основният, южен плаж на Синеморец, разположен в спокоен залив."
+    "description_bg": "Основният, южен плаж на Синеморец, разположен в спокоен залив.",
+    "waveSample": {
+      "lat": 42.0553,
+      "lng": 28.0115,
+      "offsetKm": 2.06
+    }
   },
   {
     "id": "lipite",
@@ -917,7 +1182,12 @@
       "nudist_friendly": true
     },
     "description": "A secluded wild beach accessible by a walk from Sinemorets.",
-    "description_bg": "Уединен див плаж, достъпен пеша от Синеморец."
+    "description_bg": "Уединен див плаж, достъпен пеша от Синеморец.",
+    "waveSample": {
+      "lat": 42.0475,
+      "lng": 27.9917,
+      "offsetKm": 0
+    }
   },
   {
     "id": "silistar",
@@ -934,7 +1204,12 @@
       "camping": true
     },
     "description": "One of the most beautiful southern beaches, located in a protected area.",
-    "description_bg": "Един от най-красивите южни плажове, разположен в защитена местност."
+    "description_bg": "Един от най-красивите южни плажове, разположен в защитена местност.",
+    "waveSample": {
+      "lat": 42.0224,
+      "lng": 28.0357,
+      "offsetKm": 2.07
+    }
   },
   {
     "id": "rezovo",
@@ -948,6 +1223,11 @@
     "type": "wild",
     "facilities": {},
     "description": "The southernmost beach in Bulgaria, right at the border with Turkey.",
-    "description_bg": "Най-южният плаж в България, точно на границата с Турция."
+    "description_bg": "Най-южният плаж в България, точно на границата с Турция.",
+    "waveSample": {
+      "lat": 41.9832,
+      "lng": 28.0553,
+      "offsetKm": 2.07
+    }
   }
 ]

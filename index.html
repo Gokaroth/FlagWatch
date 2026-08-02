@@ -57,9 +57,9 @@
                 <div id="filters-container-desktop" class="filter-controls-container">
                     <div class="filter-controls active" role="radiogroup" data-filter-group="conditions" data-i18n-aria="filterGroupLabel">
                         <button class="filter-btn active" role="radio" aria-checked="true" tabindex="0" data-filter="all" data-i18n="filterAll">All</button>
-                        <button class="filter-btn" role="radio" aria-checked="false" tabindex="-1" data-filter="green"><span class="flag-glyph" aria-hidden="true">🟢</span> <span data-i18n="filterGreen">Safe</span></button>
-                        <button class="filter-btn" role="radio" aria-checked="false" tabindex="-1" data-filter="yellow"><span class="flag-glyph" aria-hidden="true">🟡</span> <span data-i18n="filterYellow">Caution</span></button>
-                        <button class="filter-btn" role="radio" aria-checked="false" tabindex="-1" data-filter="red"><span class="flag-glyph" aria-hidden="true">🔴</span> <span data-i18n="filterRed">Danger</span></button>
+                        <button class="filter-btn" role="radio" aria-checked="false" tabindex="-1" data-filter="green"><span class="flag-glyph green" aria-hidden="true"></span> <span data-i18n="filterGreen">Safe</span></button>
+                        <button class="filter-btn" role="radio" aria-checked="false" tabindex="-1" data-filter="yellow"><span class="flag-glyph yellow" aria-hidden="true"></span> <span data-i18n="filterYellow">Caution</span></button>
+                        <button class="filter-btn" role="radio" aria-checked="false" tabindex="-1" data-filter="red"><span class="flag-glyph red" aria-hidden="true"></span> <span data-i18n="filterRed">Danger</span></button>
                     </div>
                 </div>
             </div>
@@ -113,9 +113,9 @@
                 <div id="filters-container" class="filter-controls-container">
                     <div class="filter-controls active" role="radiogroup" data-filter-group="conditions" data-i18n-aria="filterGroupLabel">
                         <button class="filter-btn active" role="radio" aria-checked="true" tabindex="0" data-filter="all" data-i18n="filterAll">All</button>
-                        <button class="filter-btn" role="radio" aria-checked="false" tabindex="-1" data-filter="green"><span class="flag-glyph" aria-hidden="true">🟢</span> <span data-i18n="filterGreen">Safe</span></button>
-                        <button class="filter-btn" role="radio" aria-checked="false" tabindex="-1" data-filter="yellow"><span class="flag-glyph" aria-hidden="true">🟡</span> <span data-i18n="filterYellow">Caution</span></button>
-                        <button class="filter-btn" role="radio" aria-checked="false" tabindex="-1" data-filter="red"><span class="flag-glyph" aria-hidden="true">🔴</span> <span data-i18n="filterRed">Danger</span></button>
+                        <button class="filter-btn" role="radio" aria-checked="false" tabindex="-1" data-filter="green"><span class="flag-glyph green" aria-hidden="true"></span> <span data-i18n="filterGreen">Safe</span></button>
+                        <button class="filter-btn" role="radio" aria-checked="false" tabindex="-1" data-filter="yellow"><span class="flag-glyph yellow" aria-hidden="true"></span> <span data-i18n="filterYellow">Caution</span></button>
+                        <button class="filter-btn" role="radio" aria-checked="false" tabindex="-1" data-filter="red"><span class="flag-glyph red" aria-hidden="true"></span> <span data-i18n="filterRed">Danger</span></button>
                     </div>
                 </div>
             </div>
@@ -161,6 +161,11 @@
                         <span id="waves-value" class="condition-value">--</span>
                     </div>
                     <div class="condition-item">
+                        <span class="condition-icon" aria-hidden="true">📈</span>
+                        <span class="condition-label" id="waves-max-label">Largest wave</span>
+                        <span id="waves-max-value" class="condition-value">--</span>
+                    </div>
+                    <div class="condition-item">
                         <span class="condition-icon" aria-hidden="true">💨</span>
                         <span class="condition-label" id="wind-label">Wind</span>
                         <span id="wind-value" class="condition-value">--</span>
@@ -192,6 +197,7 @@
                     </div>
                 </div>
                 <p class="data-disclaimer" id="water-temp-disclaimer"></p>
+                <p class="data-disclaimer sea-state-notice" id="sea-state-notice"></p>
 
                 <div id="beach-cleanliness" class="cleanliness-section">
                     <h3 id="cleanliness-title" class="modal-section-title">Algae Report</h3>
@@ -240,28 +246,28 @@
                     </div>
                 </div>
                 <div class="settings-section">
-                    <h3 id="flag-legend-title">Flag Legend</h3>
+                    <h3 id="flag-legend-title">Sea Conditions (modelled)</h3>
                     <div class="legend-items">
                         <div class="legend-item">
-                            <span class="flag-icon green" aria-hidden="true">🟢</span>
-                            <span id="legend-green">Safe swimming conditions</span>
+                            <span class="legend-swatch sea-calm" aria-hidden="true"></span>
+                            <span id="legend-green">Calm: low modelled waves and wind</span>
                         </div>
                         <div class="legend-item">
-                            <span class="flag-icon yellow" aria-hidden="true">🟡</span>
-                            <span id="legend-yellow">Caution advised</span>
+                            <span class="legend-swatch sea-moderate" aria-hidden="true"></span>
+                            <span id="legend-yellow">Moderate: choppy, gusty</span>
                         </div>
                         <div class="legend-item">
-                            <span class="flag-icon red" aria-hidden="true">🔴</span>
-                            <span id="legend-red">Dangerous conditions</span>
+                            <span class="legend-swatch sea-rough" aria-hidden="true"></span>
+                            <span id="legend-red">Rough: large breaking waves</span>
                         </div>
                     </div>
                 </div>
                 <div class="settings-section">
-                    <h3 id="algae-legend-title">Algae Legend</h3>
+                    <h3 id="algae-legend-title">Algae — chlorophyll-a (satellite)</h3>
                     <div class="legend-items">
                          <div class="legend-item">
                             <span class="legend-swatch clear"></span>
-                            <span id="legend-clear">Clear: Low Chlorophyll</span>
+                            <span id="legend-clear">Low: little chlorophyll detected</span>
                         </div>
                         <div class="legend-item">
                             <span class="legend-swatch moderate"></span>
@@ -276,6 +282,7 @@
                             <span id="legend-unavailable">Unavailable: No recent satellite data</span>
                         </div>
                     </div>
+                    <p class="data-disclaimer" id="algaeNotice"></p>
                 </div>
                 <div class="settings-section">
                     <h3 id="safety-tips-title">Safety Tips</h3>

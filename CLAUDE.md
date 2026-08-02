@@ -2,13 +2,14 @@
 
 Working guide for Claude in this repo. Deeper detail: `AI_CONTEXT_MEMO.md`, `DATA_SOURCES.md`, `ROADMAP.md`.
 
-FlagWatch is a real-time **beach safety + water-cleanliness PWA** for the Bulgarian Black Sea coast (56 beaches). Live at flagwatch.gokaroth.com. Vanilla JS frontend (**no build step**); a single Node server (`server.mjs`) backend on **Fly.io** (migrated off Netlify).
+FlagWatch is a real-time **sea-conditions + algae PWA** for the Bulgarian Black Sea coast (56 beaches). Live at flagwatch.gokaroth.com. Vanilla JS frontend (**no build step**); a single Node server (`server.mjs`) backend on **Fly.io** (migrated off Netlify).
 
 ## ⛔ Prime directive: never fabricate data
 This is a safety app. Honor these invariants in every change:
 - A missing/failed numeric value is `null` and renders as `—`. **Never** default to `0`.
-- Water cleanliness is `clear | moderate | high | unavailable`. `unavailable` is a real, visible (neutral-grey) state — it is shown whenever there's no genuine numeric CHL value and **must never imply clean water**.
-- The safety flag needs **both** wave height and wind speed; if either is missing it is `null` → "⚪ Unknown" (never an assumed-safe green).
+- Algae (CHL) is `clear | moderate | high | unavailable`. `unavailable` is a real, visible (neutral-grey) state — shown whenever there's no genuine numeric CHL value and **must never imply clean water**. CHL measures **algae, not bacteria** — it is not an EU bathing-water quality assessment (Directive 2006/7/EC uses E. coli / intestinal enterococci). Never label it "cleanliness" in user-facing copy.
+- **`flag` is a modelled SEA-STATE band, never a swim-safety flag.** Real Bulgarian flags are set by a lifeguard on the sand (ПМС № 82/2024) with no numeric thresholds, only at guarded beaches, and are published nowhere. So: never render it in official-flag language, never assure the user that swimming is safe, never state that swimming is prohibited, and always keep the "follow the flag on the beach" notice visible. It needs a wave height AND at least one wind measure; otherwise `null` → "Unknown" (never an assumed-calm green).
+- Honesty applies to **derived** values too, not just missing ones. A present, well-formed, confidently-wrong band is the failure mode that matters here — if the whole coast resolves to one band, that is a bug, not a calm day.
 - Water temperature is a modeled estimate and shows a disclaimer.
 Don't reintroduce any "demo"/synthetic fallback.
 
@@ -22,7 +23,11 @@ app.js                       class BeachSafetyApp — Leaflet map, list, modal, 
                              Directions (Google Maps), Share (native sheet → clipboard fallback)
 index.html / style.css       UI + themes (CSS custom properties, light/dark, WCAG 2.2 AA)
 sw.js                        service worker (precache + network-first)
-lib/copernicus.mjs           Copernicus Marine WMTS (CHL + Black Sea SST), honest "unavailable" on failure
+lib/copernicus.mjs           Copernicus Marine WMTS: CHL + Black Sea SST + the 2.5km BLKSEA WAVE
+                             model (VHM0/VCMX); honest null/"unavailable" on failure
+tools/calibrate-wave-points.mjs  one-off: resolves each beach's nearest WET 2.5km wave cell and
+                             writes `waveSample` {lat,lng,offsetKm} into beaches.json. Re-run if
+                             coordinates change or the dataset version is bumped.
 lib/fetch-beach-data.mjs     buildAllBeachData({fast}) — Open-Meteo (batched, current=) + Copernicus
 server.mjs                   THE BACKEND (zero deps). Serves static files + the API; runs the
                              collector in-process. Endpoints:
@@ -40,7 +45,7 @@ refetch when a new build lands. Frontend also fetches `/data/beaches.json` for i
 No 30s/15min function limits on Fly, so the full Copernicus build runs inline (no collect/background split).
 
 ### Merged record shape (the data contract — keep field names exact)
-`conditions`: `waveHeight, waterTemp, waterTempSource, airTemp, windSpeed, windGust, windDirection, uvIndex, flag, lastUpdated` (numbers or `null`; `flag` = `green|yellow|red|null`)
+`conditions`: `waveHeight, waveMax, waveSource, waveSampleKm, waterTemp, waterTempSource, airTemp, windSpeed, windGust, windDirection, uvIndex, flag, lastUpdated` (numbers or `null`; `flag` = `green|yellow|red|null` — internal keys kept for the data contract/history/CSS, but they mean **calm|moderate|rough**, not safe|caution|danger)
 `cleanliness`: `status, value, source, observedAt, report_en, report_bg`
 
 ## Conventions

@@ -1,7 +1,7 @@
 // NOTE: This app no longer uses the Gemini API for cleanliness reports.
 // It has been replaced with a real scientific data source from Copernicus Marine Service.
 
-const APP_VERSION = '9.1.0'; // Increment this to show the popup for new users/updates
+const APP_VERSION = '10.0.0'; // Increment this to show the popup for new users/updates
 
 /**
  * Configuration for the "What's New" popup.
@@ -9,66 +9,56 @@ const APP_VERSION = '9.1.0'; // Increment this to show the popup for new users/u
  * The content is dynamically built from the `features` array and supports multiple languages.
  */
 const WHATS_NEW_CONFIG = {
-    version: '9.1.0',
+    version: '10.0.0',
     features: [
         {
             title: {
-                en: '♿ Accessibility & Design Refresh',
-                bg: '♿ Достъпност и обновен дизайн'
+                en: '⚠️ The flag is now “Sea Conditions” — and it is not a lifeguard flag',
+                bg: '⚠️ Флагът вече е „Състояние на морето“ — и не е спасителен флаг'
             },
             description: {
-                en: "FlagWatch is now fully keyboard- and screen-reader-friendly (WCAG 2.2 AA): a redesigned beach card, a cleaner detail view with the safety flag front and centre, clearer high-contrast colours, and a new minimalist map with a true dark mode. Status is never shown by colour alone.",
-                bg: "FlagWatch вече е напълно достъпен с клавиатура и екранен четец (WCAG 2.2 AA): преработена карта на плажа, по-ясен изглед с флага за безопасност на видно място, по-контрастни цветове и нова минималистична карта с истински тъмен режим. Статусът никога не се показва само чрез цвят."
+                en: "The biggest change we have ever made. FlagWatch used to show a green/yellow/red safety flag and tell you the water was safe to swim. It should never have done that. A real beach flag is raised by a lifeguard standing on the sand, who can see rip currents, jellyfish and swimmers — things no model can see. So the flag is gone. In its place you now get <strong>Calm / Moderate / Rough</strong>: an honest description of the modelled sea state, and nothing more. Always follow the flag actually flying on the beach and the lifeguard's instructions — they outrank this app, every time.",
+                bg: "Най-голямата промяна, която сме правили. Досега FlagWatch показваше зелен/жълт/червен флаг за безопасност и Ви казваше, че водата е безопасна за плуване. Това никога не е трябвало да се случва. Истинският флаг се вдига от спасител на плажа, който вижда обратни течения, медузи и хора във водата — неща, които никой модел не вижда. Затова флагът отпада. На негово място вече виждате <strong>Спокойно / Умерено / Бурно</strong>: честно описание на моделираното състояние на морето и нищо повече. Винаги спазвайте флага, който реално се вее на плажа, и указанията на спасителя — те винаги имат предимство пред това приложение."
             },
         },
         {
             title: {
-                en: '🏖️ Massive Beach Expansion!',
-                bg: '🏖️ Мащабно разширение на плажовете!'
+                en: '🌊 Wave data is now measured ~2 km away, not ~11 km',
+                bg: '🌊 Данните за вълните вече са от ~2 км, а не от ~11 км'
             },
             description: {
-                en: "We've massively expanded our database from 15 to 56 beaches! The app now covers the entire Bulgarian Black Sea coast, from Durankulak to Rezovo, including popular wild beaches.",
-                bg: "Разширихме мащабно базата си данни от 15 на 56 плажа! Приложението вече покрива цялото българско Черноморие, от Дуранкулак до Резово, включително популярни диви плажове."
+                en: "Our old wave source quietly moved each beach out to the open sea to find water — a median of 11 km offshore, up to 21 km, with seven southern beaches all sharing one grid square and getting identical numbers. We have switched to the Copernicus 2.5 km Black Sea wave model, which actually accounts for shallow water and breaking waves. Every beach is now sampled a median of 2 km away, and each one tells you its exact distance.",
+                bg: "Старият ни източник за вълни незабелязано преместваше всеки плаж навътре в морето, за да намери вода — средно на 11 км от брега, до 21 км, като седем южни плажа попадаха в един и същ квадрат и получаваха еднакви стойности. Преминахме към модела на Copernicus за Черно море с разделителна способност 2,5 км, който отчита плитките води и разбиващите се вълни. Вече всеки плаж се измерва средно на 2 км и показва точното си разстояние."
             },
         },
         {
             title: {
-                en: '🔬 Real Scientific Algae Data',
-                bg: '🔬 Научни данни за водорасли в реално време'
+                en: '📈 We now show the largest wave, not just the average',
+                bg: '📈 Вече показваме най-голямата вълна, а не само средната'
             },
             description: {
-                en: "Cleanliness reports are now powered by real satellite data from the EU's Copernicus Marine Service, providing accurate, science-based algae bloom information.",
-                bg: "Докладите за чистота вече се базират на реални сателитни данни от Морската служба на ЕС „Коперник“, предоставяйки точна, научнообоснована информация за цъфтежа на водорасли."
+                en: "Wave height is normally an average — roughly one wave in ten is bigger than the number you are shown. That is the wave that knocks you off your feet. Each beach now also shows the modelled <strong>largest wave</strong>, and it is this figure, not the average, that decides whether conditions are marked Rough.",
+                bg: "Височината на вълните обикновено е средна стойност — приблизително всяка десета вълна е по-голяма от показаното число. Точно тя Ви събаря. Вече за всеки плаж показваме и моделираната <strong>най-голяма вълна</strong>, и именно тази стойност, а не средната, определя дали условията са отбелязани като Бурно."
             },
         },
         {
             title: {
-                en: '🌗 Full Dark Mode Support',
-                bg: '🌗 Пълна поддръжка на тъмен режим'
+                en: '🌿 “Clean water” is now correctly labelled “Algae”',
+                bg: '🌿 „Чиста вода“ вече е правилно означено като „Водорасли“'
             },
             description: {
-                en: "Enjoy a beautiful new dark theme, perfect for night-time viewing. Find the toggle in the Settings menu (⚙️). It also respects your system's default theme!",
-                bg: "Насладете се на красива нова тъмна тема, идеална за нощно гледане. Намерете превключвателя в менюто с настройки (⚙️). Тя също така уважава темата по подразбиране на вашата система!"
+                en: "Our satellite reading measures chlorophyll — that is algae. It says nothing about bacteria, which is what actually determines whether bathing water is safe under EU rules. Calling it “clean water” overstated it, so it is now labelled Algae, and low readings no longer imply the water is clean.",
+                bg: "Сателитното ни измерване отчита хлорофил — тоест водорасли. То не казва нищо за бактериите, а именно те определят дали водата за къпане е безопасна според правилата на ЕС. Определението „чиста вода“ беше пресилено, затова вече е означено като Водорасли, а ниските стойности вече не означават, че водата е чиста."
             },
         },
         {
             title: {
-                en: '🗺️ Enhanced Map Markers',
-                bg: '🗺️ Подобрени маркери на картата'
-            },
-            description: {
-                en: "See the cleanliness status at a glance! Beach markers on the map now include a small colored dot to indicate algae conditions.",
-                bg: "Вижте състоянието на чистотата с един поглед! Маркерите на плажовете на картата вече включват малка цветна точка, която показва състоянието на водораслите."
-            },
-        },
-         {
-            title: {
-                en: '🎁 See Updates Anytime',
+                en: '🎁 See updates anytime',
                 bg: '🎁 Вижте новостите по всяко време'
             },
             description: {
-                en: "Missed what's new? You can now open this update panel anytime by clicking the gift icon (🎁) in the header.",
-                bg: "Пропуснали сте какво е новото? Вече можете да отворите този панел с актуализации по всяко време, като кликнете върху иконата за подарък (🎁) в заглавната част."
+                en: "You can reopen this panel at any time from the gift icon (🎁) in the header.",
+                bg: "Можете да отворите отново този панел по всяко време от иконата за подарък (🎁) в заглавната част."
             },
         }
     ]
@@ -501,7 +491,6 @@ class BeachSafetyApp {
             if (this.currentFilter !== 'all' && flag !== this.currentFilter) return;
 
             const flagKey = flag || 'unknown';
-            const flagEmoji = flag === 'red' ? '🔴' : flag === 'yellow' ? '🟡' : flag === 'green' ? '🟢' : '⚪';
             const cleanlinessStatus = beach.cleanliness?.status || 'unavailable';
             // Algae shown by SHAPE (a leaf), not colour alone (WCAG 1.4.1). Clear/unavailable
             // show no leaf — the full status is in the marker's accessible name and the modal.
@@ -514,7 +503,7 @@ class BeachSafetyApp {
 
             const markerIcon = L.divIcon({
                 className: `custom-marker-icon ${flagKey}`,
-                html: `<div class="flag-emoji ${flagKey}" aria-hidden="true">${flagEmoji}</div>`
+                html: `<div class="flag-emoji ${flagKey}" aria-hidden="true"></div>`
                     + (algaeBadge ? `<div class="cleanliness-badge ${cleanlinessStatus}" aria-hidden="true">${algaeBadge}</div>` : '')
                     + `<span class="visually-hidden">${this.escape(label)}</span>`,
                 iconSize: [30, 42],
@@ -579,9 +568,8 @@ class BeachSafetyApp {
 
             const flag = beach.conditions.flag;
             const flagKey = flag || 'unknown';
-            const flagEmoji = flag === 'red' ? '🔴' : flag === 'yellow' ? '🟡' : flag === 'green' ? '🟢' : '⚪';
-            // Flag status as a word (strip the leading emoji) for the card's accessible name.
-            const flagWord = (this.translations[lang].flags[flagKey] || '').replace(/^\S+\s+/, '');
+            // Sea-state label for the card's accessible name (labels carry no emoji prefix).
+            const flagWord = this.translations[lang].flags[flagKey] || '';
             const name = lang === 'bg' ? beach.name_bg : beach.name;
             const nameSecondary = lang === 'bg' ? beach.name : beach.name_bg;
 
@@ -598,7 +586,7 @@ class BeachSafetyApp {
                         <h3 class="beach-name"><button type="button" class="beach-item__btn">${this.escape(name)}<span class="visually-hidden"> — ${this.escape(flagWord)}</span></button></h3>
                         <p class="beach-name-bg">${this.escape(nameSecondary)}</p>
                     </div>
-                    <span class="flag-glyph" aria-hidden="true">${flagEmoji}</span>
+                    <span class="flag-glyph ${flagKey}" aria-hidden="true"></span>
                 </div>
                 <div class="beach-info">
                     <div>${this.getFacilityIcons(beach.facilities)}</div>
@@ -656,6 +644,20 @@ class BeachSafetyApp {
         // Conditions — backend returns NUMBERS or null; render null-safely.
         document.getElementById('wind-value').textContent = this.fmt(c.windSpeed, ' km/h', 0);
         document.getElementById('waves-value').textContent = this.fmt(c.waveHeight, ' m', 2);
+        const wavesMaxEl = document.getElementById('waves-max-value');
+        if (wavesMaxEl) wavesMaxEl.textContent = this.fmt(c.waveMax, ' m', 2);
+        // Sampling-distance notice. The Copernicus point is a KNOWN, per-beach offset (median ~2 km);
+        // the Open-Meteo fallback is a silent one that can be 20 km out. Say which one this is.
+        const seaNoticeEl = document.getElementById('sea-state-notice');
+        if (seaNoticeEl) {
+            if (typeof c.waveSampleKm === 'number') {
+                seaNoticeEl.textContent = this.t('seaStateNoticeSampled', { km: c.waveSampleKm.toFixed(1) });
+            } else if (c.waveSource && c.waveSource !== 'copernicus-blksea-wav-2.5km') {
+                seaNoticeEl.textContent = this.t('seaStateNoticeCoarse');
+            } else {
+                seaNoticeEl.textContent = this.t('seaStateNotice');
+            }
+        }
         document.getElementById('water-temp-value').textContent = this.fmt(c.waterTemp, '°C', 1);
         document.getElementById('air-temp-value').textContent = this.fmt(c.airTemp, '°C', 1);
         document.getElementById('uv-index-value').textContent = this.fmt(c.uvIndex, '', 1);
@@ -1218,6 +1220,8 @@ class BeachSafetyApp {
         // Explicit wiring for elements whose ids don't match their i18n keys.
         const disclaimerEl = document.getElementById('water-temp-disclaimer');
         if (disclaimerEl) disclaimerEl.textContent = translations.waterTempDisclaimer;
+        const seaNoticeEl = document.getElementById('sea-state-notice');
+        if (seaNoticeEl && !this.currentBeach) seaNoticeEl.textContent = translations.seaStateNotice;
         const dataErrorTextEl = document.getElementById('data-error-text');
         if (dataErrorTextEl) dataErrorTextEl.textContent = translations.dataError;
 
@@ -1244,12 +1248,13 @@ class BeachSafetyApp {
             "settings-modal-title": "Settings",
             "theme-title": "Theme",
             "dark-mode-label": "Dark Mode",
-            "flag-legend-title": "Flag Legend",
-            "legend-green": "Safe swimming conditions",
-            "legend-yellow": "Caution advised",
-            "legend-red": "Dangerous conditions",
-            "algae-legend-title": "Algae Legend",
-            "legend-clear": "Clear: Low Chlorophyll",
+            "flag-legend-title": "Sea Conditions (modelled)",
+            "legend-green": "Calm: low modelled waves and wind",
+            "legend-yellow": "Moderate: choppy, gusty",
+            "legend-red": "Rough: large breaking waves",
+            "algae-legend-title": "Algae — chlorophyll-a (satellite)",
+            "algaeNotice": "Measures algae, not bacteria. This is not an EU bathing-water quality assessment and does not indicate whether the water is free of contamination.",
+            "legend-clear": "Low: little chlorophyll detected",
             "legend-moderate": "Moderate: Potential algae bloom",
             "legend-high": "High: Widespread algae bloom",
             "legend-unavailable": "Unavailable: No recent satellite data",
@@ -1261,13 +1266,18 @@ class BeachSafetyApp {
             "whats-new-modal-title": "What's New!",
             "offline-text": "Offline Mode - Showing cached data",
             "searchPlaceholder": "Search beaches...",
-            "flagStatus": "Flag Status",
+            "flagStatus": "Sea Conditions (modelled)",
+            "seaStateNotice": "Modelled estimate. This is NOT a lifeguard flag — always follow the flag flying on the beach and the lifeguard’s instructions.",
+            "seaStateNoticeSampled": "Modelled estimate, sampled {km} km offshore (Copernicus 2.5 km Black Sea wave model). This is NOT a lifeguard flag — always follow the flag flying on the beach and the lifeguard’s instructions.",
+            "seaStateNoticeCoarse": "Modelled estimate from a global ~8 km grid, which can sample up to 20 km offshore. This is NOT a lifeguard flag — always follow the flag flying on the beach and the lifeguard’s instructions.",
+            "waves-max-label": "Largest wave",
+            "wavesMaxNote": "modelled maximum crest",
             "lastUpdated": "Last updated",
             "facilities": "Facilities",
             "noResults": "No beaches match your criteria.",
             "locationNotEnabled": "Location permission is not enabled. Please enable it in your browser settings to use this feature.",
             "sharingNotSupported": "Web Share API is not supported in your browser.",
-            "shareText": "Checking out {name} on FlagWatch — current status: {status}.",
+            "shareText": "Checking out {name} on FlagWatch.",
             "linkCopied": "Link copied to clipboard.",
             "copied": "Copied!",
             "show-on-map-text": "Show on Map",
@@ -1282,14 +1292,14 @@ class BeachSafetyApp {
             "installApp": "Install App",
             "conditionsTitle": "Conditions",
             "filterAll": "All",
-            "filterGreen": "Safe",
-            "filterYellow": "Caution",
-            "filterRed": "Danger",
+            "filterGreen": "Calm",
+            "filterYellow": "Moderate",
+            "filterRed": "Rough",
             "sidebarLabel": "Beaches: search, filter and list",
             "langSwitchLabel": "Switch language (English / Bulgarian)",
             "whatsNewLabel": "What's new",
             "settingsLabel": "Settings",
-            "filterGroupLabel": "Filter beaches by flag status",
+            "filterGroupLabel": "Filter beaches by sea conditions",
             "mapRegionLabel": "Map of Black Sea beaches. The same beaches are listed in the List tab.",
             "viewTablistLabel": "Choose map or list view",
             "locateLabel": "Find my location",
@@ -1314,19 +1324,21 @@ class BeachSafetyApp {
             "trendAria": "{label}, {range}: {min}–{max}{unit}",
             "liveUpdated": "Conditions updated.",
             flags: {
-                green: "🟢 Safe",
-                yellow: "🟡 Caution",
-                red: "🔴 Danger",
-                unknown: "⚪ Unknown"
+                green: "Calm",
+                yellow: "Moderate",
+                red: "Rough",
+                unknown: "Unknown"
             },
+            // Descriptive only. This app must never assure a user that swimming is safe, and has
+            // no standing to prohibit it — only a lifeguard can do either.
             safetyMessages: {
-                green: "Enjoy the water, conditions are safe for swimming.",
-                yellow: "Be cautious when swimming. Conditions are moderate.",
-                red: "Swimming is prohibited. Conditions are dangerous.",
-                unknown: "Live safety data is unavailable right now."
+                green: "Modelled seas are calm. Conditions at the shoreline can still differ.",
+                yellow: "Modelled seas are moderate — choppy water and gusty wind likely.",
+                red: "Modelled seas are rough. Expect large, breaking waves.",
+                unknown: "Sea-state data is unavailable right now."
             },
             algaeStatus: {
-                clear: "Clear",
+                clear: "Low",
                 moderate: "Moderate",
                 high: "High",
                 unavailable: "Unavailable"
@@ -1352,12 +1364,13 @@ class BeachSafetyApp {
             "settings-modal-title": "Настройки",
             "theme-title": "Тема",
             "dark-mode-label": "Тъмен режим",
-            "flag-legend-title": "Легенда на флаговете",
-            "legend-green": "Безопасни условия за плуване",
-            "legend-yellow": "Препоръчва се повишено внимание",
-            "legend-red": "Опасни условия",
-            "algae-legend-title": "Легенда за водорасли",
-            "legend-clear": "Чисто: Ниска концентрация на хлорофил",
+            "flag-legend-title": "Състояние на морето (моделирано)",
+            "legend-green": "Спокойно: слаби моделирани вълни и вятър",
+            "legend-yellow": "Умерено: вълнение и пориви",
+            "legend-red": "Бурно: големи, разбиващи се вълни",
+            "algae-legend-title": "Водорасли — хлорофил-а (сателит)",
+            "algaeNotice": "Измерва водорасли, а не бактерии. Това не е оценка на качеството на водата за къпане по стандартите на ЕС и не показва дали водата е чиста от замърсяване.",
+            "legend-clear": "Ниско: засечен е малко хлорофил",
             "legend-moderate": "Умерено: Възможен цъфтеж на водорасли",
             "legend-high": "Високо: Масов цъфтеж на водорасли",
             "legend-unavailable": "Недостъпно: Няма скорошни сателитни данни",
@@ -1369,13 +1382,18 @@ class BeachSafetyApp {
             "whats-new-modal-title": "Какво ново!",
             "offline-text": "Офлайн режим - Показват се кеширани данни",
             "searchPlaceholder": "Търсене на плажове...",
-            "flagStatus": "Статус на флага",
+            "flagStatus": "Състояние на морето (моделирано)",
+            "seaStateNotice": "Моделирана оценка. Това НЕ е спасителен флаг — винаги спазвайте флага на плажа и указанията на спасителя.",
+            "seaStateNoticeSampled": "Моделирана оценка, измерена на {km} км навътре (модел на Copernicus за Черно море, 2,5 км). Това НЕ е спасителен флаг — винаги спазвайте флага на плажа и указанията на спасителя.",
+            "seaStateNoticeCoarse": "Моделирана оценка от глобална мрежа с ~8 км стъпка, която може да измерва до 20 км навътре. Това НЕ е спасителен флаг — винаги спазвайте флага на плажа и указанията на спасителя.",
+            "waves-max-label": "Най-голяма вълна",
+            "wavesMaxNote": "моделиран максимален гребен",
             "lastUpdated": "Последно обновяване",
             "facilities": "Удобства",
             "noResults": "Няма плажове, отговарящи на вашите критерии.",
             "locationNotEnabled": "Разрешението за местоположение не е активирано. Моля, активирайте го в настройките на браузъра си, за да използвате тази функция.",
             "sharingNotSupported": "API за споделяне в мрежата не се поддържа от вашия браузър.",
-            "shareText": "Разглеждам {name} във FlagWatch — текущ статус: {status}.",
+            "shareText": "Разглеждам {name} във FlagWatch.",
             "linkCopied": "Връзката е копирана.",
             "copied": "Копирано!",
             "show-on-map-text": "Покажи на картата",
@@ -1390,14 +1408,14 @@ class BeachSafetyApp {
             "installApp": "Инсталирай",
             "conditionsTitle": "Условия",
             "filterAll": "Всички",
-            "filterGreen": "Безопасно",
-            "filterYellow": "Внимание",
-            "filterRed": "Опасно",
+            "filterGreen": "Спокойно",
+            "filterYellow": "Умерено",
+            "filterRed": "Бурно",
             "sidebarLabel": "Плажове: търсене, филтър и списък",
             "langSwitchLabel": "Смяна на езика (английски / български)",
             "whatsNewLabel": "Какво ново",
             "settingsLabel": "Настройки",
-            "filterGroupLabel": "Филтриране на плажове по статус на флага",
+            "filterGroupLabel": "Филтриране на плажове по състояние на морето",
             "mapRegionLabel": "Карта на черноморските плажове. Същите плажове са в раздела „Списък“.",
             "viewTablistLabel": "Изберете изглед карта или списък",
             "locateLabel": "Намери моето местоположение",
@@ -1422,19 +1440,19 @@ class BeachSafetyApp {
             "trendAria": "{label}, {range}: {min}–{max}{unit}",
             "liveUpdated": "Условията са обновени.",
             flags: {
-                green: "🟢 Безопасно",
-                yellow: "🟡 Внимание",
-                red: "🔴 Опасно",
-                unknown: "⚪ Неизвестно"
+                green: "Спокойно",
+                yellow: "Умерено",
+                red: "Бурно",
+                unknown: "Неизвестно"
             },
             safetyMessages: {
-                green: "Наслаждавайте се на водата, условията са безопасни за плуване.",
-                yellow: "Бъдете внимателни при плуване. Условията са умерени.",
-                red: "Плуването е забранено. Условията са опасни.",
-                unknown: "Данните за безопасност в момента са недостъпни."
+                green: "Моделът показва спокойно море. На брега условията може да са различни.",
+                yellow: "Моделът показва умерено вълнение — вероятни са вълни и силни пориви.",
+                red: "Моделът показва бурно море. Очаквайте големи, разбиващи се вълни.",
+                unknown: "Данните за състоянието на морето в момента са недостъпни."
             },
             algaeStatus: {
-                clear: "Чисто",
+                clear: "Ниско",
                 moderate: "Умерено",
                 high: "Високо",
                 unavailable: "Недостъпно"

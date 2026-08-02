@@ -1,4 +1,4 @@
-const CACHE_NAME = 'beach-safety-v12'; // Incremented version to force update
+const CACHE_NAME = 'beach-safety-v13'; // v13: sea-conditions reframe + Copernicus wave source (app v10.0.0)
 const urlsToCache = [
     '/',
     '/index.html',

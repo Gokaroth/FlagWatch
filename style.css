@@ -271,7 +271,20 @@ body.dark-mode .form-control:focus { box-shadow: 0 0 0 0.2rem rgba(77, 171, 247,
    downward (the drift scales with zoom). absolute is still a containing block for
    the position:absolute .cleanliness-badge, so the leaf badge stays anchored. */
 .custom-marker-icon { position: absolute; display: flex; align-items: center; justify-content: center; }
-.flag-emoji { font-size: 24px; text-shadow: 0px 0px 3px rgba(0,0,0,0.5); }
+/* Map marker disc. CSS-drawn, not an emoji — same 22px visual footprint inside the
+   unchanged 30x42 iconSize box, so iconAnchor [15,21] stays the true geographic point. */
+.flag-emoji {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 2px solid #fff;
+  box-shadow: 0 0 3px rgba(0,0,0,0.5);
+  background-color: var(--color-gray-500);
+}
+.flag-emoji.green { background-color: var(--color-success); }
+.flag-emoji.yellow { background-color: var(--color-warning); }
+.flag-emoji.red { background-color: var(--color-danger); }
+.flag-emoji.unknown { background-color: var(--color-gray-500); }
 .cleanliness-dot { position: absolute; bottom: 5px; right: 0px; width: 10px; height: 10px; border-radius: 50%; border: 1.5px solid white; box-shadow: 0 0 3px rgba(0,0,0,0.5); }
 .cleanliness-dot.clear { background-color: var(--color-info); }
 .cleanliness-dot.moderate { background-color: var(--color-warning); }
@@ -337,8 +350,7 @@ input:checked + .slider:before { transform: translateX(24px); }
 .cleanliness-dot.unavailable { background-color: var(--color-gray-500); }
 .cleanliness-status.unavailable { color: var(--color-text-light); }
 
-/* Grey legend swatch for the "unavailable" algae legend row.
-   Sized/spaced to align with the existing .flag-icon emoji-based legend markers. */
+/* Grey legend swatch for the "unavailable" algae legend row. */
 .legend-swatch {
   display: inline-block;
   width: 1.2rem;
@@ -348,6 +360,12 @@ input:checked + .slider:before { transform: translateX(24px); }
   flex-shrink: 0;
   border: 1px solid var(--color-border);
 }
+.legend-swatch.sea-calm,
+.legend-swatch.sea-moderate,
+.legend-swatch.sea-rough { border-radius: 2px; width: 1.2rem; height: 0.4rem; align-self: center; }
+.legend-swatch.sea-calm { background-color: var(--color-success); }
+.legend-swatch.sea-moderate { background-color: var(--color-warning); }
+.legend-swatch.sea-rough { background-color: var(--color-danger); }
 .legend-swatch.clear { background-color: var(--color-info); }
 .legend-swatch.moderate { background-color: var(--color-warning); }
 .legend-swatch.high { background-color: var(--color-danger); }
@@ -434,7 +452,22 @@ body.dark-mode .skip-link { color: var(--color-black); }
 .filter-controls[role="radiogroup"] { align-items: center; }
 .filter-btn[aria-checked="true"] { background-color: var(--color-primary); color: var(--color-white); box-shadow: var(--box-shadow-sm); }
 body.dark-mode .filter-btn[aria-checked="true"] { color: var(--color-black); }
-.filter-btn .flag-glyph { font-size: 1rem; }
+/* Sea-state swatch. Deliberately a BAR, not a round disc or a flag emoji: this is a
+   modelled sea-state band and must not read as an official beach flag. */
+.flag-glyph {
+  display: inline-block;
+  width: 0.95rem;
+  height: 0.4rem;
+  border-radius: 2px;
+  vertical-align: middle;
+  flex-shrink: 0;
+  background-color: var(--color-gray-500);
+}
+.flag-glyph.green { background-color: var(--color-success); }
+.flag-glyph.yellow { background-color: var(--color-warning); }
+.flag-glyph.red { background-color: var(--color-danger); }
+.flag-glyph.unknown { background-color: var(--color-gray-500); }
+.filter-btn .flag-glyph { margin-right: 0.15rem; }
 
 /* Beach list as a semantic list of stretched-button cards.
    The <button> holds the name (its accessible name); ::after stretches the hit
@@ -450,7 +483,7 @@ body.dark-mode .filter-btn[aria-checked="true"] { color: var(--color-black); }
 .beach-item:has(.beach-item__btn:focus-visible) .beach-name { text-decoration: underline; }
 .beach-item__btn:focus-visible { outline: none; }
 .beach-name { line-height: 1.25; }
-.beach-item-header .flag-glyph { font-size: 1.6rem; line-height: 1; }
+.beach-item-header .flag-glyph { width: 1.4rem; height: 0.5rem; }
 li.no-results { list-style: none; }
 
 /* Accessible map markers: the algae state is shown by SHAPE (a leaf emoji), not

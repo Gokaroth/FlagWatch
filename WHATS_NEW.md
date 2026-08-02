@@ -2,7 +2,7 @@
 
 This guide explains how to display the "What's New" popup to users when you release a new version of the FlagWatch app with updated features. The popup supports both English and Bulgarian.
 
-The process is managed entirely within the `app.js` file and involves two simple steps.
+The process is managed within `app.js` and involves two steps — plus a third that is easy to forget.
 
 ## Step 1: Update the App Version
 
@@ -66,3 +66,30 @@ When a user opens the app, the `checkWhatsNew` function in `app.js` compares the
 - If the versions **do not match**, the app knows the user is on a new version.
 - It then dynamically builds the popup's content from the `WHATS_NEW_CONFIG` object, using the currently selected language (`en` or `bg`).
 - After the user dismisses the popup, the new `APP_VERSION` is saved to their browser, so they won't see the popup again until the next time you update the version.
+
+## Step 3: Bump the service-worker cache (do not skip)
+
+`sw.js` caches `app.js`. Returning users hold a registered service worker, so if you leave
+`CACHE_NAME` alone they can keep being served the previous `app.js` — which means they never see the
+new popup and never get the new UI, no matter how carefully you did steps 1 and 2.
+
+```javascript
+// sw.js, line 1
+const CACHE_NAME = 'beach-safety-v13';  // <-- increment this too
+```
+
+The fetch strategy for same-origin assets is network-first, so most users update anyway — but the
+cache name is what evicts the stale entry for anyone offline or on a flaky connection. Bump it in
+the same commit as the version.
+
+## Checking your work
+
+```bash
+npm test                 # constructs the real app; catches a broken translations object
+node --check app.js
+```
+
+Then verify `APP_VERSION` and `WHATS_NEW_CONFIG.version` are identical — if they differ, the popup
+silently never fires (see `checkWhatsNew()`), which is the most common mistake here. Every feature
+needs `title` and `description` in BOTH `en` and `bg`; a missing `bg` falls back to English rather
+than erroring, so it will not fail loudly.

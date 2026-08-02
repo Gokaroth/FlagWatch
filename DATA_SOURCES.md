@@ -4,7 +4,7 @@ This document explains where FlagWatch's data comes from and how it is interpret
 reputable, scientific sources and are transparent about their limitations. **FlagWatch never
 fabricates data**: when a value is unavailable it is reported as such, never guessed.
 
-## 1. Beach Safety Conditions (Flags: 🟢 🟡 🔴 ⚪)
+## 1. Sea Conditions (Calm / Moderate / Rough / Unknown)
 
 Live meteorological + marine data from the **Open-Meteo API** (keyless).
 
@@ -17,11 +17,44 @@ Live meteorological + marine data from the **Open-Meteo API** (keyless).
 -   Each batched request **retries (3×, with backoff) on a transient failure** (timeout / 429 / 5xx).
     A single hiccup must not blank wind — and therefore the flag — for every beach at once.
 
-**Flag logic** — requires **both** wave height and wind speed; if either is missing the flag is
-**⚪ Unknown** (never an assumed-safe green):
--   `🔴 Danger`: wave height > 2 m OR wind speed > 40 km/h
--   `🟡 Caution`: wave height > 1.25 m OR wind speed > 25 km/h
--   `🟢 Safe`: both known and below the above
+> **This is NOT a swim-safety flag.** Bulgarian beach flags are set by a lifeguard on the sand under
+> Наредба за водноспасителната дейност (ПМС № 82/2024, ДВ бр. 30). That ordinance defines the flags
+> precisely (green 348C / yellow 124C / red 186C, 600×400 mm) but attaches **no numeric thresholds** —
+> the call is lifeguard discretion, and flags exist only at guarded beaches. No official live feed
+> publishes them. FlagWatch therefore reports **modelled sea state** and defers to the physical flag.
+
+**Waves come from Copernicus, not Open-Meteo.** Primary source is
+**`BLKSEA_ANALYSISFORECAST_WAV_007_003`** (`cmems_mod_blk_wav_anfc_2.5km_PT1H-i_202411`), a **2.5 km
+Black-Sea-only** WAM model (HEREON), hourly, on the same keyless `wmts.marine.copernicus.eu/teroWmts`
+service already used for SST. Variables read: **`VHM0`** (significant wave height) and **`VCMX`**
+(maximum crest height). Unlike a global model it solves depth refraction and wave breaking.
+Open-Meteo's `wave_height` remains only as a labelled fallback (`waveSource: open-meteo-mfwam-8km`).
+
+**Sea-state logic** — requires a known wave height AND at least one wind measure; otherwise
+**Unknown** (never an assumed-calm state):
+-   `Rough`: **max crest (VCMX) > 1.5 m** OR gust > 50 km/h
+-   `Moderate`: wave height > 0.7 m OR gust > 32 km/h
+-   `Calm`: known and below the above
+-   Fallbacks: Hs > 1.2 m stands in for ROUGH when VCMX is missing; mean-wind thresholds
+    (40 / 25 km/h) are used only when gust is missing.
+
+**ROUGH keys off the maximum crest, not the mean.** Hs is the mean of the highest third — roughly
+1 in 10 waves exceeds it. What knocks a swimmer down is the biggest wave, and this model reports it
+directly, so we use the modelled maximum rather than applying a textbook Rayleigh multiplier.
+Observed VCMX/Hs across the coast is ~1.35x.
+
+**Why gusts, and why these numbers.** The previous thresholds (>1.25 m yellow, >2 m red) were
+ocean-coast values. Across the whole 2025 bathing season the Black Sea never reached 2 m Hs or
+40 km/h mean wind, so `red` was unreachable and ~98% of the season collapsed to a single band.
+The bands above are anchored to the local distribution (Hs 0.6 m ≈ median, 1.0 m ≈ p95), and use
+**gusts**, which run ~2.2× mean wind here and drive the short steep chop this fetch-limited basin
+produces. `wind_gusts_10m` was already being fetched and displayed while the flag logic ignored it.
+
+**Threshold provenance.** These are nearshore Copernicus magnitudes, which run higher than the old
+Open-Meteo offshore ones because of shoaling (observed coast-wide p50 0.74 m vs 0.60 m). They are
+anchored on swimmer-relevant physical values rather than fitted to any single day: 0.7 m Hs is
+choppy; a 1.5 m breaking crest is dangerous. They should be revisited against a real local
+distribution once `/api/history` holds a full season.
 
 ## 2. Water Cleanliness (Algae Reports)
 
@@ -63,8 +96,23 @@ auth rejection, missing/NaN value) the affected field is `null` (rendered `—`)
 
 The 56 beach coordinates in `data/beaches.json` are verified against **OpenStreetMap**
 `natural=beach` polygons (via Nominatim + an Overpass sweep of the Bulgarian coast). Each point sits
-on the actual shoreline, which keeps both the map pin and the Open-Meteo / Copernicus sample point at
-the right place. Coverage runs Durankulak → Rezovo; the southernmost beach (Rezovo) sits on the
+on the actual shoreline, which keeps the **map pin** in the right place.
+
+**Wave sample points are offset seaward, by a known amount.** A pin on the sand lands on a land cell
+in any marine model. Rather than let a provider silently substitute somewhere else, every beach
+carries a **pre-calibrated `waveSample`** — the nearest wet cell of the 2.5 km grid, resolved once by
+`tools/calibrate-wave-points.mjs` and stored in `beaches.json` with its distance. Result across all
+56 beaches: **11 resolve at the pin itself, median offset 2.04 km, max 4.68 km, none unresolved.**
+That distance is surfaced per beach in the UI (`waveSampleKm`).
+
+**Why this replaced Open-Meteo.** MFWAM (~1/12° ≈ 8 km) land-masks coastal cells and silently returns
+the nearest wet cell with no indication it did so — **median 11 km offshore, max 21 km** (Ahtopol),
+31 of 56 beaches >10 km out, and all 56 collapsing onto just **24 distinct grid cells** (seven
+southern beaches spanning ~25 km shared one, receiving byte-identical values). Nearshore shoaling,
+refraction and depth-limited breaking mean offshore Hs is neither an upper nor a lower bound on what
+a swimmer meets at the waterline. Copernicus instead returns an honest `null` on a land pixel, which
+is what makes the calibrated-offset approach possible at all — and the same honesty is why 29 beaches
+show algae as "unavailable" (CHL has no equivalent calibration yet). Coverage runs Durankulak → Rezovo; the southernmost beach (Rezovo) sits on the
 Bulgaria–Turkey border. No coordinate lies outside Bulgaria.
 
 ## 6. Notes on method
