@@ -646,6 +646,8 @@ class BeachSafetyApp {
         document.getElementById('waves-value').textContent = this.fmt(c.waveHeight, ' m', 2);
         const wavesMaxEl = document.getElementById('waves-max-value');
         if (wavesMaxEl) wavesMaxEl.textContent = this.fmt(c.waveMax, ' m', 2);
+        this.renderObserved(beach.observed, lang);
+
         // Sampling-distance notice. The Copernicus point is a KNOWN, per-beach offset (median ~2 km);
         // the Open-Meteo fallback is a silent one that can be 20 km out. Say which one this is.
         const seaNoticeEl = document.getElementById('sea-state-notice');
@@ -907,6 +909,33 @@ class BeachSafetyApp {
         body.innerHTML = rows.length
             ? rows.join('')
             : `<p class="trends-empty">${this.escape(this.t('trendsEmpty'))}</p>`;
+    }
+
+    // Measured buoy reading, when a real instrument is close enough to be meaningful.
+    // Shown as corroboration, never folded into the modelled sea-state band.
+    renderObserved(observed, lang) {
+        const section = document.getElementById('observed-section');
+        if (!section) return;
+        if (!observed || typeof observed.hm0 !== 'number') {
+            section.classList.add('hidden');
+            return;
+        }
+        section.classList.remove('hidden');
+        const hmax = typeof observed.hmax === 'number'
+            ? this.t('observedHmax', { v: observed.hmax.toFixed(2) })
+            : '';
+        document.getElementById('observed-readings').textContent = this.t('observedReadings', {
+            hm0: observed.hm0.toFixed(2),
+            hmax,
+            sst: typeof observed.waterTemp === 'number' ? observed.waterTemp.toFixed(1) : '—',
+        });
+        const buoyName = lang === 'bg' ? observed.buoyName : (observed.buoyNameEn || observed.buoyName);
+        document.getElementById('observed-meta').textContent = this.t('observedMeta', {
+            operator: observed.operator,
+            buoy: buoyName,
+            km: observed.distanceKm,
+            ago: this.timeAgo(observed.observedAt) || '',
+        });
     }
 
     // Inline-SVG sparkline. Gaps (null samples) BREAK the line — never drawn as zero.
@@ -1271,6 +1300,10 @@ class BeachSafetyApp {
             "seaStateNoticeSampled": "Modelled estimate, sampled {km} km offshore (Copernicus 2.5 km Black Sea wave model). This is NOT a lifeguard flag — always follow the flag flying on the beach and the lifeguard’s instructions.",
             "seaStateNoticeCoarse": "Modelled estimate from a global ~8 km grid, which can sample up to 20 km offshore. This is NOT a lifeguard flag — always follow the flag flying on the beach and the lifeguard’s instructions.",
             "waves-max-label": "Largest wave",
+            "observed-title": "Measured at a nearby buoy",
+            "observedReadings": "Wave height {hm0} m{hmax} · water {sst}°C",
+            "observedHmax": ", largest {v} m",
+            "observedMeta": "Real measurement from the {operator} buoy “{buoy}”, {km} km away, {ago}. Everything above is modelled — this is the actual sea.",
             "wavesMaxNote": "modelled maximum crest",
             "lastUpdated": "Last updated",
             "facilities": "Facilities",
@@ -1387,6 +1420,10 @@ class BeachSafetyApp {
             "seaStateNoticeSampled": "Моделирана оценка, измерена на {km} км навътре (модел на Copernicus за Черно море, 2,5 км). Това НЕ е спасителен флаг — винаги спазвайте флага на плажа и указанията на спасителя.",
             "seaStateNoticeCoarse": "Моделирана оценка от глобална мрежа с ~8 км стъпка, която може да измерва до 20 км навътре. Това НЕ е спасителен флаг — винаги спазвайте флага на плажа и указанията на спасителя.",
             "waves-max-label": "Най-голяма вълна",
+            "observed-title": "Измерено от близък буй",
+            "observedReadings": "Височина на вълните {hm0} м{hmax} · вода {sst}°C",
+            "observedHmax": ", най-голяма {v} м",
+            "observedMeta": "Реално измерване от буй „{buoy}“ на {operator}, на {km} км, {ago}. Всичко по-горе е моделирано — това е реалното състояние на морето.",
             "wavesMaxNote": "моделиран максимален гребен",
             "lastUpdated": "Последно обновяване",
             "facilities": "Удобства",

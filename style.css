@@ -371,6 +371,18 @@ input:checked + .slider:before { transform: translateX(24px); }
 .legend-swatch.high { background-color: var(--color-danger); }
 .legend-swatch.unavailable { background-color: var(--color-gray-500); }
 
+/* Measured buoy observation. Deliberately set apart from the modelled conditions grid — this is
+   the only real instrument in the app and must not read as more model output. */
+.observed-section {
+  margin-top: var(--spacing-md);
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-left: 3px solid var(--color-info);
+  background-color: var(--color-surface-alt, transparent);
+  border-radius: 4px;
+}
+.observed-section.hidden { display: none; }
+.observed-readings { margin: var(--spacing-xs) 0; font-weight: 600; }
+
 /* Water-temp disclaimer / general data-disclaimer helper text under the conditions grid:
    small, muted, italic. */
 .data-disclaimer {

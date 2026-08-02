@@ -23,6 +23,8 @@ app.js                       class BeachSafetyApp — Leaflet map, list, modal, 
                              Directions (Google Maps), Share (native sheet → clipboard fallback)
 index.html / style.css       UI + themes (CSS custom properties, light/dark, WCAG 2.2 AA)
 sw.js                        service worker (precache + network-first)
+lib/nimh.mjs                 NIMH/IO-BAS buoy network scrape (mm.meteo-varna.net) — the only
+                             MEASURED data in the app; QC-filters physically impossible rows
 lib/copernicus.mjs           Copernicus Marine WMTS: CHL + Black Sea SST + the 2.5km BLKSEA WAVE
                              model (VHM0/VCMX); honest null/"unavailable" on failure
 tools/calibrate-wave-points.mjs  one-off: resolves each beach's nearest WET 2.5km wave cell and
@@ -47,6 +49,7 @@ No 30s/15min function limits on Fly, so the full Copernicus build runs inline (n
 ### Merged record shape (the data contract — keep field names exact)
 `conditions`: `waveHeight, waveMax, waveSource, waveSampleKm, waterTemp, waterTempSource, airTemp, windSpeed, windGust, windDirection, uvIndex, flag, lastUpdated` (numbers or `null`; `flag` = `green|yellow|red|null` — internal keys kept for the data contract/history/CSS, but they mean **calm|moderate|rough**, not safe|caution|danger)
 `cleanliness`: `status, value, source, observedAt, report_en, report_bg`
+`observed` (top level, or `null`): `buoyId, buoyName, buoyNameEn, operator, lat, lng, observedAt, hm0, hmax, t02, tp, waterTemp, windSpeed, distanceKm` — a MEASURED buoy reading. Never feeds `flag`.
 
 ## Conventions
 - **No build step (frontend).** Don't add Vite/bundlers, TypeScript compilation, or `@google/genai` (all were removed). Everything is ESM (`"type":"module"`). The server (`server.mjs`) uses only Node built-ins + global `fetch` — **keep it dependency-free** (it ships as a plain `node server.mjs`, no install needed).

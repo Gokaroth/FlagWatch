@@ -56,6 +56,51 @@ anchored on swimmer-relevant physical values rather than fitted to any single da
 choppy; a 1.5 m breaking crest is dangerous. They should be revisited against a real local
 distribution once `/api/history` holds a full season.
 
+## 1b. Measured buoy observations (NIMH / IO-BAS) — the only real instrument
+
+Everything else in this document is model output. These are physical buoys in the water.
+
+-   **Source**: `http://mm.meteo-varna.net/` — the marine buoy network of НИМХ (National Institute of
+    Meteorology and Hydrology), published under the MASRI / Euro-Argo project with IO-BAS. Six buoys:
+    Варна-залив (47), Бургас-залив (44), Ахтопол (1289), Шабла (32987), Варна-море (30889, IO-BAS
+    DOORS), Шкорпиловци (32732). Timestamps UTC, roughly half-hourly.
+-   **One request per build.** The page's own map calls `in2.php?q=<id>` per marker over XHR, but
+    that endpoint accepts a connection and never responds to a plain GET (verified: 40 s, 0 bytes).
+    The landing page already embeds recent history for all six buoys, so we parse that instead.
+-   **Malformed markup**: rows carry a closing `</tr>` with no opening `<tr>` (102 closes, 2 opens).
+    Browsers repair this silently; a `<tr>...</tr>` regex finds one row. The parser splits on the
+    CLOSING tag.
+-   **Quality control.** The Black Sea is fetch-limited and cannot produce ocean swell, so peak
+    periods above ~12 s are physically impossible. The IO-BAS DOORS buoy intermittently emits rows
+    with tp of 20.5–25.6 s and inflated heights (12 of 102 rows on 2026-08-02, exclusively from that
+    buoy). Those are rejected, as are readings older than 6 h, `hmax < hm0`, and duplicates.
+-   **Coverage**: attached to a beach only when a buoy is within **25 km** — 50 of 56 beaches. It is
+    displayed as a clearly-labelled measurement and **never feeds the sea-state band**, so all 56
+    beaches stay computed the same way.
+-   Only the two bay buoys (Варна-залив, Бургас-залив) report `Hmax`.
+-   HTTP, not HTTPS. Fine server-side; a browser on an HTTPS page could not fetch it.
+
+**Model validation, 2026-08-02** — first time this app was ever checked against an instrument:
+
+| Buoy | Measured Hm0 | Nearest beach | Model Hs | Δ | Separation |
+|---|---|---|---|---|---|
+| Шабла | 0.61 m | shabla | 0.69 m | +0.08 | 1.0 km |
+| Ахтопол | 1.01 m | ahtopol | 1.08 m | +0.07 | 1.4 km |
+| Варна-залив | 0.35 m | varna_beach | 0.55 m | +0.20 | 1.7 km |
+| Шкорпиловци | 0.47 m | shkorpilovtsi | 0.70 m | +0.23 | 2.5 km |
+| Варна-море | 0.38 m | saints_constantine | 0.63 m | +0.25 | 5.5 km |
+| Бургас-залив | 0.41 m | burgas_north | 0.68 m | +0.27 | 6.0 km |
+
+The model reads high by +0.18 m on average, but the error tracks buoy-to-beach separation almost
+monotonically: at ~1 km it is +0.07/+0.08 m, at ~6 km it is +0.27 m. Much of the gap is therefore
+genuine spatial difference rather than model error. Not corrected for — one day is not a calibration
+set, and the bias is in the conservative direction.
+
+**Open question**: measured `Hmax/Hm0` at the two bay buoys averages **1.74** (consistent with the
+Rayleigh expectation), while the model's `VCMX/VHM0` runs **~1.35**. Both are crest-to-trough maxima.
+In absolute terms the model still reads higher than the buoys, so ROUGH is not under-firing — but
+the ratio discrepancy is unexplained and worth revisiting.
+
 ## 2. Water Cleanliness (Algae Reports)
 
 Near-real-time satellite **Chlorophyll-a (CHL)** — the primary indicator of phytoplankton (algae).
