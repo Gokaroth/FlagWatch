@@ -101,6 +101,25 @@ Rayleigh expectation), while the model's `VCMX/VHM0` runs **~1.35**. Both are cr
 In absolute terms the model still reads higher than the buoys, so ROUGH is not under-firing — but
 the ratio discrepancy is unexplained and worth revisiting.
 
+## 1c. What this app CANNOT see: rip currents
+
+Rip currents (BG **мъртво течение**, also обратно течение, or „сулган" among southern-coast
+fishermen) are the leading swimmer hazard on the Bulgarian Black Sea coast. FlagWatch cannot detect
+them and never will: they depend on bathymetry, sandbar geometry, wave incidence angle and
+directional spreading at a scale of tens of metres. A 2.5 km grid cell cannot resolve any of that,
+and no public data source publishes them for this coast.
+
+They form in surf of **0.3 to 0.6 m** — the median condition on this coast, and what this app labels
+**Calm**. NOAA issues "life-threatening rip currents are possible" at exactly that surf height. So
+the app's calmest readings coincide with real rip risk, which is why the advisory in the beach view
+is permanent and unconditional rather than triggered by a threshold.
+
+One language trap worth knowing: Bulgarian media routinely use **мъртво вълнение** (which properly
+means *swell*) to describe what is actually a rip current — e.g. flagman.bg, "Не се къпете там,
+където няма вълни и морето е най-спокойно. Има мъртво вълнение", which describes the classic
+calm-looking rip signature. A Bulgarian reader may therefore take a "Спокойно" reading as
+"no мъртво вълнение, safe to swim". The advisory exists to break that inference.
+
 ## 2. Water Cleanliness (Algae Reports)
 
 Near-real-time satellite **Chlorophyll-a (CHL)** — the primary indicator of phytoplankton (algae).

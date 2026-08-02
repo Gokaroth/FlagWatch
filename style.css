@@ -371,6 +371,16 @@ input:checked + .slider:before { transform: translateX(24px); }
 .legend-swatch.high { background-color: var(--color-danger); }
 .legend-swatch.unavailable { background-color: var(--color-gray-500); }
 
+/* Rip-current advisory. Permanent and unconditional: rips form in calm water, no model can see
+   them, and they are the leading swimmer hazard on this coast. Must never be hidden on a calm day. */
+.rip-section {
+  margin-top: var(--spacing-md);
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-left: 3px solid var(--color-danger);
+  border-radius: 4px;
+}
+.rip-notice { margin: var(--spacing-xs) 0 0; font-size: var(--font-size-sm); }
+
 /* Measured buoy observation. Deliberately set apart from the modelled conditions grid — this is
    the only real instrument in the app and must not read as more model output. */
 .observed-section {
